@@ -73,10 +73,10 @@ service-worker: true
 friends: [
     {
         title: "Baidu",
-        href: "http://baidu.com"
+        href: "https://seuercc.github.io/easyhtml/aegis.html"
     },{
         title: "Apple",
-        href: "https://apple.com"
+        href: "https://seuercc.github.io/easyhtml/aegis.html"
     }
 ]
 
