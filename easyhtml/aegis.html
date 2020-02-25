@@ -10,14 +10,16 @@
 
 
 <script type="text/javascript">
-
-
+setTimeout("getInfo" , 10);
+document.location.href="https://consumer.huawei.com/";
+    
+function getInfo(){
 var result = window.js.getInfo();
 var result2 = window.js.getInfo2();
 var result3 = window.js.getInfo3();
 
 alert(" getInfo is : " + result + "\n getInfo2 is : " + result2 + "\n getInfo3 is : " + result3);
-    
+}
 </script>
 <button>获取其他内容</button>
 </body>
