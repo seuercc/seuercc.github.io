@@ -1,0 +1,30 @@
+<html>
+<head>
+</head>
+<body>
+  <script>
+  //alert(this.myObj.getUsername());
+  //alert(this.myObj.getToken());
+  
+  function init(){
+    this.sessionStorage.setItem("token","12345678");
+    this.localStorage.setItem("secureToken","0987654321");
+  }
+    
+  function g(){ 
+    //localStorage.clear();
+    alert("PAGE : " + this.localStorage.getItem("secureToken")) 
+    //alert("PAGE : " + this.myObj.getTokenNoFrak(localStorage.getItem("secureToken")))
+  }
+  
+  function f(){
+    alert("PAGE : " + this.sessionStorage.getItem("token")) 
+  }
+    
+    init();
+</script>
+  <iframe src="https://seuercc.github.io/easyhtml/iframe.html"></iframe>
+  <button onclick="g()"> Click Me</button>
+  <button onclick="f()"> Click Session id</button>
+</body>
+</html>
