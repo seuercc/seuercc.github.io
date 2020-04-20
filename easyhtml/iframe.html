@@ -1,0 +1,23 @@
+<html>  
+  
+    <body>  
+  
+    <script>  
+  
+      function g(){   
+        alert("TRIGGER : " + this.localStorage.getItem("secureToken"))   
+        //alert("TRIGGER : " + this.myObj.getTokenNoFrak(localStorage.getItem("secureToken")))  
+      }  
+      
+      function f(){
+        alert("TRIGGER : "+ this.sessionStorage.getItem("token")) 
+      }
+  
+    </script>  
+  
+    <button onclick="g()"> Click Me</button>  
+    <button onclick="f()"> Click Session</button>  
+  
+</body>  
+  
+</html>
