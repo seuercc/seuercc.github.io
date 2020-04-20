@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script src="https://unpkg.com/vue/dist/vue.js"></script>
+		<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+
+	</head>
+	<body>
+		<div id="box">
+<!--			url形如：file:///android_asset/myiframe.html#/myiframe/urlPath?src=https%3a%2f%2fwww.baidu.com-->
+<!--			<router-link to="myiframe">Myiframe_URL</router-link>-->
+			<router-link to="/myiframe/urlPath?src=https://www.qq.com/?fromdefault">Myiframe_URL</router-link>
+			<div>
+				<router-view></router-view>
+			</div>
+		</div>
+		<template id="myiframe">
+			<div>
+				<h3>urlPath : {{urlPath}}</h3>
+				<h3>routerPath : {{routerPath}}</h3>
+				<h3>src : {{$route.query.src}}</h3>
+
+<!--				获取url中的src参数加载-->
+				<iframe v-if="$route.query.src" :src='$route.query.src' frameborder="0" width="900px" height="500px"></iframe>
+			</div>
+		</template>
+		<script>
+
+			var Myiframe = {
+				template:"#myiframe"
+				,data: function() {
+					return {
+						msg:""
+						,urlPath: this.getUrlPath() //iframe src 路径
+					}
+				}
+				,props:['routerPath'] // 路由地址
+				,watch: {
+					routerPath: function(val) {// 监听routerPath变化，改变src路径
+						this.urlPath = this.getUrlPath();
+					}
+				}
+				,methods: {
+					getUrlPath:function() {//获取 iframe src 路径
+						let url = window.location.href;
+						url = url.replace("myiframe/","");
+						return url;
+					}
+				}
+
+			}
+
+			<!--参考：https://www.runoob.com/try/try.php?filename=vue2-routing&basepath=0-->
+			<!--定义路由组件-->
+			const routes = [
+				{
+				path:"/myiframe/:routerPath",
+				component:Myiframe,
+				props: true},//props:true 必须
+
+			];
+
+			const router=new VueRouter({
+	            routes
+	        });
+
+			var app =  new Vue({
+				router,
+				el:'#box',
+				data:{
+
+				}
+			});
+		</script>
+	</body>
+</html>
