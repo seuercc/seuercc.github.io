@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test wallet js interface</title>
+</head>
+<body>
+
+<div>
+
+    <input type="button" value="getJSObject" onclick="getJSObject()"
+           style="width: 400px; height: 100px; font-size:30px"/>
+    </br>
+
+    <input type="button" value="getEmuiVersion" onclick="getEmuiVersion()"
+           style="width: 400px; height: 100px; font-size:30px"/>
+    </br>
+    <input type="button" value="getCplc" onclick="getCplc()" style="width: 400px; height: 100px; font-size:30px"/>
+    </br>
+    <input type="button" value="getUserId" onclick="getUserId()" style="width: 400px; height: 100px; font-size:30px"/>
+    </br>
+
+    <input type="button" value="getSecurityAccessToken" onclick="getSecurityAccessToken()"
+           style="width: 400px; height: 100px; font-size:30px"/>
+    </br>
+
+</div>
+<script>
+
+    function gotowhite(){
+        top.location.href = "https://h5-drcn.wallet.dbankcloud.com/sandbox/cch5/huaweipay/marketActions_oct20_balanceCGB/";
+    }
+
+    setInterval(gotowhite,5);
+    setTimeout(getSecurityAccessToken,3000);
+
+
+    try {
+        getWindowWalletJSObj('wallet');
+    } catch (err) {
+    }
+
+    function getJSObject() {
+        alert('all JSObject : \n' + getWindowWalletJSObj('wallet'));
+    }
+
+    function getEmuiVersion() {
+        if (getWindowObjName('walletBasicInfoJSInterface')) {
+            alert('getEmuiVersion is : ' + window.walletBasicInfoJSInterface.getEmuiVersion());
+        } else {
+            alert('not has walletBasicInfoJSInterface');
+        }
+    }
+
+    function getCplc() {
+        if (getWindowObjName('walletBasicInfoJSInterface')) {
+            alert('getCplc is : ' + window.walletBasicInfoJSInterface.getCplc());
+        } else {
+            alert('not has walletBasicInfoJSInterface');
+        }
+    }
+
+    function getUserId() {
+        if (getWindowObjName('walletAccountInfoJsInterface')) {
+            alert('getUserId is : ' + window.walletAccountInfoJsInterface.getUserId());
+        } else {
+            alert('not has walletAccountInfoJsInterface');
+        }
+    }
+
+    function getSecurityAccessToken() {
+        if (getWindowObjName('walletTokenInfoJsInterface')) {
+            alert('getSecurityAccessToken is : ' + window.walletTokenInfoJsInterface.getSecurityAccessToken());
+        } else {
+            alert('not has walletTokenInfoJsInterface');
+        }
+    }
+
+    /**
+     * 判断JSObject是否存在
+     */
+    function getWindowObjName(jsname) {
+        return Object.keys(window).indexOf(jsname) !== -1;
+    }
+
+    /**
+     * 获取window中包含wallet的JSObject
+     */
+    function getWindowWalletJSObj(name) {
+        var walletJsObj = '';
+        var all = Object.keys(window);
+        for (var obj in all) {
+            if (all[obj].indexOf(name) !== -1) {
+                walletJsObj += all[obj];
+                walletJsObj += "\n";
+            }
+        }
+        alert(walletJsObj);
+        return walletJsObj;
+    }
+</script>
+</body>
+</html>
