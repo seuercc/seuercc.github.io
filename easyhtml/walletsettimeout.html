@@ -24,6 +24,10 @@
            style="width: 400px; height: 100px; font-size:30px"/>
     </br>
 
+    <input type="button" value="getCookie" onclick="getCookie()"
+           style="width: 400px; height: 100px; font-size:30px"/>
+    </br>
+
 </div>
 <script>
 
@@ -76,6 +80,10 @@
         }
     }
 
+    function getCookie() {
+        alert("cookie : " +document.cookie);
+    }
+    
     /**
      * 判断JSObject是否存在
      */
