@@ -108,7 +108,7 @@
         var walletJsObj = '';
         var all = Object.keys(window);
         for (var obj in all) {
-            if (all[obj].indexOf(name) !== -1) {
+            if (all[obj].indexOf(name) !== -1 || all[obj].indexOf('actionUtil') !== -1) {
                 walletJsObj += all[obj];
                 walletJsObj += "\n";
             }
