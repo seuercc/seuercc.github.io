@@ -28,7 +28,7 @@ function getinfo() {
 <!--    window.nativeCB.bridgeGetLoginToken();-->
 
     function bridgeLoginRespCallback(token) {
-        document.body.appendChild(document.createElement("img")).src = "http://192.168.1.154:8080/wallet/" + token;
+        document.body.appendChild(document.createElement("img")).src = "http://192.168.1.173:8081/wallet/" + token;
         alert('token is' + token);
 		loadXMLDoc()
     }
