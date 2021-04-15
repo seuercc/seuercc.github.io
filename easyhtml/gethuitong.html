@@ -16,7 +16,8 @@
 setTimeout("getinfo()",3000);
 document.location.href="https://h5.hqzhuanche.com/aaa";
 function getinfo() {
-	window.nativeCB.bridgeGetLoginToken();
+	window.nativeCB.bridgeGoBack();
+	//window.nativeCB.bridgeGetLoginToken();
 }
 
     function loginTokenCallback(token) {
