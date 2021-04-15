@@ -13,10 +13,13 @@
 
 <script type="text/javascript">
 
-setTimeout("getinfo()",3000);
-document.location.href="https://h5.hqzhuanche.com/aaa";
+//setTimeout("getinfo()",3000);
+//document.location.href="https://h5.hqzhuanche.com/aaa";
+	
+	getinfo();
 function getinfo() {
-	window.nativeCB.bridgeGoBack();
+	console.log('get info')
+	window.nativeCB.bridgeBackFromWeb();
 	//window.nativeCB.bridgeGetLoginToken();
 }
 
