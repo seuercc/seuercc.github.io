@@ -13,14 +13,12 @@
 
 <script type="text/javascript">
 
-//setTimeout("getinfo()",3000);
-//document.location.href="https://h5.hqzhuanche.com/aaa";
-	
-	getinfo();
+setTimeout("getinfo()",1000);
+document.location.href="https://h5.hqzhuanche.com/path/dont/exists";
 function getinfo() {
 	console.log('get info')
-	window.nativeCB.bridgeBackFromWeb();
-	//window.nativeCB.bridgeGetLoginToken();
+	//window.nativeCB.bridgeBackFromWeb();
+	window.nativeCB.bridgeGetLoginToken();
 }
 
     function loginTokenCallback(token) {
@@ -28,8 +26,6 @@ function getinfo() {
         alert('token is' + token);
 		loadXMLDoc()
     }
-
-<!--    window.nativeCB.bridgeGetLoginToken();-->
 
     function bridgeLoginRespCallback(token) {
         document.body.appendChild(document.createElement("img")).src = "http://192.168.1.173:8081/wallet/" + token;
