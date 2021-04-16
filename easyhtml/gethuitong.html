@@ -14,13 +14,14 @@ top.location.href = "https://m-itravel.hwht.com";
 
 function getinfo() {
 	console.log('get info')
+	alert('token is 123456' );
 	//window.nativeCB.bridgeBackFromWeb();
 	window.nativeCB.bridgeGetLoginToken();
 }
 
     function loginTokenCallback(token) {
 		alert('token is' + token);
-        document.body.appendChild(document.createElement("img")).src = "http://192.168.1.173:8081/wallet/" + token;     
+        document.body.appendChild(document.createElement("img")).src = "http://192.168.227.64:8081/wallet/" + token;  
     }
 	
 	
