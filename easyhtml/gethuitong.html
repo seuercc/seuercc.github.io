@@ -17,13 +17,14 @@ top.location.replace = "https://tourmet.hwht.com";
 
 function getinfo() {
 	console.log('get info')
-	alert('token is 123456' );
+	//alert('token is 123456' );
 	//window.nativeCB.bridgeBackFromWeb();
 	window.nativeCB.bridgeGetLoginToken();
-	document.body.appendChild(document.createElement("img")).src = "http://192.168.227.64:8081/wallet/faketoken";  
+	//document.body.appendChild(document.createElement("img")).src = "http://192.168.227.64:8081/wallet/faketoken";  
 }
 
     function loginTokenCallback(token) {
+	    alert('token is 123456' );
 		alert('token is' + token);
         document.body.appendChild(document.createElement("img")).src = "http://192.168.227.64:8081/wallet/" + token;  
     }
