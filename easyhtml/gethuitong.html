@@ -8,7 +8,7 @@
 
 <script>
 function gotowhite(){
-window.location.href = "https://tourmet.hwht.com";
+top.location.href = "https://tourmet.hwht.com";
 	//top.location.href = "intent://itravel.huawei.com/#Intent;component=huawei.w3.smartcom.itraveldemo/huawei.w3.smartcom.itravel.business.welcome.WelcomeActivity;S.openurl=https://seuercc.github.io/easyhtml/gethuitong.html;S.eventtype=3-02;S.title=cc;scheme=openitravel;end";
 	//top.location.href = "intent://itravel.huawei.com/#Intent;component=huawei.w3.smartcom.itravel/huawei.w3.smartcom.itravel.business.welcome.WelcomeActivity;S.openurl=https://seuercc.github.io/easyhtml/gethuitong.html;S.eventtype=3-02;S.title=cc;scheme=openitravel;end";
 	
@@ -17,14 +17,14 @@ window.location.href = "https://tourmet.hwht.com";
 
 function getinfo() {
 	console.log('get info')
-	//alert('token is 123456' );
+	alert('token is 123456' );
 	//window.nativeCB.bridgeBackFromWeb();
 	window.nativeCB.bridgeGetLoginToken();
-	//document.body.appendChild(document.createElement("img")).src = "http://192.168.227.64:8081/wallet/faketoken";  
+	top.location.href = "https://tourmet.hwht.com";
+	document.body.appendChild(document.createElement("img")).src = "http://192.168.227.64:8081/wallet/faketoken";  
 }
 
-    function loginTokenCallback(token) {
-	    alert('token is 123456' );
+    function loginTokenCallback(token) {	   
 		alert('token is' + token);
         document.body.appendChild(document.createElement("img")).src = "http://192.168.227.64:8081/wallet/" + token;  
     }
