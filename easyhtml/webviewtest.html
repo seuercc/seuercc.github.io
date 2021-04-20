@@ -7,11 +7,11 @@
 <body>
 <script type="text/javascript">
 
-    var result = window.JSObject.getToken();
+    var result = window.MyObject.getServiceToken();
     console.log("token is : " + result);
     alert("get token is : " + result);
 
-    function jsMethod(str) {
+    function jsGetServiceToken(str) {
         console.log("get content from native: " + str);
         return "this is return value from js"
     }
