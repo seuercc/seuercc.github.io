@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebView Test</title>
+</head>
+<body>
+<script type="text/javascript">
+
+    var result = window.JSObject.getToken();
+    console.log("token is : " + result);
+    alert("get token is : " + result);
+
+    function jsMethod(str) {
+        console.log("get content from native: " + str);
+        return "this is return value from js"
+    }
+
+</script>
+</body>
+</html>
