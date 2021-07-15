@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>HarmonyOS WebView</title>
+</head>
+<body>
+     <h1>WebViewTest</h1>   
+	<p id="demo">这是段落1</p>	 
+	<p id="demo2">这是段落2</p>	 
+<script>
+
+function callToApp() {
+    if (window.JSObject && window.JSObject.call) {
+       var result = JSObject.call("message from web");
+	   document.getElementById("demo").innerHTML="jsobject is "+result;
+    }else{
+		console.log('jsobject is null')
+		alert('jsobject is null')
+		document.getElementById("demo").innerHTML="jsobject is null";
+	}
+	
+}
+
+function funcToAppCall(var message) {
+	console.log('call from app : ' + message);
+    alert("call from app : " + message);
+	document.getElementById("demo2").innerHTML=Date();
+}
+
+</script>
+<button type="button" onclick="callToApp()">callToApp</button>
+</body>
+</html>
