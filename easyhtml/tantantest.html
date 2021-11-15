@@ -3,7 +3,16 @@
 <head></head>
 <body style="word-wrap:break-word;">
 <div id="res"></div>
+	
+
+	
+	
 <script>	
+	
+	<p id="content">StevenWebViewTest</p>
+	
+	document.getElementById("content").innerText = 'call canIUse : '+window.tantan.canIUse('cc') + ' , and : ' + window.tantan.triggerAction('c','d');
+	
 	alert('tantan : ' + window.tantan.canIUse('cc'));
 	  alert('tantan : ' + window.tantan.triggerAction('c','d'));
 	
