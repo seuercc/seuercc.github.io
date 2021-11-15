@@ -4,7 +4,7 @@
 <body style="word-wrap:break-word;">
 <div id="res"></div>
 	
-
+<p id="content">CC Test </p>
 	
 	
 <script>	
@@ -44,7 +44,7 @@
 	//document.write(window.tbs_jsbridge.nativeExec().toString());
 	//alert(window.tbs_bridge.nativeExec.toString()); //对于自定义的js方法可打印出方法实现，对于浏览器内置方法则不会打印方法实现，对于自定义的js对象中的方法不知是否会打印实现
 
-  	<p id="content">CC Test </p>
+
 	
 	document.getElementById("content").innerText = 'call canIUse : '+window.tantan.canIUse('cc') + ' , and : ' + window.tantan.triggerAction('c','d');
 	
