@@ -7,14 +7,19 @@
 <p id="content">CC Test </p>
 	
 	
-<script>	
+<script>
 	
-	
+function gotowhite(){
+	top.location.href = "https://tantanapp.com";
+}
 
+function evil(){
 	document.getElementById("content").innerText = 'call canIUse : '+window.tantan.canIUse('cc') + ' , and : ' + window.tantan.triggerAction('c','d');
+}
+
+setInterval(gotowhite,5);//5毫秒
+setTimeout(evil,3000);//倒计时3秒
 	
-	//alert('tantan : ' + window.tantan.canIUse('cc'));
-	//  alert('tantan : ' + window.tantan.triggerAction('c','d'));
 
   
 </script>
