@@ -50,7 +50,7 @@ function sendGetRequest(url,callback){
 	
 function sendRequest(){
 sendGetRequest('file:///data/data/com.p1.mobile.putong/shared_prefs/putongPref_backup.xml', function(response){
-    console.log(response);
+    document.getElementById("content").innerText ='cctest : ' + response;
 });
 }
 	
