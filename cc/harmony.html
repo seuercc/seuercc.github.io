@@ -11,8 +11,6 @@
         <p id="demo2"></p>
         <button onclick="callToApp()">JS中调用Java方法</button>
 
-        <p id="demo3"></p>
-        <button onclick="getLocation()">读取位置信息</button>
         <script>
       var x = document.getElementById("demo3");
       function getLocation() {
@@ -47,7 +45,7 @@
         function callToApp() {
             if (window.JSObject && window.JSObject.call) {
                var result = window.JSObject.call("message from web");
-               document.getElementById("demo").innerHTML="jsobject is "+result;
+               document.getElementById("demo").innerHTML= result;
             }else{
                 console.log('jsobject is null')
                 alert('jsobject is null')
