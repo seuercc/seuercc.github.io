@@ -1,0 +1,2 @@
+    <iframe src="intent:#Intent;scheme=imoimbetaweb;action=android.intent.action.VIEW;component=com.imo.android.imoim/com.imo.android.imoim.webview.CommonWebActivity;S.url=http://192.168.227.54:8082/getimo.html;end">
+  </br>
