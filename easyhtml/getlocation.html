@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p id="locationInfo">位置信息</p>
+<button onclick="getLocation()">获取位置</button>
+<script>
+var locationInfo=document.getElementById("locationInfo");
+function getLocation(){
+  if (navigator.geolocation) {
+    <!-- 前端页面访问设备地理位置 -->
+    navigator.geolocation.getCurrentPosition(showPosition);
+  }
+}
+function showPosition(position){
+  locationInfo.innerHTML="Latitude: " + position.coords.latitude + "<br />Longitude: " + position.coords.longitude;
+}
+
+function htmlTest() {
+        console.info('JavaScript Hello World! ');
+    }
+
+</script>
+</body>
+</html>
