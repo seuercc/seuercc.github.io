@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+</head>
+<body>
+<div id="r">Hello world</div>
+
+<script>
+	  const ifr = document.createElement('iframe');
+	  document.body.appendChild(ifr);
+	  ifr.onload = function() {
+		const ifrContent = ifr.contentWindow.document.documentElement.innerHTML;
+		r.innerHTML = `current url:<br />${location.href}<br /><br />get data:<br />${ifrContent}`;
+	  }
+	  ifr.src = "https://www.seuercc.github.io/easyhtml/c2.svg";
+  </script>
+</body>
