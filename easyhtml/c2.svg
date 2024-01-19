@@ -6,7 +6,7 @@
             <foreignObject class="node" font-size="18" width="100%" height="100%">
                 <body xmlns="http://www.w3.org/1999/xhtml">
                     <xmp>
-                        <xsl:copy-of select="document('https://seuercc.github.io/easyhtml/c3.xml')"/>
+                        <xsl:copy-of select="document('./c3.xml')"/>
                     </xmp>
                 </body>
             </foreignObject>
