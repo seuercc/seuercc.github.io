@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xml" href="?#"?>
+<!DOCTYPE p [
+    <!ENTITY hosts SYSTEM "file:///etc/hosts">
+    ]>
+<p>
+
+    <p style="border-style: dotted;" id="hosts">/etc/hosts:
+        &hosts;
+    </p>
+
+</p>
