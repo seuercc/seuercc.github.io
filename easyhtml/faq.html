@@ -1,0 +1,13 @@
+<html>  
+<body>      
+<p id="locationInfo">信息</p>
+<button onclick="getLocation()">获取信息</button>
+
+<script>
+var locationInfo=document.getElementById("locationInfo");
+function getLocation(){
+ locationInfo.innerHTML= window.venusJSInterface.venusCustomerService();
+}
+</script>
+</body>  
+</html>
