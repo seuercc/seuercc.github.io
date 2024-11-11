@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p id="locationInfo">位置信息</p>
+<button onclick="getLocation()">获取位置</button></br>
+<script>
+    var locationInfo=document.getElementById("locationInfo");
+    function getLocation(){
+      if (navigator.geolocation) {
+        <!-- 前端页面访问设备地理位置 -->
+        navigator.geolocation.getCurrentPosition(showPosition);
+      }
+    }
+    function showPosition(position){
+      locationInfo.innerHTML="Latitude: " + position.coords.latitude + "<br />Longitude: " + position.coords.longitude;
+    }
+
+    function htmlTest() {
+            console.info('JavaScript Hello World! ');
+    }
+
+</script>
+
+<button type="button" onclick="callArkTS()">Click Me</button>
+</br>
+
+<p id="demo"></p>
+<script>
+    function callArkTS() {
+        let str = testObjName.test(function(param){testObjName.toString('this is from js')});
+        document.getElementById("demo").innerHTML = str;
+        console.info('ArkTS Hello World! :' + str);
+    }
+</script>
+
+<button type="button" onclick="callArkTS2()">Click Me 2</button>
+</br>
+<p id="demo1"></p>
+<script>
+    function callArkTS2() {
+        let str = testObjName1.test();
+        document.getElementById("demo1").innerHTML = str;
+        console.info('ArkTS Hello World! :' + str);
+    }
+</script>
+
+<!--<button type="button" onclick="tel:10086">Click Me 2</button>-->
+<a href='tel:10086'>打10086</a></br>
+<a href='paymentkit://com.huawei.hms.payment/user?pageCode=setPwd'>跳转支付</a></br>
+
+<div>
+    <input id="msgFromJS" type="text" value="send this message from HTML to ets"/><br/>
+    <input type="button" value="SendToEts" onclick="PostMsgToEts(msgFromJS.value);"/><br/>
+</div>
+
+<p class="output">display received message send from ets</p>
+<script>
+    var h5Port;
+    var output = document.querySelector('.output');
+    window.addEventListener('message', function (event) {
+        if (event.data === '__init_port__') {
+            if (event.ports[0] !== null) {
+                h5Port = event.ports[0]; // 1. 保存从应用侧发送过来的端口。
+                h5Port.onmessage = function (event) {
+                  // 2. 接收ets侧发送过来的消息。
+                  var msg = 'Got message from ets:';
+                  var result = event.data;
+                  if (typeof(result) === 'string') {
+                    console.info(`received string message from html5, string is: ${result}`);
+                    msg = msg + result;
+                  } else if (typeof(result) === 'object') {
+                    if (result instanceof ArrayBuffer) {
+                      console.info(`received arraybuffer from html5, length is: ${result.byteLength}`);
+                      msg = msg + 'lenght is ' + result.byteLength;
+                    } else {
+                      console.info('not support');
+                    }
+                  } else {
+                    console.info('not support');
+                  }
+                  output.innerHTML = msg;
+                }
+            }
+        }
+    })
+    // 3. 使用h5Port向应用侧发送消息。
+    function PostMsgToEts(data) {
+        if (h5Port) {
+          h5Port.postMessage(data);
+        } else {
+          console.error('h5Port is null, Please initialize first');
+        }
+    }
+</script>
+
+
+<!-- 多文件上传 -->
+<input type="file" id="file" multiple onchange="fileChange()"/></br>
+<!-- 展示上传的文件内容 -->
+<textarea id="textarea"></textarea></br>
+
+<script>
+    async function fileChange() {
+        var fileList = document.getElementById('file').files;
+        for (var i = 0; i < fileList.length; i++) {
+          console.log('ccc file name ' + fileList[i].name + ' , size is ' + fileList[i].size )
+          const fileRes = await waitReader(fileList[i])
+          console.log('ccc content is ' + fileRes)
+          var textarea = document.getElementById('textarea');
+          textarea.value += fileRes;
+        }
+    }
+
+
+    function waitReader (file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()   // 新建一个FileReader
+        reader.readAsText(file, 'UTF-8')  // 读取文件
+        reader.onload = function (evt) {  // 读取完文件之后会回来这里 这是个异步
+          const fileString = evt.target.result  // 读取文件内容
+          fileString ? resolve(fileString) : reject(evt)
+        }
+      })
+    }
+
+    fileChange();
+</script>
+
+
+<button type="button" onclick="start()">getUrlTest</button></br>
+<p id="geturl"></p>
+<script>
+    function test() {
+        location.href = "https://www.baidu.com:0"
+    }
+
+    function start(){
+        test();
+        setInterval(callArkTS, 50);
+    }
+
+    function callArkTS() {
+        let str = window.testObjName.test(function(param){testObjName.toString('this is from js')});
+        document.getElementById("geturl").innerHTML = str;
+        console.info('ArkTS Hello World! :' + str);
+    }
+
+    // callArkTS()
+</script>
+</body>
+</html>
