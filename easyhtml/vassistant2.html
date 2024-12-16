@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>get vassistant uid</title>
+</head>
+<body>
+<p id="content">CC Test </p>
+
+<script>
+function getinfo() {
+	var uid = window.HiVoiceInterface.getUid();
+  alert('uid is' + uid);	
+  console.log('uid is' + uid);	
+	document.getElementById("content").innerText ='cctest uid is : ' + uid;
+}	
+getinfo();
+</script>
+</body>
+</html>
