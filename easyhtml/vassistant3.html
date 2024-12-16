@@ -1,12 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>get vassistant uid</title>
-</head>
-<body>
-<p id="content">CC Test </p>
-
+<html>  
+<body>      
 <button onclick="getUid()">getUid</button></br>
 <button onclick="shareH5()">shareH5</button></br>
 	
@@ -14,9 +7,9 @@
 <a href=vassistant://voice/main?text=打开唤醒灯>打开唤醒灯</a></br>
 
 <iframe src=vassistant://voice/main?text=打开唤醒灯></br>
-
-	
+ 
 <script>
+ 
 function getUid() {
 	if(window.HiVoiceInterface){
 		var uid = window.HiVoiceInterface.getUid();
@@ -38,7 +31,7 @@ function shareH5() {
 }
 
 shareH5();
-getUid() ;	
+getUid();
 </script>
-</body>
+</body>  
 </html>
