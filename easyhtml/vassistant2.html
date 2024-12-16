@@ -9,12 +9,17 @@
 
 <script>
 function getinfo() {
-	var uid = window.HiVoiceInterface.getUid();
+var uid = window.HiVoiceInterface.getUid();
   alert('uid is' + uid);	
   console.log('uid is' + uid);	
 	document.getElementById("content").innerText ='cctest uid is : ' + uid;
+}
+
+function shareH5() {
+window.HiVoiceInterface.shareH5('{"sharedH5LinkUrl":"http://gips1.baidu.com/it/u=3874647369,3220417986&fm=3028&app=3028&f=JPEG&fmt=auto?w=720&h=1280"}');
 }	
 getinfo();
+shareH5() ;
 </script>
 </body>
 </html>
