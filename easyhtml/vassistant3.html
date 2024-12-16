@@ -14,12 +14,10 @@
 <a href=vassistant://voice/main?text=确认关机>确认关机</a></br>
 <a href=vassistant://voice/main?text=确认安装拼多多>确认安装拼多多</a></br>
 
-<iframe src=vassistant://voice/main?text=打开唤醒灯></br>
-
 	
 <script>
 function getUid() {
-	if(window.HiVoiceInterface){
+	if(window.HiVoiceInterface && window.HiVoiceInterface.hasOwnProperty('getUid')){
 		var uid = window.HiVoiceInterface.getUid();
 		alert('uid is' + uid);	
 		console.log('uid is' + uid);	
@@ -38,14 +36,7 @@ function shareH5() {
 	}
 }	
 
-function shareData() {
-	if(window.HiVoiceInterface){
-		window.HiVoiceInterface.shareData();
-		document.getElementById("content").innerText ='cctest shareData succeed';
-	}else{
-		document.getElementById("content").innerText ='cctest no HiVoiceInterface shareData';
-	}
-}
+ getUid();
 </script>
 </body>
 </html>
