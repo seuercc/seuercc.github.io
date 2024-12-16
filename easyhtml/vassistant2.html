@@ -9,14 +9,22 @@
 
 <script>
 function getinfo() {
-var uid = window.HiVoiceInterface.getUid();
-  alert('uid is' + uid);	
-  console.log('uid is' + uid);	
-	document.getElementById("content").innerText ='cctest uid is : ' + uid;
+	if(window.HiVoiceInterface){
+		var uid = window.HiVoiceInterface.getUid();
+		alert('uid is' + uid);	
+		console.log('uid is' + uid);	
+		document.getElementById("content").innerText ='cctest uid is : ' + uid;
+	}else{
+		document.getElementById("content").innerText ='cctest no HiVoiceInterface';
+	}
 }
 
 function shareH5() {
-window.HiVoiceInterface.shareH5('{"sharedH5LinkUrl":"http://gips1.baidu.com/it/u=3874647369,3220417986&fm=3028&app=3028&f=JPEG&fmt=auto?w=720&h=1280"}');
+	if(window.HiVoiceInterface){
+	window.HiVoiceInterface.shareH5('{"sharedH5LinkUrl":"http://gips1.baidu.com/it/u=3874647369,3220417986&fm=3028&app=3028&f=JPEG&fmt=auto?w=720&h=1280"}');
+	}else{
+		document.getElementById("content").innerText ='cctest no HiVoiceInterface';
+	}
 }	
 getinfo();
 shareH5() ;
