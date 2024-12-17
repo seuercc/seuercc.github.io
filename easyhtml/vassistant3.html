@@ -6,45 +6,6 @@
 </head>
 <body>
 <p id="content">CC Test </p>
-
-<button onclick="getUid()">getUid</button></br>
-<button onclick="shareH5()">shareH5</button></br>
-
-<a href=vassistant://voice/main?text=确认关机>确认关机</a></br>
-<a href=vassistant://voice/main?text=确认安装拼多多>确认安装拼多多</a></br>
 <iframe src=vassistant://voice/main?text=打开唤醒灯></br>
-	
-<script>
-function getUid() {
-	if(window.HiVoiceInterface && window.HiVoiceInterface.hasOwnProperty('getUid')){
-		var uid = '123';
-		uid =window.HiVoiceInterface.getUid();
-		alert('uid is' + uid);	
-		console.log('uid is' + uid);	
-		document.getElementById("content").innerText ='cctest uid is : ' + uid;
-	}else{
-		document.getElementById("content").innerText ='cctest no HiVoiceInterface getUid';
-	}
-}
-
-function shareH5() {
-	if(window.HiVoiceInterface){
-            class ShareInfo {
-              sharedWord: string = '';
-              sharedH5LinkUrl: string = '';
-              sharedTitle: string = '';
-              sharedContent: string = '';
-              sharedPic: string = '';
-            }
-	var shareinfo = '{"sharedH5LinkUrl":"http://gips1.baidu.com/it/u=3874647369,3220417986&fm=3028&app=3028&f=JPEG&fmt=auto?w=720&h=1280","sharedPic":"my pic","sharedWord":"ni hao" , "sharedTitle":"111","sharedContent":"11222"}'
-	window.HiVoiceInterface.shareH5(shareinfo);
-	document.getElementById("content").innerText ='cctest shareH5 succeed';
-	}else{
-		document.getElementById("content").innerText ='cctest no HiVoiceInterface shareH5';
-	}
-}	
-
-getUid();
-</script>
 </body>
 </html>
