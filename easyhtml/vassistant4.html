@@ -1,14 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>get vassistant uid</title>
-</head>
-<body>
-<p id="content">CC Test </p>
-
-
-	
+<meta charset="utf-8"> 
+<title>cc test</title> 
 <script>
 function getUid() {
 	if(window.HiVoiceInterface && window.HiVoiceInterface.hasOwnProperty('getUid')){
@@ -46,11 +40,14 @@ function closeH5() {
 		document.getElementById("content").innerText ='cctest no HiVoiceInterface closeH5';
 	}
 }
-getUid();
 </script>
-
-<button onclick="getUid()">getUid</button></br>
-<button onclick="shareH5()">shareH5</button></br>
-<button onclick="closeH5()">closeH5</button></br>
+</head>
+<body>
+	
+<h1>我的 Web 页面</h1>
+<p id="demo">一个段落。</p>
+<button type="button" onclick="getUid()">getUid</button></br>
+	<button type="button" onclick="shareH5()">shareH5</button></br>
+	<button type="button" onclick="closeH5()">closeH5</button></br>
 </body>
 </html>
