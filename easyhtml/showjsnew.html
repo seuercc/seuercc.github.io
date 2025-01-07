@@ -12,12 +12,11 @@
 			qjd_attr.push(obj);
 		}
 	}
-  var result = qjd_attr.length + ' js object : '+ qjd_attr.toString()
-  
+  	var result = qjd_attr.length + ' js object : '+ qjd_attr.toString();
 	for(i in qjd_attr){
-		if(qjd_attr[i].indexOf("qjd") != -1)  //将当前js代码中的对象过滤掉，包括qjd_browser,qjd_app,qjd_attr和qjd_div
+		if(qjd_attr[i].indexOf("qjd") != -1 || qjd_attr[i].indexOf("result") != -1)  //将当前js代码中的对象过滤掉，包括qjd_browser,qjd_app,qjd_attr和qjd_div
 			continue;		
-    result += '<br>'+qjd_attr[i]+':<br>'
+    		result += '<br>'+qjd_attr[i]+':<br>'
     
 		for(j in window[qjd_attr[i]]) //将应用添加的js对象以及js对象下包含的方法和属性都进行输出
 			result += '----'+typeof(window[qjd_attr[i]][j])+': '+j+'<br>'
