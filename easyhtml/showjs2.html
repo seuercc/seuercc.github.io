@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dynamic Div Creation</title>
+</head>
+<body>
+<script>  
+  var newDiv = document.createElement('div');
+  newDiv.id = 'result';
+  document.body.appendChild(newDiv);
+  var result = '';
+  for (let prop in window) {
+    if (typeof window[prop] === 'object' && window[prop] !== null) {
+      result += prop + '<br>';
+    }
+  }
+  newDiv.innerHTML = result;
+</script>
+</body>
+</html>
