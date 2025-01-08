@@ -5,10 +5,12 @@
 var result = '';
 for (let prop in window) {  
   if (typeof window[prop] === 'object' && window[prop] !== null) {   
-        result  += prop + '<br>'
+        result  += prop
   }
 }
-document.write(result);
+var resultDiv = document.createElement('div');
+resultDiv.innerHTML = result; 
+document.body.appendChild(resultDiv);
 </script>
 </body>
 </html>
