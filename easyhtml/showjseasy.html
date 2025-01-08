@@ -2,11 +2,12 @@
 <html>
 <head></head>
 <script>	
-	
+
+var result = '';
 for (let property in window) {
     if (window.hasOwnProperty(property)) {        
         if (typeof window[property] === 'object' && window[property] !== null) {            
-            result += typeof(window[property]) + <br>;
+            result  += window[property] + '<br>'
         }
     }
 }	
