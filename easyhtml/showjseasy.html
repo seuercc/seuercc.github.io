@@ -2,16 +2,12 @@
 <html>
 <head></head>
 <script>	
-
 var result = '';
-
 for (let prop in window) {  
-  if (typeof window[prop] === 'object' && window[prop] !== null) {
-   // console.log(prop, window[prop]);
+  if (typeof window[prop] === 'object' && window[prop] !== null) {   
         result  += prop + '<br>'
   }
 }
-    
 document.write(result);
 </script>
 </body>
