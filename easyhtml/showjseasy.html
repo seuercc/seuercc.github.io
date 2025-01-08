@@ -1,16 +1,15 @@
 
 <html>
 <head></head>
+<body>
 <script>	
 var result = '';
 for (let prop in window) {  
   if (typeof window[prop] === 'object' && window[prop] !== null) {   
-        result  += prop
+        result  += prop + '<br>'
   }
 }
-var resultDiv = document.createElement('div');
-resultDiv.innerHTML = result; 
-document.body.appendChild(resultDiv);
+document.write(result);
 </script>
 </body>
 </html>
