@@ -6,7 +6,9 @@
 var result = '';
 for (let prop in window) {  
   if (typeof window[prop] === 'object') {   
+    if(window[prop] !== null){
         result  += prop + '<br>'
+    }
   }
 }
 document.write(result);
