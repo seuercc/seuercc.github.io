@@ -4,13 +4,14 @@
 <script>	
 
 var result = '';
-for (let property in window) {
-    if (window.hasOwnProperty(property)) {        
-        if (typeof window[property] === 'object' && window[property] !== null) {            
-            result  += window[property] + '<br>'
-        }
-    }
-}	
+
+for (let prop in window) {  
+  if (typeof window[prop] === 'object' && window[prop] !== null) {
+   // console.log(prop, window[prop]);
+        result  +=window[prop] + '<br>'
+  }
+}
+    
 document.write(result);
 </script>
 </body>
