@@ -5,7 +5,7 @@
 <script>	
 var result = '';
 for (let prop in window) {  
-  if (typeof window[prop] === 'object' && window[prop] !== null) {   
+  if (typeof window[prop] === 'object') {   
         result  += prop + '<br>'
   }
 }
