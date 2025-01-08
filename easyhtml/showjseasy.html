@@ -8,7 +8,7 @@ var result = '';
 for (let prop in window) {  
   if (typeof window[prop] === 'object' && window[prop] !== null) {
    // console.log(prop, window[prop]);
-        result  +=window[prop] + '<br>'
+        result  += prop + '<br>'
   }
 }
     
