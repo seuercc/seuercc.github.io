@@ -1,0 +1,16 @@
+
+<html>
+<head></head>
+<script>	
+	
+for (let property in window) {
+    if (window.hasOwnProperty(property)) {        
+        if (typeof window[property] === 'object' && window[property] !== null) {            
+            result += typeof(window[property]) + <br>;
+        }
+    }
+}	
+document.write(result);
+</script>
+</body>
+</html>
