@@ -3,6 +3,7 @@
 <head></head>
 <body>
 <script>	
+  //不过滤window中的对象，打印所有对象
 var result = '';
 for (let prop in window) {  
   if (typeof window[prop] === 'object') {   
