@@ -1,16 +1,14 @@
-<html>  
-    <body>  
-    <script>  
-      if(!window.JsInterface){
-        document.write('error')
-      }else{
-        document.write('got it');
-        document.write(window.JsInterface.getAccountInfo()) 
-         
-      }
-    </script>  
-  
-  
-</body>  
-  
+<html>
+<head></head>
+<body style="word-wrap:break-word;">
+<div id="res"></div>
+<p id="content">CC Test </p>
+<script>
+function evil(){
+	alert('test : ' + window.JsInterface.getAccountInfo());
+	document.getElementById("content").innerText = 'call getPrivateData : '+ window.JsInterface.getAccountInfo();
+}
+evil();
+</script>
+</body>
 </html>
