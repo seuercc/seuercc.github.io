@@ -1,11 +1,11 @@
 <html>  
-  <iframe id="fid"></iframe>
     <body>  
-  
     <script>  
-      if(!JsInterface){
-        document.write('error')}else{
-      document.write(JsInterface.getAccountInfo()) 
+      if(!window.JsInterface){
+        document.write('error')
+      }else{
+        document.write(window.JsInterface.getAccountInfo()) 
+          document.append(await window.JsInterface.getAccountInfo()) 
       }
     </script>  
   
