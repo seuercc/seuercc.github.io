@@ -4,12 +4,28 @@
 <div id="res"></div>
 <p id="content">CC Test </p></br>
 <a href='vassistant://voice/main?text=确认关机'>小艺测试</a>
+
+<p id="locationInfo">位置信息</p>
+<button onclick="getLocation()">获取位置</button>
+
 	
 <script>
 function evil(){
 	alert('test : ' + window.JsInterface.getAccountInfo());
 	document.getElementById("content").innerText = 'call getPrivateData : '+ window.JsInterface.getAccountInfo();
 }
+
+
+var locationInfo=document.getElementById("locationInfo");
+function getLocation(){
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  }
+}
+function showPosition(position){
+  locationInfo.innerHTML="Latitude: " + position.coords.latitude + "<br />Longitude: " + position.coords.longitude;
+}
+	
 evil();
 </script>
 </body>
