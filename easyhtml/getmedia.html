@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Microphone Access</title>
+</head>
+<body>
+    <h1>Request Microphone Access</h1>
+    <button id="requestMicButton">Request Microphone Access</button>
+    <p id="status"></p>
+
+    <h1>Request Camera Access</h1>
+    <button id="requestCameraButton">Request Camera Access</button>
+    <p id="status2"></p>
+    <video id="video" width="640" height="480" autoplay></video>
+
+  
+    <script>
+        document.getElementById('requestMicButton').addEventListener('click', async () => {
+            const statusElement = document.getElementById('status');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                statusElement.textContent = 'Browser does not support getUserMedia API';
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                statusElement.textContent = 'Microphone access granted';
+                // You can now use the stream for audio processing
+                console.log('Audio stream:', stream);
+            } catch (err) {
+                statusElement.textContent = 'Microphone access denied or error occurred';
+                console.error('Error accessing microphone:', err);
+            }
+        });
+
+        document.getElementById('requestCameraButton').addEventListener('click', async () => {
+            const statusElement = document.getElementById('status2');
+            const videoElement = document.getElementById('video');
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                statusElement.textContent = 'Browser does not support getUserMedia API';
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                statusElement.textContent = 'Camera access granted';
+                videoElement.srcObject = stream;
+            } catch (err) {
+                statusElement.textContent = 'Camera access denied or error occurred';
+                console.error('Error accessing camera:', err);
+            }
+        });
+    </script>
+</body>
+</html>
