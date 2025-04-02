@@ -27,9 +27,13 @@
                         fileContentElem.textContent += `\n\n--- Content of ${file.name} ---\n\n` + content;
                     };
                     reader.onerror = function() {
-                        errorMessageElem.textContent = `An error occurred while reading the file: ${file.name}`;
+                        errorMessageElem.textContent += `An error occurred while reading the file: ${file.name}\n`;
                     };
-                    reader.readAsText(file);
+                    try {
+                        reader.readAsText(file);
+                    } catch (error) {
+                        errorMessageElem.textContent += `An unexpected error occurred while processing the file: ${file.name}\n`;
+                    }
                 });
             } else {
                 errorMessageElem.textContent = 'No file selected.';
