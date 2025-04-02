@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+<!-- 多文件上传 -->
+<input type="file" id="file" multiple onchange="fileChange()"/></br>
+<!-- 展示上传的文件内容 -->
+<textarea id="textarea"></textarea>
+
+<script>
+    async function fileChange() {
+        var fileList = document.getElementById('file').files;
+        for (var i = 0; i < fileList.length; i++) {
+          console.log('ccc file name ' + fileList[i].name + ' , size is ' + fileList[i].size )
+          const fileRes = await waitReader(fileList[i])
+          console.log('ccc content is ' + fileRes)
+          var textarea = document.getElementById('textarea');
+          textarea.value += fileRes;
+        }
+    }
+
+
+    function waitReader (file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader()   // 新建一个FileReader
+        reader.readAsText(file, 'UTF-8')  // 读取文件
+        reader.onload = function (evt) {  // 读取完文件之后会回来这里 这是个异步
+          const fileString = evt.target.result  // 读取文件内容
+          fileString ? resolve(fileString) : reject(evt)
+        }
+      })
+    }
+
+    fileChange();
+</script>
+</body>
+</html>
