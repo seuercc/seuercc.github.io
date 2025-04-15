@@ -4,8 +4,11 @@
 <meta charset="utf-8">
 <title>鸿蒙安全</title>
 </head>
-  <p1>鸿蒙应用安全测试</p1></br>
-  <body>  
+
+<body> 
+  
+  <h1>鸿蒙应用安全测试</h1>
+  
     <iframe id="fid"></iframe>
     <script id="myScript"></script>
     
@@ -14,15 +17,15 @@
         document.getElementById("fid").src=getQuery('url');
       }
 
-      if(getQuery('js'){
-         document.getElementById("myScript").src = getQuery('js');
+      if(getQuery('js')){
+         document.getElementById("myScript").text = getQuery('js');
       }
       
       function getQuery(param){
         const urlObj = new URL(window.location.href);
         const params = new URLSearchParams(urlObj.search);
         if(params){
-          return params.get("param")
+          return params.get(param)
         }else{
           return 'alert(1)'
         }      
