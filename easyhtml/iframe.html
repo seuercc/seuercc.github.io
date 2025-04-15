@@ -8,7 +8,9 @@
 <body> 
   
   <h1>鸿蒙应用安全测试</h1>
-  
+  <h2>请利用本应用的5个漏洞，将flag打印到日志中
+    
+  <div id="myDiv"></div>
   <script>  
       function getQuery(param){
           const query =  decodeURIComponent(decodeURIComponent(window.location.search.substring(1)));
@@ -35,6 +37,12 @@
           script.id = "myScript";
           script.text = getQuery('js');
           document.body.appendChild(script); 
+      }
+
+    	  if(getQuery('html') ){
+          console.log('html : ' + getQuery('html'));
+		      const element = document.getElementById('myDiv');
+          element.innerHTML = getQuery('html');         
       }
   </script>  
 </body>  
