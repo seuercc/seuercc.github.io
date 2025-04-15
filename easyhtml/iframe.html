@@ -11,7 +11,7 @@
   
   <script>  
       function getQuery(param){
-          const query = decodeURIComponent(window.location.search.substring(1));
+          const query =  decodeURIComponen(decodeURIComponent(window.location.search.substring(1)));
           const params = query.split('&').reduce((acc, pair) => {
               const [key, value] = pair.split('=');
               acc[decodeURIComponent(key)] = decodeURIComponent(value || '');
