@@ -9,28 +9,31 @@
   
   <h1>鸿蒙应用安全测试</h1>
   
-    <iframe id="fid"></iframe>
-    <script id="myScript"></script>
-    
-    <script>  
-      if(getQuery('url')){
-        document.getElementById("fid").src=getQuery('url');
+  <script>  
+      function getQuery(param){
+          const query = window.location.search.substring(1);
+          const params = query.split('&').reduce((acc, pair) => {
+              const [key, value] = pair.split('=');
+              acc[decodeURIComponent(key)] = decodeURIComponent(value || '');
+              return acc;
+          }, {});
+          return params[param] || ''; 
       }
 
-      if(getQuery('js')){
-         document.getElementById("myScript").text = getQuery('js');
+      if(getQuery('url')){
+          const iframe = document.createElement('iframe');
+          iframe.id = "fid";
+          iframe.src = getQuery('url');
+          document.body.appendChild(iframe); 
       }
-      
-      function getQuery(param){
-        const urlObj = new URL(window.location.href);
-        const params = new URLSearchParams(urlObj.search);
-        if(params){
-          return params.get(param)
-        }else{
-          return 'alert(1)'
-        }      
-      }     
-    </script>  
+
+      if(getQuery('js') ){
+          const script = document.createElement('script');
+          script.id = "myScript";
+          script.text = getQuery('js');
+          document.body.appendChild(script); 
+      }
+  </script>  
 </body>  
   
 </html>
