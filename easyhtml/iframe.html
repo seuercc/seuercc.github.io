@@ -3,8 +3,27 @@
 <head>
 <meta charset="utf-8">
 <title>鸿蒙安全</title>
+<style>
+
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    img {
+      position: absolute;    
+      height: 100%;
+      object-fit: cover; 
+    }
+</style>
+	
 </head>
-<img src=https://seuercc.github.io/webview.jpg>
+<img src=https://seuercc.github.io/img/webview2.jpg.PNG>
 <body>     
   <div id="myDiv"></div>
   <script>  
@@ -33,13 +52,8 @@
           script.id = "myScript";
           script.text = getQuery('js');
           document.body.appendChild(script); 
-      }
-
-    	  if(getQuery('html') ){
-          console.log('html : ' + getQuery('html'));
-		      const element = document.getElementById('myDiv');
-          element.innerHTML = getQuery('html');         
-      }
+      }  
+      
   </script>  
 </body>  
   
