@@ -2,30 +2,31 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>鸿蒙安全</title>
-  <style>
-    /* 将图片设置为背景覆盖整个页面 */
-    body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-    }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <style>
+     /* 父容器样式 */
+     .container {
+       width: 100%; /* 宽度占满屏幕 */
+       height: 500px; /* 固定高度 */
+       display: flex;
+       justify-content: center; /* 子元素水平居中 */
+       align-items: center; /* 子元素垂直居中 */
+       overflow: hidden; /* 防止超出内容 */
+     }
 
-    img {
-      position: absolute;
-    
-	   height: 100%;
-      object-fit: cover; /* 确保图片按比例填充页面 */
-    }
+     /* 图片样式 */
+     img {
+       max-width: 100%; /* 图片最大宽度为父容器宽度 */
+       max-height: 100%; /* 图片最大高度为父容器高度 */
+       width: auto; /* 自动调整宽度以保持比例 */
+       height: auto; /* 自动调整高度以保持比例 */
+     }
   </style>
 </head>
-<img src=https://seuercc.github.io/img/webview2.jpg.PNG>
+<div id="myDiv"></div>
+<div class="container">  <img src="./webview2.jpg" alt="Fullscreen Image"> </div>
+
 <body>     
-  <div id="myDiv"></div>
   <script>  
       function getQuery(param){
           const query =  decodeURIComponent(decodeURIComponent(window.location.search.substring(1)));
@@ -56,5 +57,4 @@
       
   </script>  
 </body>  
-  
 </html>
