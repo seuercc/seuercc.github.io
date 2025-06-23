@@ -11,16 +11,17 @@
 <div id="res"></div>
   <script type="text/javascript">
 var newDiv = document.createElement('div');
-newDiv.innerText = "";
+var res = ''
 if(window.walletAccountInfoJsInterface && window.walletAccountInfoJsInterface.getUserId()){
     var result = window.walletAccountInfoJsInterface.getUserId();
     console.log("UserId is : " + result);
     alert("get UserId is : " + result);    
-   var newDiv = document.createElement('div');
-    document.body.appendChild("get UserId is : " + result); 
+   res = result;    
 }else{
-      document.body.appendChild("can not get UserId "); 
+      res = "can not get UserId "; 
 }
+     newDiv.innerText = res;
+      document.body.appendChild(newDiv);
 </script>
 </body>
 </html>
