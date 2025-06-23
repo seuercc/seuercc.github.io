@@ -12,19 +12,18 @@
   <script type="text/javascript">
 var newDiv = document.createElement('div');
 var res = ''
-if(window.walletBasicAbilityJSInterface ){
-    window.walletBasicAbilityJSInterface.shareImage('111' , '/../grs_config/version.txt','222','333').then(()=>{
-		window.walletBasicAbilityJSInterface.logForH5('shareImage','result:' + result)
-	   
- 	   console.log("UserId is : " + result);
+if(walletBasicAbilityJSInterface ){
+	
+	window.walletBasicAbilityJSInterface.logForH5('cccddd','hahah')
+
+    walletBasicAbilityJSInterface.shareImage('111' , '/../grs_config/version.txt','222','333').then((result)=>{
+		window.walletBasicAbilityJSInterface.logForH5('shareImage','result:' + result);	  
+		console.log("UserId is : " + result);
 		alert("get UserId is : " + result);    
-	   res = 'NickName : ' + result;   
+		res = 'NickName : ' + result;   
 		newDiv.innerText = res;
 		document.body.appendChild(newDiv);	   
-	}
-	);
-   
-   
+	});   
 }else{
       res = "can not get NickName "; 
 	  newDiv.innerText = res;
