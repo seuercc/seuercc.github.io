@@ -11,17 +11,14 @@
 <div id="res"></div>
   <script type="text/javascript">
 
+if(window.walletAccountInfoJsInterface && window.walletAccountInfoJsInterface.getUserId()){
     var result = window.walletAccountInfoJsInterface.getUserId();
     console.log("UserId is : " + result);
-    alert("get UserId is : " + result);
-    if(result){
+    alert("get UserId is : " + result);    
     document.body.appendChild("get UserId is : " + result); 
-    }else{
+}else{
       document.body.appendChild("can not get UserId "); 
-    }
+}
 </script>
-
 </body>
 </html>
-
-
