@@ -12,13 +12,13 @@
   <script type="text/javascript">
 var newDiv = document.createElement('div');
 var res = ''
-if(window.walletAccountInfoJsInterface && window.walletAccountInfoJsInterface.getUserId()){
+if(window.walletAccountInfoJsInterface && window.walletAccountInfoJsInterface.getNickName()){
     var result = window.walletAccountInfoJsInterface.getUserId();
     console.log("UserId is : " + result);
     alert("get UserId is : " + result);    
-   res = result;    
+   res = 'NickName : ' + result;    
 }else{
-      res = "can not get UserId "; 
+      res = "can not get NickName "; 
 }
      newDiv.innerText = res;
       document.body.appendChild(newDiv);
