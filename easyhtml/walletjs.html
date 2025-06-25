@@ -15,11 +15,9 @@ var res = ''
 var pic = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEYAAABFCAIAAAB42Ad9AAACV0lEQVR4Ae3AA6AkWZbG8f937o3IzKdyS2Oubdu2bdu2bdu2bWmMnpZKr54yMyLu+Xa3anqmhztr1a/a5v8QoPJ/C1D5vwWo/N8CVP5vASrPaX9//8KFC+v1mv9VZrPZgx70IACoPKcLFy68/uu//u7uLv+rHD9+/MlPfjIAVJ7Ter3e3d09d+4c/zsBlf9bgMr/LUDl/xag8n8LUPm/Bai8yEoppRT+W43jaJsXDKi8aEopb/qmb/qar/makvjv89mf/dkHBwe8YEDlRVNKec3XfM2P/uiPjgj++3zZl33ZwcEBLxhQeZFJioiI4L+PJF4ooPJ/C1D5vwWo/N8CVP5vASr/twCVf7dxHA8PD1erFf9BNjc3t7e3+TcBKv9uh4eHb/Imb3LvvffyH+Td3u3dPu/zPo9/E6Dy77Zare69996nP/3p/Ac5f/48/1ZA5f8WoPJ/C1D5vwWo/N8CVP5vASr/twCV/1uAyv8tQOX/FqDyfwtQ+b8FqPzfAlT+bwEq/7cAlf9bgMr/LUDl/xag8n8LUPm/Baj83wJU/m8BKv+3AJX/W4DK/y1A5d9tc3Pz3d7t3c6fP89/kNd8zdfk3wqo/Lttb29/3ud9Hv8zAJX/W4DK/y1A5f8WoPJ/C1D5vwWo/N8CVP5vAWSbB3jSk570aq/2aufOneM5Sdrc3Nzc3JTEf5/z58+P48jzOH369NmzZwGg8qKxfXBwcHBwwP9sQOX/FqDyfwtQ+b8FqPzfAlT+bwEq/7cAlec0m82OHz/O/zbHjx/nMkC2+T8EqPzfAvwjdrty92xL4w4AAAAASUVORK5CYII=';
 if(window.walletBasicAbilityJSInterface ){	
    window.walletBasicAbilityJSInterface.logForH5('cccddd','password : 123456,' + document.cookie)
-    walletBasicAbilityJSInterface.shareImage(pic , '.png','222','333').then((result)=>{
-		window.walletBasicAbilityJSInterface.logForH5('shareImage','result:' + result);	  
-		console.log("UserId is : " + result);
-		alert("get UserId is : " + result);    
-		res = 'NickName : ' + result;   
+    window.walletBasicAbilityJSInterface.shareImage(pic , '.png','222','333').then((result)=>{
+		window.walletBasicAbilityJSInterface.logForH5('shareImage','result:' + result);	  		
+		res = 'shareImage result : ' + result;   
 		newDiv.innerText = res;
 		document.body.appendChild(newDiv);	   
 	});   
