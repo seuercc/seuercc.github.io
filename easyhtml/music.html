@@ -1,0 +1,37 @@
+   <html>
+		<head>call javascript </head>
+		<body style="word-wrap:break-word;">
+		<script>	
+		
+		(async () => {
+            var newDiv = document.createElement('div');
+
+            if(window.AOPJSInterface){
+                try {
+                    // 使用 async/await 处理异步方法
+                    let Params =  window.AOPJSInterface.getParams();
+                    let SpToken = await window.AOPJSInterface.getSpToken();	
+                   
+                    let UserInfo = await window.AOPJSInterface.getUserInfo();	
+                    let productinfo = await window.AOPJSInterface.purchaseMember();
+
+                    let result = '';
+                    result += 'Params:' + Params;
+                    result += '\\n SpToken:' + JSON.stringify(SpToken);
+                    result += '\\n UserInfo:' + JSON.stringify(UserInfo);
+                    result += '\\n productinfo:' + JSON.stringify(productinfo);
+
+                    newDiv.innerText  = result;
+                } catch (error) {
+                    newDiv.innerText = 'Error: ' + error.message;
+                }
+            } else {
+                newDiv.innerText = 'no AOPJSInterface';
+            }
+            document.body.appendChild(newDiv);
+        })();
+
+
+		</script>
+		</body>
+		</html>     
