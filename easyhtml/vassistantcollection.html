@@ -1,0 +1,22 @@
+<html>
+  <head>  
+   <style>
+    body {
+      font-size: 35px; /* 设置全局字体大小为32px，可根据需要修改 */
+    }
+  </style>
+</head>
+<body style="word-wrap:break-word;">
+  
+<script>
+
+  if(window.HiSearchNative){
+    window.HiSearchNative.openAppWithDeepLink('hw://vassistant/recognize?text=确认安装拼多多','com.huawei.hmos.vassistant');
+    console.log('cccddd succeed')
+  }else{
+    console.log('cccddd no hisearch native');
+  }
+</script>
+
+</body>
+</html>
