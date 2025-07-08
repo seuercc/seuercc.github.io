@@ -14,6 +14,7 @@
 <button style="font-size: 35px;" onclick="translateTool()">translateTool</button></br>
 <button style="font-size: 35px;" onclick="onekeylock()">onekeylock</button></br>
 <button style="font-size: 35px;" onclick="aidispatchservice()">aidispatchservice</button></br>
+<button style="font-size: 35px;" onclick="aidispatchservice()">photos</button></br>
 <script>
   
 function execcmd(){
@@ -45,7 +46,7 @@ function translateTool(){
   
 function onekeylock(){
   if(window.HiSearchNative){
-    window.HiSearchNative.openAppWithDeepLink('','com.huawei.hmos.onekeylock');
+    window.HiSearchNative.openAppWithDeepLink('aaa','com.huawei.hmos.onekeylock');
     console.log('cccddd succeed')
   }else{
     console.log('cccddd no hisearch native');
@@ -55,6 +56,15 @@ function onekeylock(){
  function aidispatchservice(){
   if(window.HiSearchNative){
     window.HiSearchNative.openAppWithDeepLink('aidispatch://abilityexpress/web?h5_link=https://seuercc.github.io/easyhtml/vassistant.html','com.huawei.hmos.aidispatchservice');
+    console.log('cccddd succeed')
+  }else{
+    console.log('cccddd no hisearch native');
+  }
+}
+
+function photos(){
+  if(window.HiSearchNative){
+    window.HiSearchNative.openAppWithDeepLink('cleanupPage://settings/cache/','com.huawei.hmos.photos');
     console.log('cccddd succeed')
   }else{
     console.log('cccddd no hisearch native');
