@@ -12,6 +12,8 @@
 <button style="font-size: 35px;" onclick="execcmd()">execcmd</button></br>
 <button style="font-size: 35px;" onclick="visionCamera()">visionCamera</button></br>
 <button style="font-size: 35px;" onclick="translateTool()">translateTool</button></br>
+<button style="font-size: 35px;" onclick="onekeylock()">onekeylock</button></br>
+
 <script>
   
 function execcmd(){
@@ -40,7 +42,15 @@ function translateTool(){
     console.log('cccddd no hisearch native');
   }
 }
-
+  
+function onekeylock(){
+  if(window.HiSearchNative){
+    window.HiSearchNative.openAppWithDeepLink('','com.huawei.hmos.onekeylock');
+    console.log('cccddd succeed')
+  }else{
+    console.log('cccddd no hisearch native');
+  }
+}
 </script>
 
 </body>
