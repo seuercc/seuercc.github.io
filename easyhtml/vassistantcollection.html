@@ -7,15 +7,39 @@
   </style>
 </head>
 <body style="word-wrap:break-word;">
-  
-<script>
 
+<button type="button" onclick="execcmd()">execcmd</button></br>
+<button type="button" onclick="visionCamera()">visionCamera</button></br>
+<button type="button" onclick="translateTool()">translateTool</button></br>
+<script>
+  
+function execcmd(){
   if(window.HiSearchNative){
-    window.HiSearchNative.openAppWithDeepLink('hw://vassistant/recognize?text=拨打110','com.huawei.hmos.vassistant');
+    window.HiSearchNative.openAppWithDeepLink('hw://vassistant/recognize?text=打开蓝牙','com.huawei.hmos.vassistant');
     console.log('cccddd succeed')
   }else{
     console.log('cccddd no hisearch native');
   }
+}
+  
+function visionCamera(){
+  if(window.HiSearchNative){
+    window.HiSearchNative.openAppWithDeepLink('visionCamera://com.huawei.hmos.vassistant?page=text','com.huawei.hmos.vassistant');
+    console.log('cccddd succeed')
+  }else{
+    console.log('cccddd no hisearch native');
+  }
+}
+
+function translateTool(){
+  if(window.HiSearchNative){
+    window.HiSearchNative.openAppWithDeepLink('translateTool://com.huawei.hmos.vassistant/text?page=text','com.huawei.hmos.vassistant');
+    console.log('cccddd succeed')
+  }else{
+    console.log('cccddd no hisearch native');
+  }
+}
+
 </script>
 
 </body>
