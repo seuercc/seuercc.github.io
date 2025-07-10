@@ -67,27 +67,10 @@ var h5Port;
 var output = document.querySelector('.output');
 window.addEventListener('message', function (event) {
     if (event.data === 'init_web_messageport') {
+		console.log('cccddd init_web_messageport succeed');
         if (event.ports[1] !== null) {
-            h5Port = event.ports[1]; // 1. 保存从应用侧发送过来的端口。
-            h5Port.onmessage = function (event) {
-              // 2. 接收ets侧发送过来的消息。
-              var msg = 'Got message from ets:';
-              var result = event.data;
-              if (typeof(result) === 'string') {
-                console.info(`received string message from html5, string is: ${result}`);
-                msg = msg + result;
-              } else if (typeof(result) === 'object') {
-                if (result instanceof ArrayBuffer) {
-                  console.info(`received arraybuffer from html5, length is: ${result.byteLength}`);
-                  msg = msg + 'length is ' + result.byteLength;
-                } else {
-                  console.info('not support');
-                }
-              } else {
-                console.info('not support');
-              }
-              output.innerHTML = msg;
-            }
+			      console.log('cccddd event.ports[1] !== null');
+            h5Port = event.ports[1]; 
         }else{
            console.error('cccddd event.ports[1] == null');
         }
