@@ -2,7 +2,7 @@
   <head>  
    <style>
     body {
-      font-size: 35px; /* 设置全局字体大小为32px，可根据需要修改 */
+      font-size: 35px;
     }
 
   </style>
@@ -12,15 +12,13 @@
 <button style="font-size: 35px;" onclick="execcmd()">execcmd</button></br>
 <button style="font-size: 35px;" onclick="visionCamera()">visionCamera</button></br>
 <button style="font-size: 35px;" onclick="translateTool()">translateTool</button></br>
-
 <button style="font-size: 35px;" onclick="aidispatchservice()">aidispatchservice</button></br>
-
 
    <div>
         <input type="button" value="SendToEts" style="font-size: 35px;" onclick="PostMsgToEts(msgFromJS.value);"/><br/>
         <input id="msgFromJS" type="text" style="font-size: 35px;" value="send this message from HTML to ets"/><br/>
     </div>
-   <p class="output" >display received message send from ets</p>
+<p class="output" >display received message send from ets</p>
   
 <script>
   
@@ -63,7 +61,6 @@ function translateTool(){
 }
 
 
-function PostMsgToEts(data) {
 var h5Port;
 var output = document.querySelector('.output');
 var result = '';
@@ -71,36 +68,30 @@ window.addEventListener('message', function (event) {
     if (event.data === 'init_web_messageport') {
 	console.log('cccddd init_web_messageport succeed');
 	result += 'cccddd init_web_messageport succeed \n';
-        if (event.ports[0] !== null) {
+        if (event.ports[0]) {
+		console.log('cccddd event.ports[0] !== null');
+		result += 'cccddd event.ports[0] !== null \n';
+        h5Port = event.ports[0]; 
+        }else{
+           console.error('cccddd event.ports[0] == null');
+			result += 'cccddd event.ports[0] == null \n';
+        }
+		
+		if (event.ports[1] && h5Port) {
 		console.log('cccddd event.ports[1] !== null');
 		result += 'cccddd event.ports[1] !== null \n';
-            	h5Port = event.ports[0]; 
+        h5Port = event.ports[1]; 
         }else{
            console.error('cccddd event.ports[1] == null');
-		result += 'cccddd event.ports[1] == null \n';
-        }
-    }else{
-      console.error('cccddd event.data !=== init_web_messageport');
-	    result += 'cccddd event.data !=== init_web_messageport \n';
-    }
-
-if (event.data === '__init_port__') {
-	console.log('cccddd init_web_messageport succeed');
-	result += 'cccddd init_web_messageport succeed \n';
-        if (event.ports[0] !== null) {
-		console.log('cccddd event.ports[0] !== null');
-		result += 'cccddd event.ports[1] !== null \n';
-            	h5Port = event.ports[0]; 
-        }else{
-           console.error('cccddd event.ports[1] == null');
-		result += 'cccddd event.ports[1] == null \n';
-        }
+			result += 'cccddd event.ports[1] == null \n';
+        }	
     }else{
       console.error('cccddd event.data !=== init_web_messageport');
 	    result += 'cccddd event.data !=== init_web_messageport \n';
     }
 })
 
+function PostMsgToEts(data) {
     if (h5Port) {
       h5Port.postMessage(data);
     } else {
