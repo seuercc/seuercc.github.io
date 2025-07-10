@@ -12,9 +12,16 @@
 <button style="font-size: 35px;" onclick="execcmd()">execcmd</button></br>
 <button style="font-size: 35px;" onclick="visionCamera()">visionCamera</button></br>
 <button style="font-size: 35px;" onclick="translateTool()">translateTool</button></br>
-<button style="font-size: 35px;" onclick="onekeylock()">onekeylock</button></br>
+
 <button style="font-size: 35px;" onclick="aidispatchservice()">aidispatchservice</button></br>
-<button style="font-size: 35px;" onclick="photos()">photos</button></br>
+
+
+   <div>
+        <input type="button" value="SendToEts" onclick="PostMsgToEts(msgFromJS.value);"/><br/>
+        <input id="msgFromJS" type="text" value="send this message from HTML to ets"/><br/>
+    </div>
+   <p class="output">display received message send from ets</p>
+  
 <script>
   
 function execcmd(){
@@ -44,14 +51,7 @@ function translateTool(){
   }
 }
   
-function onekeylock(){
-  if(window.HiSearchNative){
-    window.HiSearchNative.openAppWithDeepLink('aaa','com.huawei.hmos.onekeylock');
-    console.log('cccddd succeed')
-  }else{
-    console.log('cccddd no hisearch native');
-  }
-}
+
 
  function aidispatchservice(){
   if(window.HiSearchNative){
@@ -62,14 +62,44 @@ function onekeylock(){
   }
 }
 
-function photos(){
-  if(window.HiSearchNative){
-    window.HiSearchNative.openAppWithDeepLink('cleanupPage://settings/cache/','com.huawei.hmos.photos');
-    console.log('cccddd succeed')
-  }else{
-    console.log('cccddd no hisearch native');
-  }
+
+var h5Port;
+var output = document.querySelector('.output');
+window.addEventListener('message', function (event) {
+    if (event.data === 'init_web_messageport') {
+        if (event.ports[1] !== null) {
+            h5Port = event.ports[1]; // 1. 保存从应用侧发送过来的端口。
+            h5Port.onmessage = function (event) {
+              // 2. 接收ets侧发送过来的消息。
+              var msg = 'Got message from ets:';
+              var result = event.data;
+              if (typeof(result) === 'string') {
+                console.info(`received string message from html5, string is: ${result}`);
+                msg = msg + result;
+              } else if (typeof(result) === 'object') {
+                if (result instanceof ArrayBuffer) {
+                  console.info(`received arraybuffer from html5, length is: ${result.byteLength}`);
+                  msg = msg + 'length is ' + result.byteLength;
+                } else {
+                  console.info('not support');
+                }
+              } else {
+                console.info('not support');
+              }
+              output.innerHTML = msg;
+            }
+        }
+    }
+})
+// 3. 使用h5Port向应用侧发送消息。
+function PostMsgToEts(data) {
+    if (h5Port) {
+      h5Port.postMessage(data);
+    } else {
+      console.error('h5Port is null, Please initialize first');
+    }
 }
+
 </script>
 
 </body>
