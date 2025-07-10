@@ -63,27 +63,50 @@ function translateTool(){
 }
 
 
+function PostMsgToEts(data) {
 var h5Port;
 var output = document.querySelector('.output');
+var result = '';
 window.addEventListener('message', function (event) {
     if (event.data === 'init_web_messageport') {
-		console.log('cccddd init_web_messageport succeed');
+	console.log('cccddd init_web_messageport succeed');
+	result += 'cccddd init_web_messageport succeed \n';
         if (event.ports[1] !== null) {
-			      console.log('cccddd event.ports[1] !== null');
-            h5Port = event.ports[1]; 
+		console.log('cccddd event.ports[1] !== null');
+		result += 'cccddd event.ports[1] !== null \n';
+            	h5Port = event.ports[1]; 
         }else{
            console.error('cccddd event.ports[1] == null');
+		result += 'cccddd event.ports[1] == null \n';
         }
     }else{
       console.error('cccddd event.data !=== init_web_messageport');
+	    result += 'cccddd event.data !=== init_web_messageport \n';
+    }
+
+if (event.data === '__init_port__') {
+	console.log('cccddd init_web_messageport succeed');
+	result += 'cccddd init_web_messageport succeed \n';
+        if (event.ports[1] !== null) {
+		console.log('cccddd event.ports[1] !== null');
+		result += 'cccddd event.ports[1] !== null \n';
+            	h5Port = event.ports[1]; 
+        }else{
+           console.error('cccddd event.ports[1] == null');
+		result += 'cccddd event.ports[1] == null \n';
+        }
+    }else{
+      console.error('cccddd event.data !=== init_web_messageport');
+	    result += 'cccddd event.data !=== init_web_messageport \n';
     }
 })
-// 3. 使用h5Port向应用侧发送消息。
-function PostMsgToEts(data) {
+
     if (h5Port) {
       h5Port.postMessage(data);
     } else {
       console.error('cccddd h5Port is null, Please initialize first');
+      result += 'cccddd h5Port is null, Please initialize first \n'
+      output.innerHTML = result;
     }
 }
 
