@@ -88,7 +88,11 @@ window.addEventListener('message', function (event) {
               }
               output.innerHTML = msg;
             }
+        }else{
+           console.error('cccddd event.ports[1] == null');
         }
+    }else{
+      console.error('cccddd event.data !=== init_web_messageport');
     }
 })
 // 3. 使用h5Port向应用侧发送消息。
@@ -96,7 +100,7 @@ function PostMsgToEts(data) {
     if (h5Port) {
       h5Port.postMessage(data);
     } else {
-      console.error('h5Port is null, Please initialize first');
+      console.error('cccddd h5Port is null, Please initialize first');
     }
 }
 
