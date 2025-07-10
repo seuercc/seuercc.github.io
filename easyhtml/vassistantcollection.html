@@ -71,7 +71,7 @@ window.addEventListener('message', function (event) {
     if (event.data === 'init_web_messageport') {
 	console.log('cccddd init_web_messageport succeed');
 	result += 'cccddd init_web_messageport succeed \n';
-        if (event.ports[1] !== null) {
+        if (event.ports[0] !== null) {
 		console.log('cccddd event.ports[1] !== null');
 		result += 'cccddd event.ports[1] !== null \n';
             	h5Port = event.ports[1]; 
@@ -87,7 +87,7 @@ window.addEventListener('message', function (event) {
 if (event.data === '__init_port__') {
 	console.log('cccddd init_web_messageport succeed');
 	result += 'cccddd init_web_messageport succeed \n';
-        if (event.ports[1] !== null) {
+        if (event.ports[0] !== null) {
 		console.log('cccddd event.ports[1] !== null');
 		result += 'cccddd event.ports[1] !== null \n';
             	h5Port = event.ports[1]; 
