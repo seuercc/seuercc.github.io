@@ -65,26 +65,17 @@ var h5Port;
 var output = document.querySelector('.output');
 var result = '';
 window.addEventListener('message', function (event) {
-    if (event.data === 'init_web_messageport') {
+    if (event.data == 'init_web_messageport') {
 	console.log('cccddd init_web_messageport succeed');
 	result += 'cccddd init_web_messageport succeed \n';
         if (event.ports[0]) {
 		console.log('cccddd event.ports[0] !== null');
 		result += 'cccddd event.ports[0] !== null \n';
-        h5Port = event.ports[0]; 
+        	h5Port = event.ports[0]; 
         }else{
            console.error('cccddd event.ports[0] == null');
 			result += 'cccddd event.ports[0] == null \n';
         }
-		
-		if (event.ports[1] && h5Port) {
-		console.log('cccddd event.ports[1] !== null');
-		result += 'cccddd event.ports[1] !== null \n';
-        h5Port = event.ports[1]; 
-        }else{
-           console.error('cccddd event.ports[1] == null');
-			result += 'cccddd event.ports[1] == null \n';
-        }	
     }else{
       console.error('cccddd event.data !=== init_web_messageport');
 	    result += 'cccddd event.data !=== init_web_messageport \n';
