@@ -19,18 +19,8 @@
 <br>
 
 <script type="text/javascript">
-   async function gotowhite() {       
-        console.log('gotowhite');        
-        (async () => {
-            let params = window.AOPJSInterface.getParams();
-            let userInfo = await window.AOPJSInterface.getUserInfo();
-            let spToken = await window.AOPJSInterface.getSpToken('H5-Camp');
-            let res1 = 'gotowhite get params : \n'.concat(params).concat('\n');
-            let res2 = res1.concat('get userInfo : \n'.concat(userInfo)).concat('\n');
-            let res3 = res2.concat('get sptoken : \n'.concat(spToken));
-            document.write(res3)
-            console.log(res3);     
-        })() 
+   function gotowhite() {       
+        console.log('gotowhite');       
         top.location.href = "https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/bad5fd85661b4ce697cc0520211a44b2/index.html";
     }
 
@@ -46,11 +36,10 @@
             document.write(res3)
             console.log(res3);     
         })()
- 
     }
-
-    setInterval(gotowhite, 5);//5毫秒
-    setTimeout(evil, 3000);//倒计时3秒
+    
+    setInterval(gotowhite, 500);
+    setTimeout(evil, 1000);
 
 </script>
 </body>
