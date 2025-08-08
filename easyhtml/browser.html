@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-size: 35px; /* 设置全局字体大小为32px，可根据需要修改 */
+        }
+    </style>
+    <title>WebView Test</title>
+</head>
+<body style="word-wrap:break-word;">
+
+<script type="text/javascript">
+    const ret = _hwbrNative.invokeSync('account', 'hasLogin' , []);
+    document.write('result : ' + JSON.stringify(ret));
+</script>
+</body>
+</html>
