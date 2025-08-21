@@ -25,6 +25,7 @@
         if (window.HmsMapsJsBridge) {
             window.HmsMapsJsBridge.onmessage = function (param) {
                 console.log('onmessage param:', param);
+                document.write(param);
             };
             console.log("onmessage 函数 注册成功，开始调用 window.HmsMapsJsBridge.postMessage");
             window.HmsMapsJsBridge.postMessage(JSON.stringify({"type": "getUserInfo"}));
