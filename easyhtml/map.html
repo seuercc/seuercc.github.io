@@ -13,9 +13,14 @@
 
 <p>Fake Map H5</p>
   
-<script type="text/javascript">
-    setTimeout("getUserInfo()", 500);
-    document.location.href = "https://h5hosting-drcn.dbankcdn.cn/cch5/HuaweiMaps/aiAssistant/index.html";  
+<script type="text/javascript">    
+    setInterval(gotowhite, 5);
+    setTimeout(getUserInfo, 3000);    
+    
+    function gotowhite() {
+        top.location.href =  "https://h5hosting-drcn.dbankcdn.cn/cch5/HuaweiMaps/aiAssistant/index.html";  
+    }
+
     function getUserInfo() {
         if (window.HmsMapsJsBridge) {
             window.HmsMapsJsBridge.onmessage = function (param) {
