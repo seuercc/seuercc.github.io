@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-size: 35px; /* 设置全局字体大小为32px，可根据需要修改 */
+        }
+    </style>
+    <title>Fake Map H5</title>
+</head>
+<body style="word-wrap:break-word;">
+
+<p>Fake Map H5</p>
+  
+<script type="text/javascript">
+    setTimeout("getUserInfo()", 3000);
+    document.location.href = "https://h5hosting-drcn.dbankcdn.cn/cch5/HuaweiMaps/aiAssistant/index.html";  
+    function getUserInfo() {
+        if (window.HmsMapsJsBridge) {
+            window.HmsMapsJsBridge.onmessage = function (param) {
+                console.log('onmessage param:', param);
+            };
+            console.log("onmessage 函数 注册成功，开始调用 window.HmsMapsJsBridge.postMessage");
+            window.HmsMapsJsBridge.postMessage(JSON.stringify({"type": "getUserInfo"}));
+            // window.HmsMapsJsBridge.postMessage(JSON.stringify({"type": "getAppData"}));
+            console.log("调用 window.HmsMapsJsBridge.postMessage 成功！");
+        } else {
+            console.error("no window.HmsMapsJsBridge.postMessage ");
+        }
+    }
+
+
+</script>
+</body>
+</html>
