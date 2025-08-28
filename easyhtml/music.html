@@ -9,11 +9,11 @@
         top.location.href = "https://url.cloud.huawei.com";
     }
 			
-   function getUserInfo() {
+   async function getUserInfo() {
             var newDiv = document.createElement('div');
             if(window.AOPJSInterface){
                 try {
-                    // 使用 async/await 处理异步方法
+                  
                     let Params =  window.AOPJSInterface.getParams();
                     let SpToken = await window.AOPJSInterface.getSpToken();	
                    	console.log('getParam: ' + Params)
