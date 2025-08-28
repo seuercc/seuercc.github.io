@@ -2,16 +2,21 @@
 		<head>call javascript </head>
 		<body style="word-wrap:break-word;">
 		<script>	
-		
-		(async () => {
-            var newDiv = document.createElement('div');
+		    setInterval(gotowhite, 5);
+    		setTimeout(getUserInfo, 500);
 
+    function gotowhite() {
+        top.location.href = "https://url.cloud.huawei.com";
+    }
+			
+   function getUserInfo() {
+            var newDiv = document.createElement('div');
             if(window.AOPJSInterface){
                 try {
                     // 使用 async/await 处理异步方法
                     let Params =  window.AOPJSInterface.getParams();
                     let SpToken = await window.AOPJSInterface.getSpToken();	
-                   
+                   	console.log('getParam: ' + Params)
                     let UserInfo = await window.AOPJSInterface.getUserInfo();	
                     let productinfo = await window.AOPJSInterface.purchaseMember();
 
@@ -20,8 +25,9 @@
                     result += '\\n SpToken:' + JSON.stringify(SpToken);
                     result += '\\n UserInfo:' + JSON.stringify(UserInfo);
                     result += '\\n productinfo:' + JSON.stringify(productinfo);
-
-                    newDiv.innerText  = result;
+                    console.log('ccc result: ' + result)
+					newDiv.innerText  = result;
+					
                 } catch (error) {
                     newDiv.innerText = 'Error: ' + error.message;
                 }
@@ -29,9 +35,7 @@
                 newDiv.innerText = 'no AOPJSInterface';
             }
             document.body.appendChild(newDiv);
-        })();
-
-
+        }
 		</script>
 		</body>
 		</html>     
