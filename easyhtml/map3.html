@@ -12,9 +12,10 @@
 <body style="word-wrap:break-word;">
 <script type="text/javascript">
     if (window.HmsMapsJsBridge) {
+        console.log('register onmessage')
         window.HmsMapsJsBridge.onmessage = function (param) {
             console.log('onmessage param:', param);
-            console.log('cookie : ' + document.cookie);
+            console.log('cookie 1 : ' + document.cookie);
         };
     }
 
@@ -29,7 +30,7 @@
         if (window.HmsMapsJsBridge) {
             window.HmsMapsJsBridge.postMessage(JSON.stringify({"type": "getUserInfo"}));
         } else {
-            console.log(document.cookie);
+            console.log(cookie 2 : ' + document.cookie);
         }
     }
 
