@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>剪贴板内容读取器（改进版）</title>
+    <title>剪贴板内容读取器</title>
     <style>
         :root{
             --bg1:#667eea;
@@ -88,7 +88,7 @@
 </head>
 <body>
     <div class="container" role="main">
-        <h1>📋 剪贴板内容读取器（改进版）</h1>
+        <h1>📋 剪贴板内容读取器（改进版：处理 document not focused）</h1>
 
         <div id="status" class="status info" aria-live="polite">
             正在准备...
@@ -96,10 +96,9 @@
 
         <div class="info-text">
             <strong>使用说明：</strong><br>
-            • 页面加载时会自动尝试读取剪贴板（需 HTTPS 且需授权）。<br>
-            • 若读取失败会回退到文本读取；支持文本与图片预览。<br>
-            • 对于图片，浏览器是否允许写回剪贴板取决于实现与权限。<br>
-            • 你也可以在页面按 Ctrl/Cmd+V 粘贴触发读取。
+            • 页面加载时会尝试智能读取剪贴板；若遇到权限/聚焦限制，会提示你点击页面或使用“重新读取”按钮。<br>
+            • 若你想粘贴，也可以在页面按 Ctrl/Cmd+V 粘贴触发。<br>
+            • 需要在 HTTPS 下或 localhost 使用剪贴板 API。
         </div>
 
         <div class="controls" role="toolbar" aria-label="剪贴板操作">
@@ -122,28 +121,31 @@
         const btnCopy = document.getElementById('btnCopy');
         const btnClear = document.getElementById('btnClear');
 
-        // 初始化按钮事件
-        btnRead.addEventListener('click', readClipboard);
+        let waitingForActivation = false;
+        let oneTimeActivationHandler = null;
+
+        // 按钮事件
+        btnRead.addEventListener('click', async () => {
+            // 点击按钮是用户激活，直接尝试读取
+            await readClipboard();
+        });
         btnCopy.addEventListener('click', copyToClipboard);
         btnClear.addEventListener('click', clearContent);
+
         window.addEventListener('load', () => {
-            updateStatus('正在尝试读取剪贴板内容...', 'info');
-            readClipboard();
+            initAutoReadWithFocusHandling();
         });
 
         // 监听用户粘贴（更可靠）
         document.addEventListener('paste', async (ev) => {
             updateStatus('检测到粘贴事件，正在读取...', 'info');
-            // 优先使用事件中的 clipboardData（更即时）
             try {
-                const items = [];
                 const clipboardData = ev.clipboardData;
                 if (clipboardData && clipboardData.items && clipboardData.items.length) {
+                    const items = [];
                     for (const entry of clipboardData.items) {
                         if (entry.kind === 'string') {
-                            // 获取文本
                             entry.getAsString(text => {
-                                // 直接渲染
                                 currentClipboardItems = [{ type: 'text/plain', text }];
                                 renderClipboardItems();
                                 updateStatus('粘贴内容读取完成', 'success');
@@ -158,24 +160,81 @@
                     return;
                 }
             } catch (e) {
-                // fallthrough to full read
+                // fallback to full readClipboard
             }
-            // fallback：调用 readClipboard 完整路径
             await readClipboard();
         });
 
-        // 读取剪贴板：优先尝试 navigator.clipboard.read()，回退到 readText()
+        // 初始化：在 load 时智能处理 document focus / user activation 问题
+        function initAutoReadWithFocusHandling() {
+            // 如果浏览器不支持 clipboard API，直接提示
+            if (!navigator.clipboard) {
+                updateStatus('您的浏览器不支持剪贴板API（navigator.clipboard）。请使用现代浏览器并通过 HTTPS 访问。', 'error');
+                return;
+            }
+
+            // 如果文档有焦点，可以尝试自动读取（某些情况仍然会因缺少用户激活失败）
+            if (document.hasFocus && document.hasFocus()) {
+                // 尝试读取，但如果失败且错误表明需要聚焦/用户激活，则退回到等待用户操作
+                readClipboard().catch(err => {
+                    // 如果失败并且提示“Document is not focused”或权限/激活问题，则等待用户交互
+                    console.warn('自动读取失败（可能需要用户交互）：', err);
+                    promptForUserActivation();
+                });
+                return;
+            }
+
+            // 文档没有焦点：提示用户并等待一次性用户交互（click / keydown / focus / visibilitychange）
+            promptForUserActivation();
+        }
+
+        // 设置一次性的用户激活监听，用户交互后触发读取
+        function promptForUserActivation() {
+            if (waitingForActivation) return;
+            waitingForActivation = true;
+            updateStatus('需要页面激活（例如点击页面或按任意键），才能读取剪贴板。请点击页面或使用“重新读取”按钮。', 'info');
+
+            oneTimeActivationHandler = async function activationHandler(e) {
+                // 若文档仍然不可见或没有焦点，等到聚焦可用
+                if (document.visibilityState === 'hidden') return;
+                // 移除监听
+                removeActivationListeners();
+                try {
+                    await readClipboard();
+                } catch (err) {
+                    console.warn('在用户激活后读取仍失败：', err);
+                    updateStatus('在用户激活后读取剪贴板失败：' + (err?.message || String(err)), 'error');
+                }
+            };
+
+            // 事件：click / keydown / focus / visibilitychange 都能代表用户激活或聚焦发生
+            window.addEventListener('click', oneTimeActivationHandler, { once: true });
+            window.addEventListener('keydown', oneTimeActivationHandler, { once: true });
+            window.addEventListener('focus', oneTimeActivationHandler, { once: true });
+            document.addEventListener('visibilitychange', oneTimeActivationHandler, { once: true });
+        }
+
+        function removeActivationListeners() {
+            waitingForActivation = false;
+            try { window.removeEventListener('click', oneTimeActivationHandler); } catch(e){}
+            try { window.removeEventListener('keydown', oneTimeActivationHandler); } catch(e){}
+            try { window.removeEventListener('focus', oneTimeActivationHandler); } catch(e){}
+            try { document.removeEventListener('visibilitychange', oneTimeActivationHandler); } catch(e){}
+            oneTimeActivationHandler = null;
+        }
+
+        // 读取剪贴板（优先 read()，不可用回退到 readText()）
         async function readClipboard() {
             cleanupPreviews();
             currentClipboardItems = [];
             renderClipboardItems();
 
             if (!navigator.clipboard) {
-                updateStatus('您的浏览器不支持剪贴板API（navigator.clipboard）。请使用现代浏览器，并在 HTTPS 下访问。', 'error');
+                updateStatus('您的浏览器不支持剪贴板API（navigator.clipboard）。', 'error');
                 return;
             }
 
-            // 可选：查询权限（部分浏览器支持）
+            // Permissions API 可选检查
             try {
                 if (navigator.permissions && navigator.permissions.query) {
                     try {
@@ -185,28 +244,23 @@
                             return;
                         }
                     } catch (e) {
-                        // 某些浏览器上 query({name:'clipboard-read'}) 会抛错，忽略
+                        // 某些浏览器在 query({name:'clipboard-read'}) 上会抛错 - 忽略
                     }
                 }
-            } catch (e) {
-                // ignore
-            }
+            } catch (e) { /* ignore */ }
 
             updateStatus('正在读取剪贴板...', 'info');
 
-            // 如果支持 read(), 先尝试 read()
+            // 如果支持 read()
             if (navigator.clipboard.read) {
                 try {
                     const clipboardItems = await navigator.clipboard.read();
                     if (!clipboardItems || clipboardItems.length === 0) {
-                        // 可能剪贴板为空
                         updateStatus('剪贴板为空', 'info');
                         contentDiv.textContent = '剪贴板中没有内容';
                         return;
                     }
-
                     for (const item of clipboardItems) {
-                        // item is ClipboardItem
                         for (const type of item.types) {
                             try {
                                 const blob = await item.getType(type);
@@ -221,7 +275,6 @@
                                 }
                             } catch (e) {
                                 console.warn('无法读取类型', type, e);
-                                // 记录不可读的类型
                                 currentClipboardItems.push({ type, error: true });
                             }
                         }
@@ -230,8 +283,13 @@
                     updateStatus('✅ 剪贴板内容读取成功！', 'success');
                     return;
                 } catch (err) {
-                    console.warn('navigator.clipboard.read() 失败，尝试回退到 readText():', err);
-                    // 继续到 readText 回退逻辑
+                    // 常见错误：NotAllowedError 或 Document is not focused（或其他），在这里捕获并回退
+                    console.warn('navigator.clipboard.read() 失败：', err);
+                    // 如果是聚焦/激活相关错误，抛出以便上层逻辑处理（会提示用户激活）
+                    if (err && (err.message?.includes('focus') || err.name === 'NotAllowedError' || err.name === 'NotReadableError')) {
+                        throw err;
+                    }
+                    // 其他错误继续回退到 readText
                 }
             }
 
@@ -250,13 +308,12 @@
                     return;
                 } catch (err) {
                     console.error('readText 失败：', err);
-                    updateStatus(`读取剪贴板失败：${err?.message || String(err)}`, 'error');
-                    return;
+                    // 如果readText失败，向上抛出，调用者可能决定提示用户激活
+                    throw err;
                 }
             }
 
-            // 最后兜底
-            updateStatus('无法读取剪贴板：不支持 read() 和 readText()。请使用支持剪贴板API的现代浏览器（HTTPS 下）。', 'error');
+            updateStatus('无法读取剪贴板：浏览器不支持 read() 和 readText()。', 'error');
         }
 
         // 渲染 clipboardItems（把文本与图片显示在 contentDiv）
@@ -306,7 +363,6 @@
                     info.className = 'small';
                     info.textContent = `二进制数据（${item.type || 'unknown'}），大小：${item.blob.size || '未知'} 字节`;
                     wrapper.appendChild(info);
-                    // 可提供下载链接
                     try {
                         const url = URL.createObjectURL(item.blob);
                         const a = document.createElement('a');
@@ -336,7 +392,6 @@
                 return;
             }
 
-            // 优先寻找 text 类型
             const textItem = currentClipboardItems.find(i => i.text);
             if (textItem && navigator.clipboard && navigator.clipboard.writeText) {
                 try {
@@ -350,7 +405,6 @@
                 }
             }
 
-            // 没有文本，尝试写入图片（需要浏览器支持 navigator.clipboard.write + ClipboardItem）
             const imageItem = currentClipboardItems.find(i => i.blob && i.type && i.type.startsWith('image/'));
             if (imageItem && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
                 try {
@@ -404,9 +458,6 @@
                 statusDiv.textContent = originalText;
             }, timeout);
         }
-
-        // 注：某些浏览器提供 navigator.clipboard.addEventListener('clipboardchange')，但支持很少且行为不一致。
-        // 如果你希望自动在剪贴板变更时读取，可以在支持的环境下增加轮询或用户交互触发的读取。
     </script>
 </body>
 </html>
