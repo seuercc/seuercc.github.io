@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>剪贴板内容读取器（改进版）</title>
+    <style>
+        :root{
+            --bg1:#667eea;
+            --bg2:#764ba2;
+            --card:#fff;
+            --muted:#6b7280;
+        }
+        html,body{height:100%}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 28px;
+            background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+        }
+        h1 {text-align:center;color:#374151;margin-bottom:16px;font-size:2rem}
+        .status {
+            text-align: left;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        .status.info { background:#d1ecf1; color:#0c5460; border:1px solid #bee5eb; }
+        .status.success { background:#d4edda; color:#155724; border:1px solid #c3e6cb; }
+        .status.error { background:#f8d7da; color:#721c24; border:1px solid #f5c6cb; }
+        .status.copy-success { background:#e8f5e8; color:#2e7d32; border:1px solid #c8e6c9; }
+        .info-text {
+            background-color: #f1f5f9;
+            border-left: 4px solid #60a5fa;
+            padding: 12px;
+            margin: 12px 0 20px 0;
+            border-radius: 0 8px 8px 0;
+            color: #374151;
+            line-height:1.4;
+        }
+        .controls { text-align:center;margin-bottom:18px }
+        button {
+            background: linear-gradient(45deg, var(--bg1), var(--bg2));
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 6px;
+            transition: transform .18s ease, box-shadow .18s ease;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+        }
+        button:focus { outline:3px solid rgba(99,102,241,0.2); outline-offset:3px; }
+        button:hover { transform: translateY(-3px); box-shadow:0 10px 28px rgba(0,0,0,0.2) }
+        button[disabled] { opacity:.6; cursor:not-allowed; transform:none; box-shadow:none; }
+        .clipboard-content {
+            background-color: #f8fafc;
+            border: 1px solid #e6eef8;
+            border-radius: 8px;
+            padding: 18px;
+            margin: 12px 0;
+            min-height: 140px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color:#111827;
+        }
+        .item { margin-bottom:12px; padding:10px; border-radius:8px; background:#fff; border:1px solid #eef2ff; }
+        .item .meta { font-size:12px; color:var(--muted); margin-bottom:8px; }
+        img.preview { max-width: 100%; height: auto; border-radius: 6px; display:block; margin-top:6px; border:1px solid #e6eef8; }
+        pre.text-content { white-space:pre-wrap; font-family:inherit; font-size:13px; margin:0; background:#f8fafc; padding:8px; border-radius:6px; border:1px dashed #e2e8f0 }
+        .small { font-size:12px; color:var(--muted); }
+    </style>
+</head>
+<body>
+    <div class="container" role="main">
+        <h1>📋 剪贴板内容读取器（改进版）</h1>
+
+        <div id="status" class="status info" aria-live="polite">
+            正在准备...
+        </div>
+
+        <div class="info-text">
+            <strong>使用说明：</strong><br>
+            • 页面加载时会自动尝试读取剪贴板（需 HTTPS 且需授权）。<br>
+            • 若读取失败会回退到文本读取；支持文本与图片预览。<br>
+            • 对于图片，浏览器是否允许写回剪贴板取决于实现与权限。<br>
+            • 你也可以在页面按 Ctrl/Cmd+V 粘贴触发读取。
+        </div>
+
+        <div class="controls" role="toolbar" aria-label="剪贴板操作">
+            <button id="btnRead" type="button">🔄 重新读取</button>
+            <button id="btnCopy" type="button">📋 复制内容</button>
+            <button id="btnClear" type="button">🗑️ 清空内容</button>
+        </div>
+
+        <div id="clipboardContent" class="clipboard-content" aria-live="polite">
+            剪贴板内容将在这里显示...
+        </div>
+    </div>
+
+    <script>
+        // 结构化保存当前剪贴板项：数组，元素形如 { type, blob?, text?, previewUrl? }
+        let currentClipboardItems = [];
+        const statusDiv = document.getElementById('status');
+        const contentDiv = document.getElementById('clipboardContent');
+        const btnRead = document.getElementById('btnRead');
+        const btnCopy = document.getElementById('btnCopy');
+        const btnClear = document.getElementById('btnClear');
+
+        // 初始化按钮事件
+        btnRead.addEventListener('click', readClipboard);
+        btnCopy.addEventListener('click', copyToClipboard);
+        btnClear.addEventListener('click', clearContent);
+        window.addEventListener('load', () => {
+            updateStatus('正在尝试读取剪贴板内容...', 'info');
+            readClipboard();
+        });
+
+        // 监听用户粘贴（更可靠）
+        document.addEventListener('paste', async (ev) => {
+            updateStatus('检测到粘贴事件，正在读取...', 'info');
+            // 优先使用事件中的 clipboardData（更即时）
+            try {
+                const items = [];
+                const clipboardData = ev.clipboardData;
+                if (clipboardData && clipboardData.items && clipboardData.items.length) {
+                    for (const entry of clipboardData.items) {
+                        if (entry.kind === 'string') {
+                            // 获取文本
+                            entry.getAsString(text => {
+                                // 直接渲染
+                                currentClipboardItems = [{ type: 'text/plain', text }];
+                                renderClipboardItems();
+                                updateStatus('粘贴内容读取完成', 'success');
+                            });
+                        } else if (entry.kind === 'file') {
+                            const file = entry.getAsFile();
+                            currentClipboardItems = [{ type: file.type || 'application/octet-stream', blob: file }];
+                            renderClipboardItems();
+                            updateStatus('粘贴文件读取完成', 'success');
+                        }
+                    }
+                    return;
+                }
+            } catch (e) {
+                // fallthrough to full read
+            }
+            // fallback：调用 readClipboard 完整路径
+            await readClipboard();
+        });
+
+        // 读取剪贴板：优先尝试 navigator.clipboard.read()，回退到 readText()
+        async function readClipboard() {
+            cleanupPreviews();
+            currentClipboardItems = [];
+            renderClipboardItems();
+
+            if (!navigator.clipboard) {
+                updateStatus('您的浏览器不支持剪贴板API（navigator.clipboard）。请使用现代浏览器，并在 HTTPS 下访问。', 'error');
+                return;
+            }
+
+            // 可选：查询权限（部分浏览器支持）
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    try {
+                        const perm = await navigator.permissions.query({ name: 'clipboard-read' });
+                        if (perm.state === 'denied') {
+                            updateStatus('剪贴板读取权限被拒绝（Permissions API 返回 denied）。请在浏览器中允许剪贴板访问。', 'error');
+                            return;
+                        }
+                    } catch (e) {
+                        // 某些浏览器上 query({name:'clipboard-read'}) 会抛错，忽略
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            updateStatus('正在读取剪贴板...', 'info');
+
+            // 如果支持 read(), 先尝试 read()
+            if (navigator.clipboard.read) {
+                try {
+                    const clipboardItems = await navigator.clipboard.read();
+                    if (!clipboardItems || clipboardItems.length === 0) {
+                        // 可能剪贴板为空
+                        updateStatus('剪贴板为空', 'info');
+                        contentDiv.textContent = '剪贴板中没有内容';
+                        return;
+                    }
+
+                    for (const item of clipboardItems) {
+                        // item is ClipboardItem
+                        for (const type of item.types) {
+                            try {
+                                const blob = await item.getType(type);
+                                if (type.startsWith('text/')) {
+                                    const text = await blob.text();
+                                    currentClipboardItems.push({ type, text, blob });
+                                } else if (type.startsWith('image/')) {
+                                    const previewUrl = URL.createObjectURL(blob);
+                                    currentClipboardItems.push({ type, blob, previewUrl });
+                                } else {
+                                    currentClipboardItems.push({ type, blob });
+                                }
+                            } catch (e) {
+                                console.warn('无法读取类型', type, e);
+                                // 记录不可读的类型
+                                currentClipboardItems.push({ type, error: true });
+                            }
+                        }
+                    }
+                    renderClipboardItems();
+                    updateStatus('✅ 剪贴板内容读取成功！', 'success');
+                    return;
+                } catch (err) {
+                    console.warn('navigator.clipboard.read() 失败，尝试回退到 readText():', err);
+                    // 继续到 readText 回退逻辑
+                }
+            }
+
+            // 回退：尝试只读取文本（兼容性更好）
+            if (navigator.clipboard.readText) {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (!text) {
+                        updateStatus('剪贴板为空或无文本可读', 'info');
+                        contentDiv.textContent = '剪贴板中没有文本内容';
+                        return;
+                    }
+                    currentClipboardItems = [{ type: 'text/plain', text }];
+                    renderClipboardItems();
+                    updateStatus('✅ 剪贴板文本读取成功（readText）！', 'success');
+                    return;
+                } catch (err) {
+                    console.error('readText 失败：', err);
+                    updateStatus(`读取剪贴板失败：${err?.message || String(err)}`, 'error');
+                    return;
+                }
+            }
+
+            // 最后兜底
+            updateStatus('无法读取剪贴板：不支持 read() 和 readText()。请使用支持剪贴板API的现代浏览器（HTTPS 下）。', 'error');
+        }
+
+        // 渲染 clipboardItems（把文本与图片显示在 contentDiv）
+        function renderClipboardItems() {
+            contentDiv.innerHTML = '';
+            if (!currentClipboardItems || currentClipboardItems.length === 0) {
+                contentDiv.textContent = '剪贴板内容将在这里显示...';
+                return;
+            }
+            for (const item of currentClipboardItems) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'item';
+                const meta = document.createElement('div');
+                meta.className = 'meta';
+                meta.textContent = item.type ? `[${item.type}]` : '[unknown]';
+                wrapper.appendChild(meta);
+
+                if (item.error) {
+                    const p = document.createElement('div');
+                    p.className = 'small';
+                    p.textContent = '无法读取该类型的内容（被浏览器或权限限制）';
+                    wrapper.appendChild(p);
+                } else if (item.text) {
+                    const pre = document.createElement('pre');
+                    pre.className = 'text-content';
+                    pre.textContent = item.text;
+                    wrapper.appendChild(pre);
+                } else if (item.previewUrl) {
+                    const info = document.createElement('div');
+                    info.className = 'small';
+                    info.textContent = `图片（${item.type}） - 预览：`;
+                    wrapper.appendChild(info);
+                    const img = document.createElement('img');
+                    img.className = 'preview';
+                    img.src = item.previewUrl;
+                    img.alt = '剪贴板图片预览';
+                    wrapper.appendChild(img);
+
+                    if (item.blob && typeof item.blob.size === 'number') {
+                        const size = document.createElement('div');
+                        size.className = 'small';
+                        size.textContent = `大小：${item.blob.size} 字节`;
+                        wrapper.appendChild(size);
+                    }
+                } else if (item.blob) {
+                    const info = document.createElement('div');
+                    info.className = 'small';
+                    info.textContent = `二进制数据（${item.type || 'unknown'}），大小：${item.blob.size || '未知'} 字节`;
+                    wrapper.appendChild(info);
+                    // 可提供下载链接
+                    try {
+                        const url = URL.createObjectURL(item.blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.textContent = '下载';
+                        a.download = 'clipboard-item';
+                        a.style.marginLeft = '8px';
+                        a.addEventListener('click', () => setTimeout(() => URL.revokeObjectURL(url), 10000));
+                        wrapper.appendChild(a);
+                    } catch (e) {
+                        // ignore
+                    }
+                } else {
+                    const p = document.createElement('div');
+                    p.className = 'small';
+                    p.textContent = '没有可展示的内容';
+                    wrapper.appendChild(p);
+                }
+                contentDiv.appendChild(wrapper);
+            }
+        }
+
+        // 复制到剪贴板：优先文本，其次尝试复制图片（如果支持）
+        async function copyToClipboard() {
+            if (!currentClipboardItems || currentClipboardItems.length === 0) {
+                alert('没有内容可复制');
+                return;
+            }
+
+            // 优先寻找 text 类型
+            const textItem = currentClipboardItems.find(i => i.text);
+            if (textItem && navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(textItem.text);
+                    flashStatus('✅ 文本已复制到剪贴板！', 'copy-success');
+                    return;
+                } catch (e) {
+                    console.error('writeText 失败：', e);
+                    alert('复制文本失败：' + (e?.message || e));
+                    return;
+                }
+            }
+
+            // 没有文本，尝试写入图片（需要浏览器支持 navigator.clipboard.write + ClipboardItem）
+            const imageItem = currentClipboardItems.find(i => i.blob && i.type && i.type.startsWith('image/'));
+            if (imageItem && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+                try {
+                    const clipItem = new ClipboardItem({ [imageItem.type]: imageItem.blob });
+                    await navigator.clipboard.write([clipItem]);
+                    flashStatus('✅ 图片已写入剪贴板（若浏览器支持）！', 'copy-success');
+                    return;
+                } catch (e) {
+                    console.error('写入图片到剪贴板失败：', e);
+                    alert('写入图片到剪贴板失败：' + (e?.message || e));
+                    return;
+                }
+            }
+
+            alert('当前内容不可复制为纯文本，且浏览器不支持将二进制写回剪贴板。');
+        }
+
+        // 清空显示并释放预览 URL
+        function clearContent() {
+            cleanupPreviews();
+            currentClipboardItems = [];
+            renderClipboardItems();
+            updateStatus('内容已清空，点击"重新读取"获取新的剪贴板内容', 'info');
+        }
+
+        // 清除预览 URL（释放内存）
+        function cleanupPreviews() {
+            if (!currentClipboardItems) return;
+            for (const it of currentClipboardItems) {
+                if (it.previewUrl) {
+                    try { URL.revokeObjectURL(it.previewUrl); } catch (e) { /* ignore */ }
+                    it.previewUrl = null;
+                }
+            }
+        }
+
+        // 更新状态栏
+        function updateStatus(text, type='info') {
+            statusDiv.className = 'status ' + (type || 'info');
+            statusDiv.textContent = text;
+        }
+
+        // 短暂显示复制成功样式并还原
+        function flashStatus(text, cls='copy-success', timeout=2000) {
+            const originalText = statusDiv.textContent;
+            const originalClass = statusDiv.className;
+            statusDiv.className = 'status ' + cls;
+            statusDiv.textContent = text;
+            setTimeout(() => {
+                statusDiv.className = originalClass;
+                statusDiv.textContent = originalText;
+            }, timeout);
+        }
+
+        // 注：某些浏览器提供 navigator.clipboard.addEventListener('clipboardchange')，但支持很少且行为不一致。
+        // 如果你希望自动在剪贴板变更时读取，可以在支持的环境下增加轮询或用户交互触发的读取。
+    </script>
+</body>
+</html>
