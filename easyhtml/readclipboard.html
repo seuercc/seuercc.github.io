@@ -261,7 +261,7 @@
     <div class="container">
         <div class="header">
             <h1>剪贴板数据读写工具</h1>
-            <p>支持剪贴板读取、写入和1MB数据生成</p>
+            <p>支持剪贴板读取、写入和1MB数据生成（包含特殊字符）</p>
         </div>
         
         <div class="content">
@@ -283,7 +283,7 @@
             <div class="auto-generate">
                 <h3>自动生成数据</h3>
                 <div class="auto-buttons">
-                    <button id="generateBtn">生成10MB数据</button>
+                    <button id="generateBtn">生成1MB数据</button>
                     <button id="autoCopyBtn">生成并自动复制</button>
                 </div>
                 <div class="progress-container" id="progressContainer">
@@ -299,29 +299,23 @@
             <div class="clipboard-info">
                 <h3>技术实现说明</h3>
                 <p>此工具使用现代浏览器的 <code>navigator.clipboard.writeText()</code> 和 <code>navigator.clipboard.readText()</code> API 实现剪贴板读写功能。</p>
-                <p>1MB数据生成使用优化的算法，避免阻塞UI线程。</p>
+                <p>1MB数据生成包含字母、数字和特殊字符，直接生成不拆分任务。</p>
                 
                 <div class="code">
-// 写入剪贴板的JavaScript代码
-async function copyToClipboard(text) {
-    try {
-        await navigator.clipboard.writeText(text);
-        return true; // 复制成功
-    } catch (err) {
-        console.error('复制失败: ', err);
-        return false; // 复制失败
+// 生成1MB数据的JavaScript代码（包含特殊字符）
+function generate1MBData() {
+    const targetSize = 1024 * 1024; // 1MB in bytes
+    let data = '';
+    
+    // 包含字母、数字和特殊字符的字符集
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/`~";
+    
+    // 直接生成数据，不拆分任务
+    for (let i = 0; data.length < targetSize; i++) {
+        data += charset.charAt(Math.floor(Math.random() * charset.length));
     }
-}
-
-// 读取剪贴板的JavaScript代码
-async function readFromClipboard() {
-    try {
-        const text = await navigator.clipboard.readText();
-        return text; // 返回剪贴板内容
-    } catch (err) {
-        console.error('读取失败: ', err);
-        return null; // 读取失败
-    }
+    
+    return data;
 }
                 </div>
             </div>
@@ -422,7 +416,7 @@ async function readFromClipboard() {
                 showFeedback('文本已清空', 'info');
             });
             
-            // 生成10MB数据
+            // 生成1MB数据
             generateBtn.addEventListener('click', function() {
                 generate1MBData(false);
             });
@@ -485,11 +479,9 @@ async function readFromClipboard() {
                 }
             }
             
-            // 生成10MB数据
+            // 生成1MB数据（包含特殊字符）
             function generate1MBData(autoCopy) {
-                const targetSize = 10 * 1024 * 1024; // 1MB in bytes
-                const chunkSize = 10000; // 每次生成的字符数
-                let data = '';
+                const targetSize = 100 * 1024 * 1024; // 1MB in bytes
                 
                 // 禁用按钮
                 generateBtn.disabled = true;
@@ -500,36 +492,29 @@ async function readFromClipboard() {
                 progressBar.style.width = '0%';
                 progressText.textContent = '生成中: 0%';
                 
-                // 生成器函数
-                function* dataGenerator() {
-                    const baseText = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\n";
-                    const baseLength = baseText.length;
+                // 立即更新进度到10%
+                setTimeout(() => {
+                    progressBar.style.width = '10%';
+                    progressText.textContent = '生成中: 10%';
                     
-                    while (data.length < targetSize) {
-                        let chunk = '';
-                        for (let i = 0; i < chunkSize && data.length < targetSize; i++) {
-                            chunk += baseText.charAt(Math.floor(Math.random() * baseLength));
-                        }
-                        data += chunk;
-                        const progress = Math.min(100, Math.floor((data.length / targetSize) * 100));
-                        yield progress;
-                    }
-                    return data;
-                }
-                
-                const generator = dataGenerator();
-                
-                function generateChunk() {
-                    const result = generator.next();
-                    
-                    if (!result.done) {
-                        // 更新进度
-                        progressBar.style.width = result.value + '%';
-                        progressText.textContent = `生成中: ${result.value}%`;
+                    // 继续生成
+                    setTimeout(() => {
+                        // 包含字母、数字和特殊字符的字符集
+                        const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/`~";
+                        let data = '';
                         
-                        // 继续生成下一块
-                        setTimeout(generateChunk, 0);
-                    } else {
+                        // 直接生成数据，不拆分任务
+                        for (let i = 0; data.length < targetSize; i++) {
+                            data += charset.charAt(Math.floor(Math.random() * charset.length));
+                            
+                            // 每生成10%更新一次进度
+                            if (i % (targetSize / 10) === 0) {
+                                const progress = Math.min(100, Math.floor((data.length / targetSize) * 100));
+                                progressBar.style.width = progress + '%';
+                                progressText.textContent = `生成中: ${progress}%`;
+                            }
+                        }
+                        
                         // 生成完成
                         progressBar.style.width = '100%';
                         progressText.textContent = '生成完成!';
@@ -542,7 +527,7 @@ async function readFromClipboard() {
                         generateBtn.disabled = false;
                         autoCopyBtn.disabled = false;
                         
-                        showFeedback(`已生成10MB数据 (${data.length.toLocaleString()} 字符)`, 'success');
+                        showFeedback(`已生成1MB数据 (${data.length.toLocaleString()} 字符)`, 'success');
                         
                         // 如果设置了自动复制
                         if (autoCopy) {
@@ -550,11 +535,8 @@ async function readFromClipboard() {
                                 copyBtn.click();
                             }, 500);
                         }
-                    }
-                }
-                
-                // 开始生成
-                generateChunk();
+                    }, 100);
+                }, 100);
             }
         });
     </script>
