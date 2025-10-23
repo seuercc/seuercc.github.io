@@ -283,7 +283,7 @@
             <div class="auto-generate">
                 <h3>自动生成数据</h3>
                 <div class="auto-buttons">
-                    <button id="generateBtn">生成1MB数据</button>
+                    <button id="generateBtn">生成10MB数据</button>
                     <button id="autoCopyBtn">生成并自动复制</button>
                 </div>
                 <div class="progress-container" id="progressContainer">
@@ -422,7 +422,7 @@ async function readFromClipboard() {
                 showFeedback('文本已清空', 'info');
             });
             
-            // 生成1MB数据
+            // 生成10MB数据
             generateBtn.addEventListener('click', function() {
                 generate1MBData(false);
             });
@@ -485,9 +485,9 @@ async function readFromClipboard() {
                 }
             }
             
-            // 生成1MB数据
+            // 生成10MB数据
             function generate1MBData(autoCopy) {
-                const targetSize = 1024 * 1024; // 1MB in bytes
+                const targetSize = 10 * 1024 * 1024; // 1MB in bytes
                 const chunkSize = 10000; // 每次生成的字符数
                 let data = '';
                 
@@ -542,7 +542,7 @@ async function readFromClipboard() {
                         generateBtn.disabled = false;
                         autoCopyBtn.disabled = false;
                         
-                        showFeedback(`已生成1MB数据 (${data.length.toLocaleString()} 字符)`, 'success');
+                        showFeedback(`已生成10MB数据 (${data.length.toLocaleString()} 字符)`, 'success');
                         
                         // 如果设置了自动复制
                         if (autoCopy) {
