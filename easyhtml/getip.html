@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地网络设备探测器</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- 配置Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36BFFA',
+                        dark: '#1D2939',
+                        light: '#F9FAFB',
+                        success: '#039855',
+                        warning: '#F79009',
+                        danger: '#D92D20'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .device-card {
+                @apply bg-white rounded-xl shadow-md p-5 transition-all duration-300 hover:shadow-lg border border-gray-100;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center gap-2;
+            }
+            .status-indicator {
+                @apply w-3 h-3 rounded-full inline-block mr-2;
+            }
+        }
+    </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fa fa-wifi text-primary text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-bold text-dark">网络设备探测器</h1>
+            </div>
+            <div class="text-sm text-gray-500">
+                <span id="connection-status" class="flex items-center">
+                    <span class="status-indicator bg-gray-300"></span>
+                    等待连接
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-8 md:py-12">
+        <!-- 介绍区域 -->
+        <section class="text-center mb-10 max-w-2xl mx-auto">
+            <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-4">发现本地网络设备</h2>
+            <p class="text-gray-600 mb-8">点击下方按钮开始扫描您所在局域网内的设备。浏览器可能会请求网络访问权限，请允许以完成探测。</p>
+            
+            <!-- 控制按钮 -->
+            <div class="flex justify-center gap-4 mb-8">
+                <button id="scan-btn" class="btn-primary">
+                    <i class="fa fa-search"></i>
+                    开始扫描设备
+                </button>
+                <button id="clear-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400/50 flex items-center justify-center gap-2">
+                    <i class="fa fa-trash"></i>
+                    清除结果
+                </button>
+            </div>
+            
+            <!-- 状态信息 -->
+            <div id="status-message" class="hidden p-4 rounded-lg bg-blue-50 text-primary border border-blue-100 mb-6">
+                <p class="flex items-center gap-2"><i class="fa fa-info-circle"></i><span>正在扫描本地网络设备...</span></p>
+            </div>
+        </section>
+        
+        <!-- 设备列表 -->
+        <section>
+            <h3 class="text-xl font-semibold text-dark mb-4 flex items-center">
+                <i class="fa fa-list-ul text-primary mr-2"></i>
+                检测到的设备
+                <span id="device-count" class="ml-2 bg-primary/10 text-primary text-sm px-2 py-1 rounded-full">0</span>
+            </h3>
+            
+            <div id="devices-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 设备卡片将在这里动态生成 -->
+                <div class="col-span-full text-center py-12 text-gray-500 border border-dashed border-gray-300 rounded-xl">
+                    <i class="fa fa-wifi text-4xl mb-4 opacity-30"></i>
+                    <p>尚未检测到设备，请点击"开始扫描设备"按钮</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-6">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-400">
+            <p>本地网络设备探测器 &copy; 2023</p>
+            <p class="mt-1">仅在浏览器内运行，不会上传您的网络信息</p>
+        </div>
+    </footer>
+
+    <script>
+        // DOM元素
+        const scanBtn = document.getElementById('scan-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const devicesContainer = document.getElementById('devices-container');
+        const deviceCount = document.getElementById('device-count');
+        const statusMessage = document.getElementById('status-message');
+        const connectionStatus = document.getElementById('connection-status');
+        
+        // 存储检测到的IP地址
+        let detectedIPs = [];
+        
+        // 更新连接状态显示
+        function updateConnectionStatus(status, isConnected = false) {
+            let indicatorClass, statusText;
+            
+            if (isConnected) {
+                indicatorClass = 'bg-success';
+                statusText = '已连接网络';
+            } else {
+                switch(status) {
+                    case 'scanning':
+                        indicatorClass = 'bg-warning animate-pulse';
+                        statusText = '正在扫描...';
+                        break;
+                    case 'error':
+                        indicatorClass = 'bg-danger';
+                        statusText = '连接错误';
+                        break;
+                    default:
+                        indicatorClass = 'bg-gray-300';
+                        statusText = '等待连接';
+                }
+            }
+            
+            connectionStatus.innerHTML = `<span class="status-indicator ${indicatorClass}"></span>${statusText}`;
+        }
+        
+        // 获取本地IP地址
+        function getLocalIPs(callback) {
+            const ips = [];
+            const RTCPeerConnection = window.RTCPeerConnection || 
+                                   window.webkitRTCPeerConnection || 
+                                   window.mozRTCPeerConnection;
+            
+            // 检查浏览器是否支持
+            if (!RTCPeerConnection) {
+                callback([]);
+                return;
+            }
+            
+            const pc = new RTCPeerConnection({
+                iceServers: []
+            });
+            
+            pc.createDataChannel('');
+            
+            pc.onicecandidate = function(e) {
+                if (!e.candidate) {
+                    pc.close();
+                    callback(ips);
+                    return;
+                }
+                
+                // 从候选信息中提取IP地址
+                const ipMatch = /^candidate:.+ (\S+) \d+ typ/.exec(e.candidate.candidate);
+                if (ipMatch && ipMatch[1]) {
+                    const ip = ipMatch[1];
+                    // 过滤掉重复IP和本地回环地址
+                    if (ips.indexOf(ip) === -1 && !ip.startsWith('127.')) {
+                        ips.push(ip);
+                    }
+                }
+            };
+            
+            // 创建offer触发ICE候选收集
+            pc.createOffer(
+                function(sdp) {
+                    pc.setLocalDescription(sdp);
+                },
+                function(error) {
+                    console.error('创建offer失败:', error);
+                    pc.close();
+                    callback(ips);
+                }
+            );
+        }
+        
+        // 显示设备列表
+        function displayDevices(ips) {
+            detectedIPs = ips;
+            deviceCount.textContent = ips.length;
+            
+            // 清空容器
+            devicesContainer.innerHTML = '';
+            
+            if (ips.length === 0) {
+                devicesContainer.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500 border border-dashed border-gray-300 rounded-xl">
+                        <i class="fa fa-exclamation-circle text-4xl mb-4 opacity-30"></i>
+                        <p>未检测到任何设备，请确保您已连接到网络</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 添加设备卡片
+            ips.forEach((ip, index) => {
+                const deviceCard = document.createElement('div');
+                deviceCard.className = 'device-card';
+                deviceCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-3">
+                        <h4 class="font-semibold text-dark">设备 ${index + 1}</h4>
+                        <span class="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+                            <i class="fa fa-globe mr-1"></i>本地设备
+                        </span>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-500 mb-1">IP 地址</p>
+                        <p class="font-mono text-dark">${ip}</p>
+                    </div>
+                    <div class="flex justify-end">
+                        <button class="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <i class="fa fa-external-link"></i> 查看详情
+                        </button>
+                    </div>
+                `;
+                devicesContainer.appendChild(deviceCard);
+            });
+        }
+        
+        // 扫描设备
+        function scanDevices() {
+            // 更新UI状态
+            scanBtn.disabled = true;
+            scanBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 扫描中...';
+            statusMessage.classList.remove('hidden');
+            statusMessage.querySelector('span').innerHTML = '<i class="fa fa-spinner fa-spin mr-2"></i>正在扫描本地网络设备...';
+            updateConnectionStatus('scanning');
+            
+            // 开始扫描
+            getLocalIPs(ips => {
+                // 恢复UI状态
+                scanBtn.disabled = false;
+                scanBtn.innerHTML = '<i class="fa fa-search"></i> 开始扫描设备';
+                statusMessage.classList.add('hidden');
+                
+                if (ips.length > 0) {
+                    updateConnectionStatus('', true);
+                    statusMessage.querySelector('span').textContent = `已发现 ${ips.length} 个设备`;
+                    statusMessage.classList.remove('hidden');
+                    
+                    // 3秒后隐藏成功消息
+                    setTimeout(() => {
+                        statusMessage.classList.add('hidden');
+                    }, 3000);
+                    
+                    displayDevices(ips);
+                } else {
+                    updateConnectionStatus('error');
+                    statusMessage.querySelector('span').innerHTML = '<i class="fa fa-exclamation-circle mr-2"></i>未检测到任何设备，请重试';
+                    statusMessage.classList.remove('hidden');
+                    displayDevices([]);
+                }
+            });
+        }
+        
+        // 清除结果
+        function clearResults() {
+            detectedIPs = [];
+            displayDevices([]);
+            updateConnectionStatus('');
+        }
+        
+        // 事件监听
+        scanBtn.addEventListener('click', scanDevices);
+        clearBtn.addEventListener('click', clearResults);
+        
+        // 页面加载时检查网络连接
+        window.addEventListener('load', () => {
+            if (navigator.onLine) {
+                updateConnectionStatus('', true);
+            } else {
+                updateConnectionStatus('error');
+            }
+        });
+        
+        // 监听网络状态变化
+        window.addEventListener('online', () => {
+            updateConnectionStatus('', true);
+        });
+        
+        window.addEventListener('offline', () => {
+            updateConnectionStatus('error');
+        });
+    </script>
+</body>
+</html>
