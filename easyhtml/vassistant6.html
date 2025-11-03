@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AgentId Test</title>
+</head>
+<body>
+<p id="content">AgentId Test</p>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const agentId = urlParams.get('agentId');
+  let targetUrl = 'vassistant://voice/main?text=播放七里香&agentId=';
+  if (agentId) {
+    targetUrl += targetUrl.includes('?') ? `&agentId=${agentId}` : `?agentId=${agentId}`;
+  }else{
+   targetUrl = 'vassistant://voice/main?text=播放七里香&agentId=1';
+  }
+  console.log('拼接后的URL:', targetUrl);
+  window.location.href = targetUrl;
+  </script>
+</body>
+</html>
