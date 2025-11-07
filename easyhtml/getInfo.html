@@ -6,7 +6,42 @@
   <title>设备信息获取工具</title>
   
   <style>
-    /* 保留原有样式，新增文件上传相关样式 */
+    /* 保留原有样式，新增视频录制相关样式 */
+    .recording-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #EF4444;
+      margin-right: 6px;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .recordings-list {
+      margin-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 16px;
+    }
+    
+    .recording-item {
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background-color: #f8fafc;
+    }
+    
+    .dark-mode .recording-item {
+      background-color: #334155;
+    }
+    
+    .recording-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.875rem;
+    }
+    
+    /* 原有样式保持不变 */
     .file-upload-container {
       margin-bottom: 16px;
     }
@@ -58,7 +93,6 @@
       color: #e2e8f0;
     }
     
-    /* 原有样式保持不变 */
     /* 基础样式 */
     * {
       margin: 0;
@@ -266,6 +300,13 @@
       margin-bottom: 20px;
     }
     
+    /* 录制视频预览 */
+    .recorded-video {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    
     /* 动画 */
     @keyframes fadeIn {
       from {
@@ -283,7 +324,7 @@
         opacity: 1;
       }
       50% {
-        opacity: 0.7;
+        opacity: 0.5;
       }
     }
     
@@ -348,7 +389,7 @@
     
     <!-- 功能卡片容器 -->
     <div class="card-container">
-      <!-- 新增文件上传卡片 -->
+      <!-- 文件上传卡片 -->
       <div class="card card-full">
         <div class="card-header">
           <h2 class="card-title">
@@ -369,7 +410,44 @@
         </div>
       </div>
       
-      <!-- 原有卡片保持不变 -->
+      <!-- 摄像头卡片（增加录制功能） -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">📹</span>摄像头
+          </h2>
+          <span id="cameraStatus" class="status-badge">未开启</span>
+        </div>
+        <div>
+          <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
+          <!-- 录制状态指示器 -->
+          <div id="recordingIndicator" style="display: none; margin-bottom: 12px; color: #EF4444; font-size: 0.9rem;">
+            <span class="recording-indicator"></span>正在录制...
+          </div>
+        </div>
+        <div class="btn-group">
+          <button id="startCamera" class="btn btn-primary">
+            <span>▶️</span>开启
+          </button>
+          <button id="stopCamera" class="btn btn-disabled" disabled>
+            <span>⏹️</span>关闭
+          </button>
+        </div>
+        <!-- 录制控制按钮 -->
+        <div class="btn-group" style="margin-top: 12px;">
+          <button id="startRecordingVideo" class="btn btn-danger" disabled>
+            <span>⏺️</span>开始录制
+          </button>
+          <button id="stopRecordingVideo" class="btn btn-disabled" disabled>
+            <span>⏹️</span>停止录制
+          </button>
+        </div>
+        <!-- 录制视频列表 -->
+        <div class="recordings-list" id="recordingsList">
+          <!-- 录制的视频将动态添加到这里 -->
+        </div>
+      </div>
+      
       <!-- 地理位置卡片 -->
       <div class="card">
         <div class="card-header">
@@ -384,27 +462,6 @@
         <button id="getLocation" class="btn btn-primary">
           <span>🧭</span>获取经纬度
         </button>
-      </div>
-      
-      <!-- 摄像头卡片 -->
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">
-            <span class="card-icon">📹</span>摄像头
-          </h2>
-          <span id="cameraStatus" class="status-badge">未开启</span>
-        </div>
-        <div>
-          <video id="cameraPreview" class="camera-preview" autoplay playsinline></video>
-        </div>
-        <div class="btn-group">
-          <button id="startCamera" class="btn btn-primary">
-            <span>▶️</span>开启
-          </button>
-          <button id="stopCamera" class="btn btn-disabled" disabled>
-            <span>⏹️</span>关闭
-          </button>
-        </div>
       </div>
       
       <!-- 录音与语音转文字卡片 -->
@@ -515,18 +572,25 @@
     let mediaRecorder = null;
     let audioChunks = [];
     let cameraStream = null;
+    let videoRecorder = null; // 视频录制器
+    let videoChunks = []; // 视频数据块
+    let recordingStartTime = null; // 录制开始时间
     let gyroHandler = null;
-    let speechRecognition = null; // 语音识别对象
-    let isRecognitionSupported = false; // 是否支持语音识别
+    let speechRecognition = null;
+    let isRecognitionSupported = false;
     
-    // DOM元素获取（新增文件上传相关）
+    // DOM元素获取（新增视频录制相关）
+    const startRecordingVideoBtn = document.getElementById('startRecordingVideo');
+    const stopRecordingVideoBtn = document.getElementById('stopRecordingVideo');
+    const recordingIndicator = document.getElementById('recordingIndicator');
+    const recordingsList = document.getElementById('recordingsList');
+    
+    // 原有DOM元素获取
     const fileUpload = document.getElementById('fileUpload');
     const selectedFileInfo = document.getElementById('selectedFileInfo');
     const fileContent = document.getElementById('fileContent');
     const clearFileBtn = document.getElementById('clearFile');
     const fileStatus = document.getElementById('fileStatus');
-    
-    // 原有DOM元素获取保持不变
     const statusBox = document.getElementById('statusBox');
     const getLocationBtn = document.getElementById('getLocation');
     const locationInfo = document.getElementById('locationInfo');
@@ -535,8 +599,8 @@
     const stopCameraBtn = document.getElementById('stopCamera');
     const cameraPreview = document.getElementById('cameraPreview');
     const cameraStatus = document.getElementById('cameraStatus');
-    const startRecordingBtn = document.getElementById('startRecording');
-    const stopRecordingBtn = document.getElementById('stopRecording');
+    const startAudioRecordingBtn = document.getElementById('startRecording');
+    const stopAudioRecordingBtn = document.getElementById('stopRecording');
     const audioInfo = document.getElementById('audioInfo');
     const audioStatus = document.getElementById('audioStatus');
     const transcriptBox = document.getElementById('transcriptBox');
@@ -554,7 +618,7 @@
     const ipInfo = document.getElementById('ipInfo');
     const ipStatus = document.getElementById('ipStatus');
     
-    // 文件上传功能实现
+    // 文件上传功能
     fileUpload.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) {
@@ -562,10 +626,8 @@
         return;
       }
       
-      // 显示文件信息
       selectedFileInfo.textContent = `已选择: ${file.name} (${formatFileSize(file.size)})`;
       
-      // 仅允许文本文件（安全限制）
       if (!file.type.startsWith('text/') && !(file.name.endsWith('.txt') || file.name.endsWith('.log'))) {
         fileContent.textContent = '仅支持文本文件（.txt, .log等）';
         updateStatus(fileStatus, '格式不支持', false);
@@ -575,7 +637,6 @@
         return;
       }
       
-      // 读取文件内容
       const reader = new FileReader();
       
       reader.onload = (event) => {
@@ -600,14 +661,11 @@
         clearFileBtn.className = 'btn btn-danger';
       };
       
-      // 读取文本文件
       reader.readAsText(file);
     });
     
-    // 清空文件上传内容
     clearFileBtn.addEventListener('click', resetFileUpload);
     
-    // 重置文件上传状态
     function resetFileUpload() {
       fileUpload.value = '';
       selectedFileInfo.textContent = '未选择文件';
@@ -617,14 +675,13 @@
       clearFileBtn.className = 'btn btn-disabled';
     }
     
-    // 格式化文件大小显示
     function formatFileSize(bytes) {
       if (bytes < 1024) return bytes + ' B';
       if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
       return (bytes / 1048576).toFixed(2) + ' MB';
     }
     
-    // 初始化语音识别（原有功能）
+    // 初始化语音识别
     function initSpeechRecognition() {
       try {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -668,7 +725,7 @@
       }
     }
     
-    // 显示状态消息（原有功能）
+    // 显示状态消息
     function showStatus(message, isError = false) {
       statusBox.textContent = message;
       statusBox.classList.remove('status-success', 'status-error', 'hidden');
@@ -679,12 +736,13 @@
         statusBox.classList.add('status-success');
       }
       
+      statusBox.style.display = 'block';
       setTimeout(() => {
-        statusBox.classList.add('hidden');
+        statusBox.style.display = 'none';
       }, 3000);
     }
     
-    // 格式化信息显示（原有功能）
+    // 格式化信息显示
     function formatInfo(data) {
       if (typeof data === 'object') {
         let html = '';
@@ -698,17 +756,15 @@
       return data;
     }
     
-    // 更新状态标签（原有功能）
+    // 更新状态标签
     function updateStatus(element, status, isSuccess = true) {
       element.textContent = status;
       element.style.backgroundColor = isSuccess ? '#dcfce7' : '#fee2e2';
       element.style.color = isSuccess ? '#166534' : '#b91c1c';
     }
     
-    // 以下为原有功能的事件监听和实现（保持不变）
     // 地理位置获取
     getLocationBtn.addEventListener('click', () => {
-      // 实现代码保持不变
       if (!navigator.geolocation) {
         const error = '您的浏览器不支持地理位置服务';
         locationInfo.innerHTML = error;
@@ -754,24 +810,27 @@
       );
     });
     
-    // 摄像头控制
+    // 摄像头控制（增加录制功能）
     startCameraBtn.addEventListener('click', async () => {
-      // 实现代码保持不变
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
         
         let constraints = {
           video: { facingMode: 'environment' },
-          audio: false
+          audio: true // 需要音频才能录制带声音的视频
         };
         
         if (videoDevices.length === 0) {
-          constraints = { video: true, audio: false };
+          constraints = { video: true, audio: true };
         }
         
         cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraPreview.srcObject = cameraStream;
+        
+        // 启用录制按钮
+        startRecordingVideoBtn.disabled = false;
+        startRecordingVideoBtn.className = 'btn btn-danger';
         
         startCameraBtn.disabled = true;
         stopCameraBtn.disabled = false;
@@ -787,12 +846,22 @@
     });
     
     stopCameraBtn.addEventListener('click', () => {
-      // 实现代码保持不变
+      // 停止录制（如果正在录制）
+      if (videoRecorder && videoRecorder.state !== 'inactive') {
+        stopRecordingVideoBtn.click();
+      }
+      
       if (cameraStream) {
         cameraStream.getTracks().forEach(track => track.stop());
         cameraPreview.srcObject = null;
         cameraStream = null;
       }
+      
+      // 禁用录制按钮
+      startRecordingVideoBtn.disabled = true;
+      stopRecordingVideoBtn.disabled = true;
+      startRecordingVideoBtn.className = 'btn btn-disabled';
+      stopRecordingVideoBtn.className = 'btn btn-disabled';
       
       startCameraBtn.disabled = false;
       stopCameraBtn.disabled = true;
@@ -802,9 +871,99 @@
       showStatus('摄像头已关闭');
     });
     
+    // 视频录制控制
+    startRecordingVideoBtn.addEventListener('click', () => {
+      if (!cameraStream) return;
+      
+      // 初始化录制器
+      videoChunks = [];
+      videoRecorder = new MediaRecorder(cameraStream, {
+        mimeType: 'video/webm; codecs=vp9' // 使用WebM格式
+      });
+      
+      // 记录开始时间
+      recordingStartTime = new Date();
+      
+      // 开始录制
+      videoRecorder.start();
+      
+      // 更新UI
+      startRecordingVideoBtn.disabled = true;
+      stopRecordingVideoBtn.disabled = false;
+      startRecordingVideoBtn.className = 'btn btn-disabled';
+      stopRecordingVideoBtn.className = 'btn btn-primary';
+      recordingIndicator.style.display = 'flex';
+      updateStatus(cameraStatus, '录制中');
+      showStatus('开始录制视频');
+    });
+    
+    stopRecordingVideoBtn.addEventListener('click', () => {
+      if (!videoRecorder || videoRecorder.state === 'inactive') return;
+      
+      // 停止录制
+      videoRecorder.stop();
+      
+      // 计算录制时长
+      const recordingEndTime = new Date();
+      const duration = Math.round((recordingEndTime - recordingStartTime) / 1000);
+      
+      // 处理录制数据
+      videoRecorder.addEventListener('dataavailable', (event) => {
+        videoChunks.push(event.data);
+        
+        // 创建视频Blob
+        const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
+        const videoUrl = URL.createObjectURL(videoBlob);
+        
+        // 创建视频播放元素
+        const recordingItem = document.createElement('div');
+        recordingItem.className = 'recording-item';
+        
+        // 视频信息（时间和时长）
+        const recordingDate = new Date().toLocaleString();
+        recordingItem.innerHTML = `
+          <div class="recording-info">
+            <span>录制于 ${recordingDate}</span>
+            <span>时长: ${duration}秒</span>
+          </div>
+          <video class="recorded-video" controls>
+            <source src="${videoUrl}" type="video/webm">
+            您的浏览器不支持视频播放
+          </video>
+          <button class="btn btn-primary download-video" data-url="${videoUrl}" data-filename="recording-${Date.now()}.webm">
+            <span>💾</span>保存视频
+          </button>
+        `;
+        
+        // 添加到录制列表
+        recordingsList.prepend(recordingItem);
+        
+        // 添加下载功能
+        recordingItem.querySelector('.download-video').addEventListener('click', (e) => {
+          const url = e.target.closest('.download-video').dataset.url;
+          const filename = e.target.closest('.download-video').dataset.filename;
+          
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
+      });
+      
+      // 更新UI
+      startRecordingVideoBtn.disabled = false;
+      stopRecordingVideoBtn.disabled = true;
+      startRecordingVideoBtn.className = 'btn btn-danger';
+      stopRecordingVideoBtn.className = 'btn btn-disabled';
+      recordingIndicator.style.display = 'none';
+      updateStatus(cameraStatus, '已开启');
+      showStatus('视频录制已完成');
+    });
+    
     // 录音与语音识别控制
-    startRecordingBtn.addEventListener('click', async () => {
-      // 实现代码保持不变
+    startAudioRecordingBtn.addEventListener('click', async () => {
       try {
         if (!isRecognitionSupported) {
           showStatus('您的浏览器不支持语音识别功能', true);
@@ -837,10 +996,10 @@
         mediaRecorder.start();
         speechRecognition.start();
         
-        startRecordingBtn.disabled = true;
-        stopRecordingBtn.disabled = false;
-        startRecordingBtn.className = 'btn btn-disabled';
-        stopRecordingBtn.className = 'btn btn-danger';
+        startAudioRecordingBtn.disabled = true;
+        stopAudioRecordingBtn.disabled = false;
+        startAudioRecordingBtn.className = 'btn btn-disabled';
+        stopAudioRecordingBtn.className = 'btn btn-danger';
         updateStatus(audioStatus, '录音中');
         showStatus('开始录音和语音识别');
       } catch (error) {
@@ -851,8 +1010,7 @@
       }
     });
     
-    stopRecordingBtn.addEventListener('click', () => {
-      // 实现代码保持不变
+    stopAudioRecordingBtn.addEventListener('click', () => {
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
         mediaRecorder.stop();
         mediaRecorder.stream.getTracks().forEach(track => track.stop());
@@ -862,17 +1020,16 @@
         speechRecognition.stop();
       }
       
-      startRecordingBtn.disabled = false;
-      stopRecordingBtn.disabled = true;
-      startRecordingBtn.className = 'btn btn-primary';
-      stopRecordingBtn.className = 'btn btn-disabled';
+      startAudioRecordingBtn.disabled = false;
+      stopAudioRecordingBtn.disabled = true;
+      startAudioRecordingBtn.className = 'btn btn-primary';
+      stopAudioRecordingBtn.className = 'btn btn-disabled';
       updateStatus(audioStatus, '已停止');
       showStatus('录音和语音识别已停止');
     });
     
     // 剪贴板内容获取
     getClipboardBtn.addEventListener('click', async () => {
-      // 实现代码保持不变
       try {
         if (!navigator.clipboard) {
           throw new Error('您的浏览器不支持剪贴板API');
@@ -899,7 +1056,6 @@
     
     // 陀螺仪信息获取
     startGyroBtn.addEventListener('click', () => {
-      // 实现代码保持不变
       if (!window.DeviceMotionEvent) {
         const error = '您的设备不支持陀螺仪';
         gyroInfo.textContent = error;
@@ -934,7 +1090,6 @@
     });
     
     function startGyroMonitoring() {
-      // 实现代码保持不变
       function handleMotion(event) {
         const acceleration = event.accelerationIncludingGravity;
         const rotation = event.rotationRate;
@@ -963,7 +1118,6 @@
     }
     
     stopGyroBtn.addEventListener('click', () => {
-      // 实现代码保持不变
       if (gyroHandler) {
         window.removeEventListener('devicemotion', gyroHandler);
         gyroHandler = null;
@@ -980,7 +1134,6 @@
     
     // 设备信息获取
     getDeviceInfoBtn.addEventListener('click', () => {
-      // 实现代码保持不变
       try {
         const deviceData = {
           '浏览器名称': navigator.appName,
@@ -1019,7 +1172,6 @@
     
     // IP信息获取
     getIpInfoBtn.addEventListener('click', async () => {
-      // 实现代码保持不变
       try {
         ipInfo.textContent = '正在获取IP信息...';
         
