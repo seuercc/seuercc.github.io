@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设备信息检测器</title>
+  <style>
+    /* 基础样式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    }
+    
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      padding-top: 70px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* 头部样式 */
+    header {
+      background: linear-gradient(135deg, #165DFF 0%, #0A337A 100%);
+      color: white;
+      padding: 15px 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 100;
+      transition: padding 0.3s ease;
+    }
+    
+    header .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    
+    .refresh-btn {
+      background-color: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .refresh-btn:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* 主内容区 */
+    main {
+      padding: 20px 0 40px;
+    }
+    
+    /* 状态卡片 */
+    .status-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    @media (min-width: 768px) {
+      .status-cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .status-card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+    
+    .status-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .status-title {
+      font-weight: 600;
+      color: #555;
+    }
+    
+    .status-badge {
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .status-content {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    
+    /* 信息卡片容器 */
+    .info-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    @media (min-width: 1024px) {
+      .info-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .info-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-card.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .card-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    /* 信息项样式 */
+    .info-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    
+    .info-item {
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+      border-bottom: none;
+    }
+    
+    .info-label {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .info-value {
+      color: #333;
+      font-family: monospace;
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+    
+    .info-value.limited {
+      color: #999;
+      font-style: italic;
+    }
+    
+    /* 剪贴板区域 */
+    .clipboard-actions {
+      display: flex;
+      flex-wrap: gap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .clipboard-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      transition: opacity 0.3s ease;
+    }
+    
+    .clipboard-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .clipboard-content {
+      min-height: 120px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #555;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    
+    .clipboard-note {
+      margin-top: 15px;
+      font-size: 0.85rem;
+      color: #777;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    /* 隐私说明 */
+    .privacy-note {
+      background-color: #fff8e1;
+      border-left: 4px solid #FBBD23;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #6d4c41;
+    }
+    
+    /* 页脚样式 */
+    footer {
+      background-color: #1e293b;
+      color: #94a3b8;
+      padding: 30px 0;
+      margin-top: 50px;
+    }
+    
+    .footer-content {
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .footer-content p {
+      margin-bottom: 8px;
+    }
+    
+    /* 通知组件 */
+    .notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #1e293b;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .notification.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    /* 颜色样式 */
+    .bg-primary {
+      background-color: #165DFF;
+    }
+    
+    .bg-primary-light {
+      background-color: rgba(22, 93, 255, 0.1);
+      color: #165DFF;
+    }
+    
+    .bg-secondary {
+      background-color: #36D399;
+    }
+    
+    .bg-secondary-light {
+      background-color: rgba(54, 211, 153, 0.1);
+      color: #36D399;
+    }
+    
+    .bg-warning {
+      background-color: #FBBD23;
+      color: white;
+    }
+    
+    .bg-warning-light {
+      background-color: rgba(251, 189, 35, 0.1);
+      color: #FBBD23;
+    }
+    
+    .bg-success {
+      background-color: #36D399;
+      color: white;
+    }
+    
+    .bg-danger {
+      background-color: #F87272;
+      color: white;
+    }
+    
+    .bg-gray {
+      background-color: #f1f5f9;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <header>
+    <div class="container">
+      <div class="header-title">
+        <span>🔌</span>
+        <h1>设备信息检测器</h1>
+      </div>
+      <button id="refreshBtn" class="refresh-btn">
+        <span>🔄</span> 刷新
+      </button>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="container">
+    <!-- 隐私说明 -->
+    <div class="privacy-note">
+      <strong>隐私说明：</strong> 出于安全和隐私保护，浏览器不允许网页获取设备的MAC地址、IMEI、SN等敏感信息。这些信息仅能通过原生应用在获得用户授权后访问。
+    </div>
+    
+    <!-- 状态卡片 -->
+    <div class="status-cards">
+      <div class="status-card">
+        <div class="status-header">
+          <h3 class="status-title">设备状态</h3>
+          <span id="deviceStatus" class="status-badge bg-success">
+            <span>✓</span>正常
+          </span>
+        </div>
+        <p id="deviceType" class="status-content"></p>
+      </div>
+      
+      <div class="status-card">
+        <div class="status-header">
+          <h3 class="status-title">网络状态</h3>
+          <span id="networkStatus" class="status-badge bg-warning">
+            <span>⟳</span>检测中
+          </span>
+        </div>
+        <p id="connectionType" class="status-content"></p>
+      </div>
+      
+      <div class="status-card">
+        <div class="status-header">
+          <h3 class="status-title">剪贴板</h3>
+          <span id="clipboardStatus" class="status-badge bg-gray">
+            <span>📋</span>未访问
+          </span>
+        </div>
+        <p id="clipboardPreview" class="status-content">点击下方按钮获取剪贴板内容</p>
+      </div>
+    </div>
+    
+    <!-- 信息卡片容器 -->
+    <div class="info-cards">
+      <!-- 设备信息卡片 -->
+      <div class="info-card">
+        <div class="card-header bg-primary-light">
+          <span>🖥️</span>
+          <h2>设备信息</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-label">用户代理</div>
+              <div class="info-value" id="userAgent"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">浏览器名称</div>
+              <div class="info-value" id="browserName"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">浏览器版本</div>
+              <div class="info-value" id="browserVersion"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">操作系统</div>
+              <div class="info-value" id="os"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">设备类型</div>
+              <div class="info-value" id="deviceCategory"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">屏幕分辨率</div>
+              <div class="info-value" id="screenResolution"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">可用屏幕尺寸</div>
+              <div class="info-value" id="availableScreen"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">颜色深度</div>
+              <div class="info-value" id="colorDepth"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">语言</div>
+              <div class="info-value" id="language"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">时区</div>
+              <div class="info-value" id="timezone"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 硬件标识信息卡片（说明无法获取） -->
+      <div class="info-card">
+        <div class="card-header bg-warning-light">
+          <span>🔒</span>
+          <h2>硬件标识信息</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-label">MAC地址</div>
+              <div class="info-value limited">浏览器限制，无法获取</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">IMEI（移动设备识别码）</div>
+              <div class="info-value limited">浏览器限制，无法获取</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">SN（序列号）</div>
+              <div class="info-value limited">浏览器限制，无法获取</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">ODID（开放设备标识）</div>
+              <div class="info-value limited">浏览器限制，无法获取</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">UDID（唯一设备标识符）</div>
+              <div class="info-value limited">浏览器限制，无法获取</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">CPU信息</div>
+              <div class="info-value limited">浏览器限制，无法获取详细信息</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">内存信息</div>
+              <div class="info-value limited">浏览器限制，无法获取详细信息</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 网络信息卡片 -->
+      <div class="info-card">
+        <div class="card-header bg-secondary-light">
+          <span>📶</span>
+          <h2>网络信息</h2>
+        </div>
+        <div class="card-body">
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-label">在线状态</div>
+              <div class="info-value" id="onlineStatus"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">连接类型</div>
+              <div class="info-value" id="netConnectionType"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">有效带宽 (Mbps)</div>
+              <div class="info-value" id="effectiveBandwidth"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">RTT (ms)</div>
+              <div class="info-value" id="rtt"></div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">IP 地址</div>
+              <div class="info-value" id="ipAddress">检测中...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">地理位置</div>
+              <div class="info-value" id="location">未获取</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">服务器时间</div>
+              <div class="info-value" id="serverTime">同步中...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 剪贴板信息卡片 -->
+      <div class="info-card full-width">
+        <div class="card-header bg-warning-light">
+          <span>📋</span>
+          <h2>剪贴板信息</h2>
+        </div>
+        <div class="card-body">
+          <div class="clipboard-actions">
+            <button id="readClipboard" class="clipboard-btn bg-warning">
+              <span>📋</span>读取剪贴板
+            </button>
+            <button id="writeClipboard" class="clipboard-btn bg-primary">
+              <span>📝</span>写入示例文本到剪贴板
+            </button>
+          </div>
+          
+          <div class="clipboard-content" id="clipboardContent">
+            剪贴板内容将显示在这里...
+          </div>
+          
+          <div class="clipboard-note">
+            <span>ℹ️</span>
+            <span>注意：浏览器可能会限制剪贴板访问，通常需要用户交互才能读取或写入剪贴板。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 页脚 -->
+  <footer>
+    <div class="container footer-content">
+      <p>设备信息检测器 &copy; 2023 | 仅在浏览器中运行，不会上传任何数据</p>
+      <p>使用原生 JavaScript 构建，不依赖任何第三方库</p>
+    </div>
+  </footer>
+  
+  <!-- 通知组件 -->
+  <div id="notification" class="notification">
+    <span id="notificationIcon">ℹ️</span>
+    <span id="notificationText">通知内容</span>
+  </div>
+
+  <script>
+    // DOM 元素
+    const refreshBtn = document.getElementById('refreshBtn');
+    const notification = document.getElementById('notification');
+    const notificationIcon = document.getElementById('notificationIcon');
+    const notificationText = document.getElementById('notificationText');
+    
+    // 剪贴板相关
+    const readClipboardBtn = document.getElementById('readClipboard');
+    const writeClipboardBtn = document.getElementById('writeClipboard');
+    const clipboardContent = document.getElementById('clipboardContent');
+    const clipboardStatus = document.getElementById('clipboardStatus');
+    const clipboardPreview = document.getElementById('clipboardPreview');
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      // 初始化所有信息
+      initAllInfo();
+      
+      // 监听网络状态变化
+      window.addEventListener('online', updateNetworkInfo);
+      window.addEventListener('offline', updateNetworkInfo);
+      
+      // 刷新按钮事件
+      refreshBtn.addEventListener('click', () => {
+        showNotification('正在刷新信息...', '⟳');
+        setTimeout(() => {
+          initAllInfo();
+          showNotification('信息已更新', '✓');
+        }, 500);
+      });
+      
+      // 剪贴板读取按钮
+      readClipboardBtn.addEventListener('click', async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          clipboardContent.textContent = text || '剪贴板为空';
+          clipboardStatus.innerHTML = '<span>✓</span>已读取';
+          clipboardStatus.className = 'status-badge bg-success';
+          
+          // 更新预览
+          clipboardPreview.textContent = text.length > 30 ? text.substring(0, 30) + '...' : text || '剪贴板为空';
+          
+          showNotification('已成功读取剪贴板内容', '✓');
+        } catch (err) {
+          console.error('无法读取剪贴板:', err);
+          clipboardContent.textContent = '无法访问剪贴板，请确保授予权限并在用户交互中尝试。';
+          clipboardStatus.innerHTML = '<span>⚠️</span>访问失败';
+          clipboardStatus.className = 'status-badge bg-danger';
+          showNotification('无法访问剪贴板，请检查权限', '⚠️');
+        }
+      });
+      
+      // 剪贴板写入按钮
+      writeClipboardBtn.addEventListener('click', async () => {
+        const sampleText = `设备信息检测器 - ${new Date().toLocaleString()}
+检测到的IP: ${document.getElementById('ipAddress').textContent || '未知'}
+浏览器: ${document.getElementById('browserName').textContent || '未知'}`;
+        
+        try {
+          await navigator.clipboard.writeText(sampleText);
+          clipboardContent.textContent = sampleText;
+          clipboardStatus.innerHTML = '<span>✓</span>已写入';
+          clipboardStatus.className = 'status-badge bg-success';
+          clipboardPreview.textContent = '示例文本已写入剪贴板';
+          showNotification('已成功写入剪贴板', '✓');
+        } catch (err) {
+          console.error('无法写入剪贴板:', err);
+          clipboardStatus.innerHTML = '<span>⚠️</span>写入失败';
+          clipboardStatus.className = 'status-badge bg-danger';
+          showNotification('无法写入剪贴板，请检查权限', '⚠️');
+        }
+      });
+    });
+    
+    // 初始化所有信息
+    function initAllInfo() {
+      detectDeviceInfo();
+      updateNetworkInfo();
+      getIpAddress();
+      getServerTime();
+    }
+    
+    // 检测设备信息
+    function detectDeviceInfo() {
+      const userAgent = navigator.userAgent;
+      document.getElementById('userAgent').textContent = userAgent;
+      
+      // 检测浏览器
+      let browserName, browserVersion;
+      if (userAgent.indexOf('Chrome') > -1) {
+        browserName = 'Chrome';
+        browserVersion = userAgent.match(/Chrome\/(\d+\.\d+)/)[1];
+      } else if (userAgent.indexOf('Firefox') > -1) {
+        browserName = 'Firefox';
+        browserVersion = userAgent.match(/Firefox\/(\d+\.\d+)/)[1];
+      } else if (userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1) {
+        browserName = 'Safari';
+        browserVersion = userAgent.match(/Version\/(\d+\.\d+)/)[1];
+      } else if (userAgent.indexOf('Edge') > -1) {
+        browserName = 'Edge';
+        browserVersion = userAgent.match(/Edge\/(\d+\.\d+)/)[1];
+      } else if (userAgent.indexOf('MSIE') > -1 || userAgent.indexOf('Trident') > -1) {
+        browserName = 'Internet Explorer';
+        browserVersion = userAgent.match(/(MSIE \d+\.\d+|rv:(\d+\.\d+))/)[1];
+      } else {
+        browserName = '未知浏览器';
+        browserVersion = '未知版本';
+      }
+      
+      document.getElementById('browserName').textContent = browserName;
+      document.getElementById('browserVersion').textContent = browserVersion;
+      
+      // 检测操作系统
+      let os;
+      if (userAgent.indexOf('Windows') > -1) {
+        os = 'Windows';
+      } else if (userAgent.indexOf('Mac OS X') > -1) {
+        os = 'macOS';
+      } else if (userAgent.indexOf('Linux') > -1) {
+        os = 'Linux';
+      } else if (userAgent.indexOf('Android') > -1) {
+        os = 'Android';
+      } else if (userAgent.indexOf('iPhone') > -1 || userAgent.indexOf('iPad') > -1) {
+        os = 'iOS';
+      } else {
+        os = '未知操作系统';
+      }
+      document.getElementById('os').textContent = os;
+      
+      // 检测设备类型
+      let deviceType, deviceCategory, deviceStatusEl;
+      deviceStatusEl = document.getElementById('deviceStatus');
+      
+      if (/Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+        deviceType = '移动设备';
+        deviceCategory = /iPhone|iPad|iPod/.test(userAgent) ? 'iOS 设备' : 'Android 设备';
+        deviceStatusEl.innerHTML = '<span>📱</span>移动设备';
+      } else {
+        deviceType = '桌面设备';
+        deviceCategory = os === 'macOS' ? 'Mac 电脑' : 'PC 电脑';
+        deviceStatusEl.innerHTML = '<span>🖥️</span>桌面设备';
+      }
+      
+      document.getElementById('deviceType').textContent = deviceType;
+      document.getElementById('deviceCategory').textContent = deviceCategory;
+      
+      // 屏幕信息
+      document.getElementById('screenResolution').textContent = 
+        `${screen.width} x ${screen.height} px`;
+      document.getElementById('availableScreen').textContent = 
+        `${screen.availWidth} x ${screen.availHeight} px`;
+      document.getElementById('colorDepth').textContent = 
+        `${screen.colorDepth} 位`;
+      
+      // 语言信息
+      document.getElementById('language').textContent = 
+        navigator.language || navigator.userLanguage;
+      
+      // 时区信息
+      document.getElementById('timezone').textContent = 
+        Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+    
+    // 更新网络信息
+    function updateNetworkInfo() {
+      // 在线状态
+      const isOnline = navigator.onLine;
+      document.getElementById('onlineStatus').textContent = isOnline ? '在线' : '离线';
+      
+      // 网络状态指示器
+      const networkStatusEl = document.getElementById('networkStatus');
+      if (isOnline) {
+        networkStatusEl.innerHTML = '<span>✓</span>已连接';
+        networkStatusEl.className = 'status-badge bg-success';
+      } else {
+        networkStatusEl.innerHTML = '<span>⚠️</span>已断开';
+        networkStatusEl.className = 'status-badge bg-danger';
+      }
+      
+      // 连接类型
+      let connectionType, effectiveBandwidth, rtt;
+      if (navigator.connection) {
+        connectionType = navigator.connection.type || 'unknown';
+        // 转换为更友好的名称
+        const connectionTypes = {
+          'wifi': 'Wi-Fi',
+          'cellular': '蜂窝移动网络',
+          'ethernet': '以太网',
+          'bluetooth': '蓝牙',
+          'none': '无网络',
+          'unknown': '未知'
+        };
+        connectionType = connectionTypes[connectionType] || connectionType;
+        
+        // 有效带宽 (Mbps)
+        effectiveBandwidth = navigator.connection.downlink ? 
+          (navigator.connection.downlink).toFixed(2) + ' Mbps' : '未知';
+        
+        // RTT (ms)
+        rtt = navigator.connection.rtt ? 
+          navigator.connection.rtt + ' ms' : '未知';
+      } else {
+        connectionType = '无法获取详细信息';
+        effectiveBandwidth = '不支持';
+        rtt = '不支持';
+      }
+      
+      document.getElementById('connectionType').textContent = connectionType;
+      document.getElementById('netConnectionType').textContent = connectionType;
+      document.getElementById('effectiveBandwidth').textContent = effectiveBandwidth;
+      document.getElementById('rtt').textContent = rtt;
+    }
+    
+    // 获取IP地址 (使用公共API，但不引入SDK)
+    function getIpAddress() {
+      // 使用多个备选API以提高成功率
+      const ipApis = [
+        'https://api.ipify.org?format=json',
+        'https://ipapi.co/json/',
+        'https://ipinfo.io/json'
+      ];
+      
+      let apiIndex = 0;
+      
+      function tryNextApi() {
+        if (apiIndex >= ipApis.length) {
+          document.getElementById('ipAddress').textContent = '无法获取';
+          return;
+        }
+        
+        fetch(ipApis[apiIndex])
+          .then(response => response.json())
+          .then(data => {
+            let ip, location = '未知';
+            
+            // 提取IP地址
+            if (data.ip) {
+              ip = data.ip;
+            } else if (data.query) {
+              ip = data.query;
+            }
+            
+            // 提取位置信息
+            if (data.city && data.region && data.country) {
+              location = `${data.country} ${data.region} ${data.city}`;
+            } else if (data.loc) {
+              location = data.loc;
+            }
+            
+            if (ip) {
+              document.getElementById('ipAddress').textContent = ip;
+              document.getElementById('location').textContent = location;
+            } else {
+              throw new Error('未找到IP地址');
+            }
+          })
+          .catch(() => {
+            apiIndex++;
+            tryNextApi();
+          });
+      }
+      
+      tryNextApi();
+    }
+    
+    // 获取服务器时间
+    function getServerTime() {
+      fetch('https://worldtimeapi.org/api/ip')
+        .then(response => response.json())
+        .then(data => {
+          const serverTime = new Date(data.datetime).toLocaleString();
+          document.getElementById('serverTime').textContent = serverTime;
+        })
+        .catch(() => {
+          // 失败时使用本地时间作为备选
+          document.getElementById('serverTime').textContent = 
+            `本地时间: ${new Date().toLocaleString()}`;
+        });
+    }
+    
+    // 显示通知
+    function showNotification(text, icon) {
+      notificationText.textContent = text;
+      notificationIcon.textContent = icon;
+      
+      // 显示通知
+      notification.classList.add('show');
+      
+      // 3秒后隐藏
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+    
+    // 滚动时改变导航栏样式
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('header');
+      if (window.scrollY > 10) {
+        header.style.padding = '10px 0';
+      } else {
+        header.style.padding = '15px 0';
+      }
+    });
+  </script>
+</body>
+</html>
