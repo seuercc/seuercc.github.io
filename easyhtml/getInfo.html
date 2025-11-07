@@ -6,7 +6,24 @@
   <title>设备信息获取工具</title>
   
   <style>
-    /* 保留原有样式，新增视频录制相关样式 */
+    /* 新增样式 */
+    .clipboard-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      min-height: 100px;
+      font-family: inherit;
+      resize: vertical;
+    }
+    
+    .dark-mode .clipboard-input {
+      background-color: #1e293b;
+      border-color: #475569;
+      color: #e2e8f0;
+    }
+    
     .recording-indicator {
       display: inline-block;
       width: 12px;
@@ -41,7 +58,7 @@
       font-size: 0.875rem;
     }
     
-    /* 原有样式保持不变 */
+    /* 原有样式 */
     .file-upload-container {
       margin-bottom: 16px;
     }
@@ -387,30 +404,25 @@
     <!-- 状态提示框 -->
     <div id="statusBox" class="status-box"></div>
     
-    <!-- 功能卡片容器 -->
+    <!-- 功能卡片容器（按新顺序排列） -->
     <div class="card-container">
-      <!-- 文件上传卡片 -->
-      <div class="card card-full">
+      <!-- 1. 地理位置卡片 -->
+      <div class="card">
         <div class="card-header">
           <h2 class="card-title">
-            <span class="card-icon">📂</span>文件上传
+            <span class="card-icon">📍</span>地理位置
           </h2>
-          <span id="fileStatus" class="status-badge">未上传</span>
+          <span id="locationStatus" class="status-badge">未获取</span>
         </div>
-        <div class="card-content">
-          <div class="file-upload-container">
-            <label for="fileUpload" class="file-label">📎 选择文件</label>
-            <input type="file" id="fileUpload" class="file-input" accept="text/*">
-            <div id="selectedFileInfo" class="file-info">未选择文件</div>
-            <div id="fileContent" class="file-content">文件内容将显示在这里...</div>
-          </div>
-          <button id="clearFile" class="btn btn-disabled" disabled>
-            <span>🗑️</span>清空
-          </button>
+        <div id="locationInfo" class="card-content">
+          点击下方按钮获取经纬度信息
         </div>
+        <button id="getLocation" class="btn btn-primary">
+          <span>🧭</span>获取经纬度
+        </button>
       </div>
       
-      <!-- 摄像头卡片（增加录制功能） -->
+      <!-- 2. 摄像头卡片 -->
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">
@@ -448,23 +460,7 @@
         </div>
       </div>
       
-      <!-- 地理位置卡片 -->
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">
-            <span class="card-icon">📍</span>地理位置
-          </h2>
-          <span id="locationStatus" class="status-badge">未获取</span>
-        </div>
-        <div id="locationInfo" class="card-content">
-          点击下方按钮获取经纬度信息
-        </div>
-        <button id="getLocation" class="btn btn-primary">
-          <span>🧭</span>获取经纬度
-        </button>
-      </div>
-      
-      <!-- 录音与语音转文字卡片 -->
+      <!-- 3. 录音与语音转文字卡片 -->
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">
@@ -488,23 +484,39 @@
         </div>
       </div>
       
-      <!-- 剪贴板卡片 -->
+      <!-- 4. 剪贴板读取卡片 -->
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">
-            <span class="card-icon">📋</span>剪贴板
+            <span class="card-icon">📋</span>剪贴板读取
           </h2>
-          <span id="clipboardStatus" class="status-badge">未获取</span>
+          <span id="clipboardReadStatus" class="status-badge">未获取</span>
         </div>
-        <div id="clipboardInfo" class="card-content">
+        <div id="clipboardReadInfo" class="card-content">
           点击下方按钮获取剪贴板内容
         </div>
         <button id="getClipboard" class="btn btn-primary">
-          <span>📎</span>获取内容
+          <span>📥</span>读取剪贴板
         </button>
       </div>
       
-      <!-- 陀螺仪卡片 -->
+      <!-- 5. 剪贴板写入卡片（新增） -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">📋</span>剪贴板写入
+          </h2>
+          <span id="clipboardWriteStatus" class="status-badge">未写入</span>
+        </div>
+        <div class="card-content">
+          <textarea id="clipboardWriteInput" class="clipboard-input" placeholder="请输入要写入剪贴板的内容..."></textarea>
+        </div>
+        <button id="setClipboard" class="btn btn-primary">
+          <span>📤</span>写入剪贴板
+        </button>
+      </div>
+      
+      <!-- 6. 陀螺仪卡片 -->
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">
@@ -525,23 +537,7 @@
         </div>
       </div>
       
-      <!-- 设备信息卡片 -->
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">
-            <span class="card-icon">ℹ️</span>设备信息
-          </h2>
-          <span id="deviceStatus" class="status-badge">未获取</span>
-        </div>
-        <div id="deviceInfo" class="card-content">
-          点击下方按钮获取设备信息
-        </div>
-        <button id="getDeviceInfo" class="btn btn-primary">
-          <span>📱</span>获取信息
-        </button>
-      </div>
-      
-      <!-- IP信息卡片 -->
+      <!-- 7. IP信息卡片 -->
       <div class="card card-full">
         <div class="card-header">
           <h2 class="card-title">
@@ -554,6 +550,22 @@
         </div>
         <button id="getIpInfo" class="btn btn-primary">
           <span>🔍</span>获取IP信息
+        </button>
+      </div>
+      
+      <!-- 8. 设备信息卡片 -->
+      <div class="card card-full">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">ℹ️</span>设备信息
+          </h2>
+          <span id="deviceStatus" class="status-badge">未获取</span>
+        </div>
+        <div id="deviceInfo" class="card-content">
+          点击下方按钮获取设备信息
+        </div>
+        <button id="getDeviceInfo" class="btn btn-primary">
+          <span>📱</span>获取信息
         </button>
       </div>
     </div>
@@ -579,18 +591,20 @@
     let speechRecognition = null;
     let isRecognitionSupported = false;
     
-    // DOM元素获取（新增视频录制相关）
+    // DOM元素获取（新增剪贴板写入相关）
+    const setClipboardBtn = document.getElementById('setClipboard');
+    const clipboardWriteInput = document.getElementById('clipboardWriteInput');
+    const clipboardWriteStatus = document.getElementById('clipboardWriteStatus');
+    const clipboardReadInfo = document.getElementById('clipboardReadInfo');
+    const clipboardReadStatus = document.getElementById('clipboardReadStatus');
+    
+    // 视频录制相关元素
     const startRecordingVideoBtn = document.getElementById('startRecordingVideo');
     const stopRecordingVideoBtn = document.getElementById('stopRecordingVideo');
     const recordingIndicator = document.getElementById('recordingIndicator');
     const recordingsList = document.getElementById('recordingsList');
     
-    // 原有DOM元素获取
-    const fileUpload = document.getElementById('fileUpload');
-    const selectedFileInfo = document.getElementById('selectedFileInfo');
-    const fileContent = document.getElementById('fileContent');
-    const clearFileBtn = document.getElementById('clearFile');
-    const fileStatus = document.getElementById('fileStatus');
+    // 其他DOM元素
     const statusBox = document.getElementById('statusBox');
     const getLocationBtn = document.getElementById('getLocation');
     const locationInfo = document.getElementById('locationInfo');
@@ -605,8 +619,6 @@
     const audioStatus = document.getElementById('audioStatus');
     const transcriptBox = document.getElementById('transcriptBox');
     const getClipboardBtn = document.getElementById('getClipboard');
-    const clipboardInfo = document.getElementById('clipboardInfo');
-    const clipboardStatus = document.getElementById('clipboardStatus');
     const startGyroBtn = document.getElementById('startGyro');
     const stopGyroBtn = document.getElementById('stopGyro');
     const gyroInfo = document.getElementById('gyroInfo');
@@ -618,68 +630,54 @@
     const ipInfo = document.getElementById('ipInfo');
     const ipStatus = document.getElementById('ipStatus');
     
-    // 文件上传功能
-    fileUpload.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) {
-        resetFileUpload();
-        return;
-      }
-      
-      selectedFileInfo.textContent = `已选择: ${file.name} (${formatFileSize(file.size)})`;
-      
-      if (!file.type.startsWith('text/') && !(file.name.endsWith('.txt') || file.name.endsWith('.log'))) {
-        fileContent.textContent = '仅支持文本文件（.txt, .log等）';
-        updateStatus(fileStatus, '格式不支持', false);
-        showStatus('请选择文本类型文件', true);
-        clearFileBtn.disabled = false;
-        clearFileBtn.className = 'btn btn-danger';
-        return;
-      }
-      
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        try {
-          fileContent.textContent = event.target.result;
-          updateStatus(fileStatus, '已上传');
-          showStatus(`文件 "${file.name}" 读取成功`);
-          clearFileBtn.disabled = false;
-          clearFileBtn.className = 'btn btn-danger';
-        } catch (error) {
-          fileContent.textContent = `文件读取失败: ${error.message}`;
-          updateStatus(fileStatus, '读取失败', false);
-          showStatus('文件读取失败', true);
+    // 剪贴板写入功能（新增）
+    setClipboardBtn.addEventListener('click', async () => {
+      try {
+        if (!navigator.clipboard) {
+          throw new Error('您的浏览器不支持剪贴板API');
         }
-      };
-      
-      reader.onerror = () => {
-        fileContent.textContent = `文件读取错误: ${reader.error.message}`;
-        updateStatus(fileStatus, '读取失败', false);
-        showStatus('文件读取错误', true);
-        clearFileBtn.disabled = false;
-        clearFileBtn.className = 'btn btn-danger';
-      };
-      
-      reader.readAsText(file);
+        
+        const text = clipboardWriteInput.value.trim();
+        if (!text) {
+          showStatus('请输入要写入剪贴板的内容', true);
+          return;
+        }
+        
+        await navigator.clipboard.writeText(text);
+        updateStatus(clipboardWriteStatus, '已写入');
+        showStatus('内容已成功写入剪贴板');
+      } catch (error) {
+        const errorMsg = `剪贴板写入失败: ${error.message}`;
+        showStatus(errorMsg, true);
+        updateStatus(clipboardWriteStatus, '写入失败', false);
+      }
     });
     
-    clearFileBtn.addEventListener('click', resetFileUpload);
-    
-    function resetFileUpload() {
-      fileUpload.value = '';
-      selectedFileInfo.textContent = '未选择文件';
-      fileContent.textContent = '文件内容将显示在这里...';
-      updateStatus(fileStatus, '未上传');
-      clearFileBtn.disabled = true;
-      clearFileBtn.className = 'btn btn-disabled';
-    }
-    
-    function formatFileSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
-      return (bytes / 1048576).toFixed(2) + ' MB';
-    }
+    // 剪贴板读取功能（调整ID对应）
+    getClipboardBtn.addEventListener('click', async () => {
+      try {
+        if (!navigator.clipboard) {
+          throw new Error('您的浏览器不支持剪贴板API');
+        }
+        
+        clipboardReadInfo.textContent = '正在获取剪贴板内容...';
+        const text = await navigator.clipboard.readText();
+        
+        if (text.trim() === '') {
+          clipboardReadInfo.textContent = '剪贴板为空';
+        } else {
+          clipboardReadInfo.textContent = text;
+        }
+        
+        updateStatus(clipboardReadStatus, '已获取');
+        showStatus('剪贴板内容获取成功');
+      } catch (error) {
+        const errorMsg = `剪贴板获取失败: ${error.message}`;
+        clipboardReadInfo.textContent = errorMsg;
+        showStatus(errorMsg, true);
+        updateStatus(clipboardReadStatus, '获取失败', false);
+      }
+    });
     
     // 初始化语音识别
     function initSpeechRecognition() {
@@ -810,7 +808,7 @@
       );
     });
     
-    // 摄像头控制（增加录制功能）
+    // 摄像头控制
     startCameraBtn.addEventListener('click', async () => {
       try {
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -1028,33 +1026,7 @@
       showStatus('录音和语音识别已停止');
     });
     
-    // 剪贴板内容获取
-    getClipboardBtn.addEventListener('click', async () => {
-      try {
-        if (!navigator.clipboard) {
-          throw new Error('您的浏览器不支持剪贴板API');
-        }
-        
-        clipboardInfo.textContent = '正在获取剪贴板内容...';
-        const text = await navigator.clipboard.readText();
-        
-        if (text.trim() === '') {
-          clipboardInfo.textContent = '剪贴板为空';
-        } else {
-          clipboardInfo.textContent = text;
-        }
-        
-        updateStatus(clipboardStatus, '已获取');
-        showStatus('剪贴板内容获取成功');
-      } catch (error) {
-        const errorMsg = `剪贴板获取失败: ${error.message}`;
-        clipboardInfo.textContent = errorMsg;
-        showStatus(errorMsg, true);
-        updateStatus(clipboardStatus, '获取失败', false);
-      }
-    });
-    
-    // 陀螺仪信息获取
+    // 陀螺仪信息获取（确保实时刷新）
     startGyroBtn.addEventListener('click', () => {
       if (!window.DeviceMotionEvent) {
         const error = '您的设备不支持陀螺仪';
@@ -1089,7 +1061,9 @@
       }
     });
     
+    // 陀螺仪实时监测函数
     function startGyroMonitoring() {
+      // 每次设备运动都会触发此函数，实现实时刷新
       function handleMotion(event) {
         const acceleration = event.accelerationIncludingGravity;
         const rotation = event.rotationRate;
@@ -1106,6 +1080,7 @@
         gyroInfo.innerHTML = formatInfo(gyroData);
       }
       
+      // 添加事件监听器，设备运动时会持续触发
       window.addEventListener('devicemotion', handleMotion);
       gyroHandler = handleMotion;
       
@@ -1114,7 +1089,7 @@
       startGyroBtn.className = 'btn btn-disabled';
       stopGyroBtn.className = 'btn btn-danger';
       updateStatus(gyroStatus, '监测中');
-      showStatus('陀螺仪监测已开启');
+      showStatus('陀螺仪监测已开启，数据实时更新');
     }
     
     stopGyroBtn.addEventListener('click', () => {
