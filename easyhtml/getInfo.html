@@ -58,7 +58,7 @@
       font-size: 0.875rem;
     }
     
-    /* 原有样式 */
+    /* 文件上传样式 */
     .file-upload-container {
       margin-bottom: 16px;
     }
@@ -404,7 +404,7 @@
     <!-- 状态提示框 -->
     <div id="statusBox" class="status-box"></div>
     
-    <!-- 功能卡片容器（按新顺序排列） -->
+    <!-- 功能卡片容器 -->
     <div class="card-container">
       <!-- 1. 地理位置卡片 -->
       <div class="card">
@@ -500,7 +500,7 @@
         </button>
       </div>
       
-      <!-- 5. 剪贴板写入卡片（新增） -->
+      <!-- 5. 剪贴板写入卡片 -->
       <div class="card">
         <div class="card-header">
           <h2 class="card-title">
@@ -553,7 +553,45 @@
         </button>
       </div>
       
-      <!-- 8. 设备信息卡片 -->
+      <!-- 8. 文件上传功能（新增） -->
+      <div class="card card-full">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">📂</span>文件上传
+          </h2>
+          <span id="fileStatus" class="status-badge">未上传</span>
+        </div>
+        <div class="file-upload-container">
+          <input type="file" id="fileInput" class="file-input" accept="text/*">
+          <label for="fileInput" class="file-label">
+            <span>📎</span>选择文件
+          </label>
+          <div id="fileInfo" class="file-info">
+            请选择一个文本文件上传（支持.txt, .html, .js等文本格式）
+          </div>
+          <div id="fileContent" class="file-content">
+            文件内容将显示在这里...
+          </div>
+        </div>
+      </div>
+      
+      <!-- 9. 跳转小艺功能（新增） -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-icon">🤖</span>小艺助手
+          </h2>
+          <span id="xiaoyiStatus" class="status-badge">未跳转</span>
+        </div>
+        <div class="card-content">
+          点击下方按钮跳转到小艺助手，将自动询问"帮我确认重启手机"
+        </div>
+        <button id="gotoXiaoyi" class="btn btn-primary">
+          <span>🚀</span>打开小艺助手
+        </button>
+      </div>
+      
+      <!-- 10. 设备信息卡片 -->
       <div class="card card-full">
         <div class="card-header">
           <h2 class="card-title">
@@ -584,14 +622,14 @@
     let mediaRecorder = null;
     let audioChunks = [];
     let cameraStream = null;
-    let videoRecorder = null; // 视频录制器
-    let videoChunks = []; // 视频数据块
-    let recordingStartTime = null; // 录制开始时间
+    let videoRecorder = null;
+    let videoChunks = [];
+    let recordingStartTime = null;
     let gyroHandler = null;
     let speechRecognition = null;
     let isRecognitionSupported = false;
     
-    // DOM元素获取（新增剪贴板写入相关）
+    // DOM元素获取
     const setClipboardBtn = document.getElementById('setClipboard');
     const clipboardWriteInput = document.getElementById('clipboardWriteInput');
     const clipboardWriteStatus = document.getElementById('clipboardWriteStatus');
@@ -603,6 +641,16 @@
     const stopRecordingVideoBtn = document.getElementById('stopRecordingVideo');
     const recordingIndicator = document.getElementById('recordingIndicator');
     const recordingsList = document.getElementById('recordingsList');
+    
+    // 文件上传相关元素（新增）
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileContent = document.getElementById('fileContent');
+    const fileStatus = document.getElementById('fileStatus');
+    
+    // 小艺跳转相关元素（新增）
+    const gotoXiaoyiBtn = document.getElementById('gotoXiaoyi');
+    const xiaoyiStatus = document.getElementById('xiaoyiStatus');
     
     // 其他DOM元素
     const statusBox = document.getElementById('statusBox');
@@ -630,7 +678,7 @@
     const ipInfo = document.getElementById('ipInfo');
     const ipStatus = document.getElementById('ipStatus');
     
-    // 剪贴板写入功能（新增）
+    // 剪贴板写入功能
     setClipboardBtn.addEventListener('click', async () => {
       try {
         if (!navigator.clipboard) {
@@ -653,7 +701,7 @@
       }
     });
     
-    // 剪贴板读取功能（调整ID对应）
+    // 剪贴板读取功能
     getClipboardBtn.addEventListener('click', async () => {
       try {
         if (!navigator.clipboard) {
@@ -676,6 +724,62 @@
         clipboardReadInfo.textContent = errorMsg;
         showStatus(errorMsg, true);
         updateStatus(clipboardReadStatus, '获取失败', false);
+      }
+    });
+    
+    // 文件上传功能（新增）
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) {
+        fileInfo.textContent = '未选择文件';
+        fileContent.textContent = '文件内容将显示在这里...';
+        updateStatus(fileStatus, '未上传');
+        return;
+      }
+      
+      // 显示文件信息
+      fileInfo.textContent = `已选择: ${file.name} (${formatFileSize(file.size)})`;
+      
+      // 读取文本文件内容
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          fileContent.textContent = event.target.result;
+          updateStatus(fileStatus, '上传成功');
+          showStatus(`文件 "${file.name}" 读取成功`);
+        } catch (error) {
+          fileContent.textContent = `文件读取失败: ${error.message}`;
+          updateStatus(fileStatus, '读取失败', false);
+          showStatus(`文件读取失败: ${error.message}`, true);
+        }
+      };
+      
+      reader.onerror = () => {
+        fileContent.textContent = `文件读取错误: ${reader.error.message}`;
+        updateStatus(fileStatus, '读取失败', false);
+        showStatus(`文件读取错误: ${reader.error.message}`, true);
+      };
+      
+      // 对于大文件限制显示大小
+      if (file.size > 1024 * 1024) { // 1MB以上
+        reader.readAsText(file, 'UTF-8');
+        fileContent.textContent = '正在读取大文件...（仅显示前10000字符）';
+      } else {
+        reader.readAsText(file, 'UTF-8');
+      }
+    });
+    
+    // 跳转小艺功能（新增）
+    gotoXiaoyiBtn.addEventListener('click', () => {
+      const xiaoyiUrl = 'https://celia.cloud.huawei.com/launch?text=帮我确认重启手机&intent=QAtest&id=1&agentName=xiaoyi';
+      try {
+        window.open(xiaoyiUrl, '_blank');
+        updateStatus(xiaoyiStatus, '已跳转');
+        showStatus('已打开小艺助手');
+      } catch (error) {
+        const errorMsg = `跳转失败: ${error.message}`;
+        showStatus(errorMsg, true);
+        updateStatus(xiaoyiStatus, '跳转失败', false);
       }
     });
     
@@ -738,6 +842,13 @@
       setTimeout(() => {
         statusBox.style.display = 'none';
       }, 3000);
+    }
+    
+    // 格式化文件大小（新增）
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+      else return (bytes / 1048576).toFixed(2) + ' MB';
     }
     
     // 格式化信息显示
@@ -816,7 +927,7 @@
         
         let constraints = {
           video: { facingMode: 'environment' },
-          audio: true // 需要音频才能录制带声音的视频
+          audio: true
         };
         
         if (videoDevices.length === 0) {
@@ -826,7 +937,6 @@
         cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraPreview.srcObject = cameraStream;
         
-        // 启用录制按钮
         startRecordingVideoBtn.disabled = false;
         startRecordingVideoBtn.className = 'btn btn-danger';
         
@@ -844,7 +954,6 @@
     });
     
     stopCameraBtn.addEventListener('click', () => {
-      // 停止录制（如果正在录制）
       if (videoRecorder && videoRecorder.state !== 'inactive') {
         stopRecordingVideoBtn.click();
       }
@@ -855,7 +964,6 @@
         cameraStream = null;
       }
       
-      // 禁用录制按钮
       startRecordingVideoBtn.disabled = true;
       stopRecordingVideoBtn.disabled = true;
       startRecordingVideoBtn.className = 'btn btn-disabled';
@@ -873,19 +981,14 @@
     startRecordingVideoBtn.addEventListener('click', () => {
       if (!cameraStream) return;
       
-      // 初始化录制器
       videoChunks = [];
       videoRecorder = new MediaRecorder(cameraStream, {
-        mimeType: 'video/webm; codecs=vp9' // 使用WebM格式
+        mimeType: 'video/webm; codecs=vp9'
       });
       
-      // 记录开始时间
       recordingStartTime = new Date();
-      
-      // 开始录制
       videoRecorder.start();
       
-      // 更新UI
       startRecordingVideoBtn.disabled = true;
       stopRecordingVideoBtn.disabled = false;
       startRecordingVideoBtn.className = 'btn btn-disabled';
@@ -898,26 +1001,17 @@
     stopRecordingVideoBtn.addEventListener('click', () => {
       if (!videoRecorder || videoRecorder.state === 'inactive') return;
       
-      // 停止录制
       videoRecorder.stop();
-      
-      // 计算录制时长
       const recordingEndTime = new Date();
       const duration = Math.round((recordingEndTime - recordingStartTime) / 1000);
       
-      // 处理录制数据
       videoRecorder.addEventListener('dataavailable', (event) => {
         videoChunks.push(event.data);
-        
-        // 创建视频Blob
         const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
         const videoUrl = URL.createObjectURL(videoBlob);
         
-        // 创建视频播放元素
         const recordingItem = document.createElement('div');
         recordingItem.className = 'recording-item';
-        
-        // 视频信息（时间和时长）
         const recordingDate = new Date().toLocaleString();
         recordingItem.innerHTML = `
           <div class="recording-info">
@@ -933,10 +1027,7 @@
           </button>
         `;
         
-        // 添加到录制列表
         recordingsList.prepend(recordingItem);
-        
-        // 添加下载功能
         recordingItem.querySelector('.download-video').addEventListener('click', (e) => {
           const url = e.target.closest('.download-video').dataset.url;
           const filename = e.target.closest('.download-video').dataset.filename;
@@ -950,7 +1041,6 @@
         });
       });
       
-      // 更新UI
       startRecordingVideoBtn.disabled = false;
       stopRecordingVideoBtn.disabled = true;
       startRecordingVideoBtn.className = 'btn btn-danger';
@@ -1026,7 +1116,7 @@
       showStatus('录音和语音识别已停止');
     });
     
-    // 陀螺仪信息获取（确保实时刷新）
+    // 陀螺仪信息获取
     startGyroBtn.addEventListener('click', () => {
       if (!window.DeviceMotionEvent) {
         const error = '您的设备不支持陀螺仪';
@@ -1061,9 +1151,7 @@
       }
     });
     
-    // 陀螺仪实时监测函数
     function startGyroMonitoring() {
-      // 每次设备运动都会触发此函数，实现实时刷新
       function handleMotion(event) {
         const acceleration = event.accelerationIncludingGravity;
         const rotation = event.rotationRate;
@@ -1080,7 +1168,6 @@
         gyroInfo.innerHTML = formatInfo(gyroData);
       }
       
-      // 添加事件监听器，设备运动时会持续触发
       window.addEventListener('devicemotion', handleMotion);
       gyroHandler = handleMotion;
       
