@@ -1,24 +1,1144 @@
 <!DOCTYPE html>
-<html>
-<body>
-<p id="locationInfo">位置信息</p>
-<button onclick="getLocation()">获取位置</button>
-<script>
-var locationInfo=document.getElementById("locationInfo");
-function getLocation(){
-  if (navigator.geolocation) {
-    <!-- 前端页面访问设备地理位置 -->
-    navigator.geolocation.getCurrentPosition(showPosition);
-  }
-}
-function showPosition(position){
-  locationInfo.innerHTML="Latitude: " + position.coords.latitude + "<br />Longitude: " + position.coords.longitude;
-}
-
-function htmlTest() {
-        console.info('JavaScript Hello World! ');
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地理位置获取工具</title>
+  <!-- 引入Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <!-- 引入Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <!-- 引入Leaflet地图库 -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Tailwind配置 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#64748B',
+            success: '#10B981',
+            warning: '#F59E0B',
+            danger: '#EF4444',
+            dark: '#1E293B',
+            light: '#F8FAFC'
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
     }
+  </script>
+  
+  <!-- 自定义工具类 -->
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      }
+      .btn-hover {
+        transition: all 0.3s ease;
+      }
+      .btn-hover:hover {
+        transform: translateY(-2px);
+      }
+      .gradient-bg {
+        background: linear-gradient(135deg, #3B82F6 0%, #6366F1 100%);
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen">
+  <!-- 顶部导航 -->
+  <nav class="bg-white shadow-sm fixed w-full z-10 transition-all duration-300" id="navbar">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <i class="fa fa-map-marker text-primary text-2xl mr-3"></i>
+          <span class="font-bold text-xl text-dark">位置获取工具</span>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <i class="fa fa-moon-o text-dark"></i>
+          </button>
+          <button id="info-btn" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+            <i class="fa fa-info-circle text-dark"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-</script>
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+    <!-- 页面标题 -->
+    <div class="text-center mb-12">
+      <h1 class="text-[clamp(1.8rem,5vw,2.8rem)] font-bold text-dark mb-4">
+        精准定位，轻松获取
+      </h1>
+      <p class="text-secondary text-lg max-w-2xl mx-auto">
+        通过多种方式获取您的地理位置信息，从IP定位到精确GPS，满足您的不同需求
+      </p>
+    </div>
+    
+    <!-- 卡片容器 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+      <!-- IP定位卡片 -->
+      <div class="bg-white rounded-xl p-6 card-shadow transition-all duration-300 hover:shadow-lg">
+        <div class="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+          <i class="fa fa-globe text-primary text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-dark mb-3">IP定位</h3>
+        <p class="text-secondary mb-6">通过IP地址获取粗略地理位置，无需授权，快速便捷</p>
+        <button id="ip-location-btn" class="w-full bg-primary text-white py-3 px-4 rounded-lg btn-hover flex items-center justify-center">
+          <i class="fa fa-search mr-2"></i>
+          获取IP位置
+        </button>
+      </div>
+      
+      <!-- 网络定位卡片 -->
+      <div class="bg-white rounded-xl p-6 card-shadow transition-all duration-300 hover:shadow-lg">
+        <div class="w-14 h-14 bg-success/10 rounded-full flex items-center justify-center mb-6">
+          <i class="fa fa-wifi text-success text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-dark mb-3">网络定位</h3>
+        <p class="text-secondary mb-6">通过基站或WiFi信号获取位置，精度中等，需要授权</p>
+        <button id="network-location-btn" class="w-full bg-success text-white py-3 px-4 rounded-lg btn-hover flex items-center justify-center">
+          <i class="fa fa-signal mr-2"></i>
+          获取网络位置
+        </button>
+      </div>
+      
+      <!-- GPS定位卡片 -->
+      <div class="bg-white rounded-xl p-6 card-shadow transition-all duration-300 hover:shadow-lg">
+        <div class="w-14 h-14 bg-warning/10 rounded-full flex items-center justify-center mb-6">
+          <i class="fa fa-satellite text-warning text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-dark mb-3">GPS定位</h3>
+        <p class="text-secondary mb-6">通过设备GPS获取精确经纬度，精度最高，需要授权</p>
+        <button id="gps-location-btn" class="w-full bg-warning text-white py-3 px-4 rounded-lg btn-hover flex items-center justify-center">
+          <i class="fa fa-crosshairs mr-2"></i>
+          获取GPS位置
+        </button>
+      </div>
+    </div>
+    
+    <!-- 结果显示区域 -->
+    <div id="results-container" class="hidden mb-12">
+      <div class="bg-white rounded-xl p-6 card-shadow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between mb-8">
+          <h2 class="text-2xl font-bold text-dark mb-4 md:mb-0">
+            <span id="result-type">位置结果</span>
+            <span id="accuracy-badge" class="ml-3 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"></span>
+          </h2>
+          <div class="flex space-x-3">
+            <button id="copy-btn" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <i class="fa fa-copy mr-2"></i>
+              复制结果
+            </button>
+            <button id="share-btn" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              <i class="fa fa-share-alt mr-2"></i>
+              分享
+            </button>
+          </div>
+        </div>
+        
+        <!-- 结果内容 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- 位置信息 -->
+          <div class="lg:col-span-1">
+            <h3 class="text-lg font-semibold text-dark mb-4 flex items-center">
+              <i class="fa fa-info-circle text-primary mr-2"></i>
+              位置详情
+            </h3>
+            <ul class="space-y-3">
+              <li class="flex items-start">
+                <span class="text-secondary w-24 inline-block">IP地址:</span>
+                <span id="ip-address" class="text-dark font-medium">-</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-secondary w-24 inline-block">国家:</span>
+                <span id="country" class="text-dark font-medium">-</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-secondary w-24 inline-block">地区:</span>
+                <span id="region" class="text-dark font-medium">-</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-secondary w-24 inline-block">城市:</span>
+                <span id="city" class="text-dark font-medium">-</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-secondary w-24 inline-block">经纬度:</span>
+                <span id="coordinates" class="text-dark font-medium">-</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-secondary w-24 inline-block">精度:</span>
+                <span id="accuracy" class="text-dark font-medium">-</span>
+              </li>
+              <li class="flex items-start">
+                <span class="text-secondary w-24 inline-block">获取时间:</span>
+                <span id="timestamp" class="text-dark font-medium">-</span>
+              </li>
+            </ul>
+          </div>
+          
+          <!-- 地图显示 -->
+          <div class="lg:col-span-2">
+            <h3 class="text-lg font-semibold text-dark mb-4 flex items-center">
+              <i class="fa fa-map text-primary mr-2"></i>
+              位置地图
+            </h3>
+            <div id="map" class="w-full h-[300px] md:h-[400px] rounded-lg overflow-hidden border border-gray-200"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 历史记录 -->
+    <div id="history-container" class="hidden mb-12">
+      <div class="bg-white rounded-xl p-6 card-shadow">
+        <h2 class="text-2xl font-bold text-dark mb-6 flex items-center">
+          <i class="fa fa-history text-primary mr-3"></i>
+          历史记录
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">类型</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">位置</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">经纬度</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">时间</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase tracking-wider">操作</th>
+              </tr>
+            </thead>
+            <tbody id="history-list" class="bg-white divide-y divide-gray-200">
+              <!-- 历史记录将在这里动态添加 -->
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button id="clear-history-btn" class="text-secondary hover:text-danger transition-colors flex items-center">
+            <i class="fa fa-trash mr-2"></i>
+            清空历史
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 统计信息 -->
+    <div id="stats-container" class="hidden">
+      <div class="bg-white rounded-xl p-6 card-shadow">
+        <h2 class="text-2xl font-bold text-dark mb-6 flex items-center">
+          <i class="fa fa-bar-chart text-primary mr-3"></i>
+          使用统计
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h3 class="text-lg font-semibold text-dark mb-4">定位方式使用次数</h3>
+            <div class="h-[250px]">
+              <canvas id="method-chart"></canvas>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-dark mb-4">定位精度分布</h3>
+            <div class="h-[250px]">
+              <canvas id="accuracy-chart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-dark text-white py-12">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div>
+          <h3 class="text-xl font-bold mb-4 flex items-center">
+            <i class="fa fa-map-marker mr-2"></i>
+            位置获取工具
+          </h3>
+          <p class="text-gray-400">
+            提供多种方式获取地理位置信息，满足不同场景下的定位需求
+          </p>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-4">功能链接</h3>
+          <ul class="space-y-2">
+            <li>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors flex items-center">
+                <i class="fa fa-globe mr-2"></i>
+                IP定位
+              </a>
+            </li>
+            <li>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors flex items-center">
+                <i class="fa fa-wifi mr-2"></i>
+                网络定位
+              </a>
+            </li>
+            <li>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors flex items-center">
+                <i class="fa fa-satellite mr-2"></i>
+                GPS定位
+              </a>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-4">相关资源</h3>
+          <ul class="space-y-2">
+            <li>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors flex items-center">
+                <i class="fa fa-info-circle mr-2"></i>
+                使用说明
+              </a>
+            </li>
+            <li>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors flex items-center">
+                <i class="fa fa-shield mr-2"></i>
+                隐私政策
+              </a>
+            </li>
+            <li>
+              <a href="#" class="text-gray-400 hover:text-white transition-colors flex items-center">
+                <i class="fa fa-question-circle mr-2"></i>
+                常见问题
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+        <p>&copy; 2023 位置获取工具. 保留所有权利.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 弹窗组件 -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-bold text-dark" id="modal-title">信息</h3>
+          <button id="close-modal" class="text-gray-400 hover:text-gray-600">
+            <i class="fa fa-times text-xl"></i>
+          </button>
+        </div>
+        <div id="modal-content" class="text-gray-600 mb-6">
+          <!-- 弹窗内容将在这里动态添加 -->
+        </div>
+        <div class="flex justify-end">
+          <button id="modal-confirm" class="px-4 py-2 bg-primary text-white rounded-lg btn-hover">
+            确定
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通知组件 -->
+  <div id="notification" class="fixed bottom-4 right-4 max-w-sm w-full bg-white rounded-lg shadow-lg p-4 transform translate-y-full transition-transform duration-300 z-40 hidden">
+    <div class="flex items-start">
+      <div id="notification-icon" class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3">
+        <i class="fa fa-info text-white"></i>
+      </div>
+      <div class="ml-3">
+        <h3 id="notification-title" class="text-sm font-medium text-gray-900">通知</h3>
+        <div id="notification-message" class="mt-1 text-sm text-gray-500">这是一条通知消息</div>
+      </div>
+      <button id="close-notification" class="ml-auto flex-shrink-0 flex items-center justify-center h-5 w-5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+        <i class="fa fa-times text-xs text-gray-600"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript代码 -->
+  <script>
+    // 全局变量
+    let map = null;
+    let marker = null;
+    let locationHistory = JSON.parse(localStorage.getItem('locationHistory')) || [];
+    let statsData = JSON.parse(localStorage.getItem('statsData')) || {
+      methods: { ip: 0, network: 0, gps: 0 },
+      accuracy: { low: 0, medium: 0, high: 0 }
+    };
+    
+    // DOM加载完成后执行
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化事件监听
+      initEventListeners();
+      
+      // 检查是否有历史记录
+      if (locationHistory.length > 0) {
+        document.getElementById('history-container').classList.remove('hidden');
+        renderHistory();
+      }
+      
+      // 初始化统计图表
+      if (Object.values(statsData.methods).some(count => count > 0)) {
+        document.getElementById('stats-container').classList.remove('hidden');
+        initCharts();
+      }
+      
+      // 检查主题设置
+      checkTheme();
+    });
+    
+    // 初始化事件监听
+    function initEventListeners() {
+      // 导航栏滚动效果
+      window.addEventListener('scroll', function() {
+        const navbar = document.getElementById('navbar');
+        if (window.scrollY > 10) {
+          navbar.classList.add('shadow-md');
+          navbar.classList.remove('shadow-sm');
+        } else {
+          navbar.classList.remove('shadow-md');
+          navbar.classList.add('shadow-sm');
+        }
+      });
+      
+      // 定位按钮点击事件
+      document.getElementById('ip-location-btn').addEventListener('click', getIpLocation);
+      document.getElementById('network-location-btn').addEventListener('click', getNetworkLocation);
+      document.getElementById('gps-location-btn').addEventListener('click', getGpsLocation);
+      
+      // 结果操作按钮
+      document.getElementById('copy-btn').addEventListener('click', copyResults);
+      document.getElementById('share-btn').addEventListener('click', shareResults);
+      
+      // 历史记录按钮
+      document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
+      
+      // 主题切换按钮
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+      
+      // 信息按钮
+      document.getElementById('info-btn').addEventListener('click', showInfo);
+      
+      // 弹窗按钮
+      document.getElementById('close-modal').addEventListener('click', closeModal);
+      document.getElementById('modal-confirm').addEventListener('click', closeModal);
+      
+      // 通知关闭按钮
+      document.getElementById('close-notification').addEventListener('click', closeNotification);
+    }
+    
+    // 通过IP获取位置
+    function getIpLocation() {
+      showNotification('info', '正在通过IP获取位置...');
+      
+      // 使用ipapi.co的API获取位置信息
+      fetch('https://ipapi.co/json/')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('网络错误');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const locationData = {
+            type: 'ip',
+            ip: data.ip,
+            country: data.country_name || '未知',
+            region: data.region || '未知',
+            city: data.city || '未知',
+            latitude: data.latitude,
+            longitude: data.longitude,
+            accuracy: '低 (IP定位)',
+            timestamp: new Date().toLocaleString()
+          };
+          
+          // 更新统计数据
+          updateStats('ip', 'low');
+          
+          // 显示结果
+          displayResults(locationData);
+          
+          // 添加到历史记录
+          addToHistory(locationData);
+          
+          showNotification('success', 'IP位置获取成功');
+        })
+        .catch(error => {
+          console.error('IP定位失败:', error);
+          showNotification('error', 'IP位置获取失败，请检查网络连接');
+        });
+    }
+    
+    // 通过网络获取位置 (基站/WiFi)
+    function getNetworkLocation() {
+      if (!navigator.geolocation) {
+        showNotification('error', '您的浏览器不支持地理定位功能');
+        return;
+      }
+      
+      showNotification('info', '正在通过网络获取位置...');
+      
+      // 使用高精度选项，但设置较短的超时时间
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const locationData = {
+            type: 'network',
+            ip: '未知',
+            country: '未知',
+            region: '未知',
+            city: '未知',
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: `中 (${position.coords.accuracy}米)`,
+            timestamp: new Date().toLocaleString()
+          };
+          
+          // 更新统计数据
+          updateStats('network', getAccuracyCategory(position.coords.accuracy));
+          
+          // 反向地理编码获取位置名称
+          reverseGeocode(position.coords.latitude, position.coords.longitude, locationData);
+          
+          // 显示结果
+          displayResults(locationData);
+          
+          // 添加到历史记录
+          addToHistory(locationData);
+          
+          showNotification('success', '网络位置获取成功');
+        },
+        function(error) {
+          console.error('网络定位失败:', error);
+          let errorMessage = '网络位置获取失败';
+          switch(error.code) {
+            case 1:
+              errorMessage = '您拒绝了位置授权';
+              break;
+            case 2:
+              errorMessage = '无法获取位置信息';
+              break;
+            case 3:
+              errorMessage = '获取位置超时';
+              break;
+          }
+          showNotification('error', errorMessage);
+        },
+        {
+          enableHighAccuracy: false, // 不启用高精度模式
+          timeout: 10000, // 10秒超时
+          maximumAge: 0 // 不使用缓存
+        }
+      );
+    }
+    
+    // 通过GPS获取位置
+    function getGpsLocation() {
+      if (!navigator.geolocation) {
+        showNotification('error', '您的浏览器不支持地理定位功能');
+        return;
+      }
+      
+      showNotification('info', '正在通过GPS获取位置...这可能需要一些时间');
+      
+      // 使用高精度选项
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const locationData = {
+            type: 'gps',
+            ip: '未知',
+            country: '未知',
+            region: '未知',
+            city: '未知',
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: `高 (${position.coords.accuracy}米)`,
+            timestamp: new Date().toLocaleString()
+          };
+          
+          // 更新统计数据
+          updateStats('gps', getAccuracyCategory(position.coords.accuracy));
+          
+          // 反向地理编码获取位置名称
+          reverseGeocode(position.coords.latitude, position.coords.longitude, locationData);
+          
+          // 显示结果
+          displayResults(locationData);
+          
+          // 添加到历史记录
+          addToHistory(locationData);
+          
+          showNotification('success', 'GPS位置获取成功');
+        },
+        function(error) {
+          console.error('GPS定位失败:', error);
+          let errorMessage = 'GPS位置获取失败';
+          switch(error.code) {
+            case 1:
+              errorMessage = '您拒绝了位置授权';
+              break;
+            case 2:
+              errorMessage = '无法获取位置信息';
+              break;
+            case 3:
+              errorMessage = '获取位置超时，请确保您在室外或靠近窗户的地方';
+              break;
+          }
+          showNotification('error', errorMessage);
+        },
+        {
+          enableHighAccuracy: true, // 启用高精度模式
+          timeout: 30000, // 30秒超时
+          maximumAge: 0 // 不使用缓存
+        }
+      );
+    }
+    
+    // 反向地理编码 (通过经纬度获取地址信息)
+    function reverseGeocode(latitude, longitude, locationData) {
+      // 使用OpenStreetMap的Nominatim API
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('反向地理编码失败');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.address) {
+            locationData.country = data.address.country || '未知';
+            locationData.region = data.address.state || data.address.region || '未知';
+            locationData.city = data.address.city || data.address.town || data.address.village || '未知';
+            
+            // 更新显示的结果
+            document.getElementById('country').textContent = locationData.country;
+            document.getElementById('region').textContent = locationData.region;
+            document.getElementById('city').textContent = locationData.city;
+            
+            // 更新历史记录中的数据
+            updateHistory(locationData);
+          }
+        })
+        .catch(error => {
+          console.error('反向地理编码失败:', error);
+          // 即使失败也继续，使用默认的"未知"值
+        });
+    }
+    
+    // 显示结果
+    function displayResults(locationData) {
+      // 显示结果容器
+      document.getElementById('results-container').classList.remove('hidden');
+      
+      // 更新结果标题
+      const typeNames = {
+        ip: 'IP定位结果',
+        network: '网络定位结果',
+        gps: 'GPS定位结果'
+      };
+      document.getElementById('result-type').textContent = typeNames[locationData.type] || '位置结果';
+      
+      // 更新精度徽章
+      const accuracyColors = {
+        '低': 'bg-primary/10 text-primary',
+        '中': 'bg-warning/10 text-warning',
+        '高': 'bg-success/10 text-success'
+      };
+      const accuracyLevel = locationData.accuracy.split(' ')[0];
+      document.getElementById('accuracy-badge').textContent = `精度: ${accuracyLevel}`;
+      document.getElementById('accuracy-badge').className = `ml-3 text-xs px-2 py-1 rounded-full ${accuracyColors[accuracyLevel] || 'bg-gray-100 text-gray-600'}`;
+      
+      // 更新位置信息
+      document.getElementById('ip-address').textContent = locationData.ip;
+      document.getElementById('country').textContent = locationData.country;
+      document.getElementById('region').textContent = locationData.region;
+      document.getElementById('city').textContent = locationData.city;
+      document.getElementById('coordinates').textContent = `${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`;
+      document.getElementById('accuracy').textContent = locationData.accuracy;
+      document.getElementById('timestamp').textContent = locationData.timestamp;
+      
+      // 初始化或更新地图
+      initMap(locationData.latitude, locationData.longitude);
+      
+      // 显示统计信息
+      document.getElementById('stats-container').classList.remove('hidden');
+      initCharts();
+    }
+    
+    // 初始化地图
+    function initMap(latitude, longitude) {
+      // 如果地图已存在，更新标记位置
+      if (map) {
+        marker.setLatLng([latitude, longitude]);
+        map.setView([latitude, longitude], 13);
+        return;
+      }
+      
+      // 创建新地图
+      map = L.map('map').setView([latitude, longitude], 13);
+      
+      // 使用OpenStreetMap瓦片
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+      
+      // 添加标记
+      marker = L.marker([latitude, longitude]).addTo(map);
+      marker.bindPopup('您的位置').openPopup();
+    }
+    
+    // 添加到历史记录
+    function addToHistory(locationData) {
+      // 添加到历史记录数组
+      locationHistory.unshift(locationData);
+      
+      // 限制历史记录数量为10条
+      if (locationHistory.length > 10) {
+        locationHistory.pop();
+      }
+      
+      // 保存到本地存储
+      localStorage.setItem('locationHistory', JSON.stringify(locationHistory));
+      
+      // 显示历史记录容器
+      document.getElementById('history-container').classList.remove('hidden');
+      
+      // 重新渲染历史记录
+      renderHistory();
+    }
+    
+    // 更新历史记录中的条目
+    function updateHistory(updatedData) {
+      // 找到并更新匹配的历史记录
+      for (let i = 0; i < locationHistory.length; i++) {
+        if (locationHistory[i].timestamp === updatedData.timestamp) {
+          locationHistory[i] = updatedData;
+          break;
+        }
+      }
+      
+      // 保存到本地存储
+      localStorage.setItem('locationHistory', JSON.stringify(locationHistory));
+      
+      // 重新渲染历史记录
+      renderHistory();
+    }
+    
+    // 渲染历史记录
+    function renderHistory() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '';
+      
+      // 没有历史记录时显示提示
+      if (locationHistory.length === 0) {
+        const emptyRow = document.createElement('tr');
+        emptyRow.innerHTML = `
+          <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+            暂无历史记录
+          </td>
+        `;
+        historyList.appendChild(emptyRow);
+        return;
+      }
+      
+      // 渲染每条历史记录
+      locationHistory.forEach((item, index) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50 transition-colors';
+        
+        // 定位类型图标
+        const typeIcons = {
+          ip: '<i class="fa fa-globe text-primary mr-1"></i> IP定位',
+          network: '<i class="fa fa-wifi text-success mr-1"></i> 网络定位',
+          gps: '<i class="fa fa-satellite text-warning mr-1"></i> GPS定位'
+        };
+        
+        // 位置信息
+        const locationText = `${item.country} ${item.region} ${item.city}`.trim() || '未知位置';
+        
+        // 经纬度
+        const coordsText = `${item.latitude.toFixed(6)}, ${item.longitude.toFixed(6)}`;
+        
+        row.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-900">${typeIcons[item.type] || '位置记录'}</div>
+          </td>
+          <td class="px-6 py-4">
+            <div class="text-sm text-gray-900">${locationText}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-900">${coordsText}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-500">${item.timestamp}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <button class="view-history-btn text-primary hover:text-primary/80 transition-colors" data-index="${index}">
+              <i class="fa fa-eye mr-1"></i> 查看
+            </button>
+          </td>
+        `;
+        
+        historyList.appendChild(row);
+      });
+      
+      // 添加查看历史记录的事件监听
+      document.querySelectorAll('.view-history-btn').forEach(button => {
+        button.addEventListener('click', function() {
+          const index = parseInt(this.getAttribute('data-index'));
+          const historyItem = locationHistory[index];
+          displayResults(historyItem);
+          
+          // 滚动到结果区域
+          document.getElementById('results-container').scrollIntoView({ behavior: 'smooth' });
+        });
+      });
+    }
+    
+    // 清空历史记录
+    function clearHistory() {
+      // 显示确认弹窗
+      showModal(
+        '确认清空',
+        '您确定要清空所有历史记录吗？此操作无法撤销。',
+        function() {
+          // 清空历史记录
+          locationHistory = [];
+          localStorage.removeItem('locationHistory');
+          
+          // 隐藏历史记录容器
+          document.getElementById('history-container').classList.add('hidden');
+          
+          // 重新渲染历史记录
+          renderHistory();
+          
+          showNotification('success', '历史记录已清空');
+        }
+      );
+    }
+    
+    // 更新统计数据
+    function updateStats(method, accuracy) {
+      // 更新方法统计
+      if (statsData.methods[method]) {
+        statsData.methods[method]++;
+      }
+      
+      // 更新精度统计
+      if (statsData.accuracy[accuracy]) {
+        statsData.accuracy[accuracy]++;
+      }
+      
+      // 保存到本地存储
+      localStorage.setItem('statsData', JSON.stringify(statsData));
+    }
+    
+    // 获取精度类别
+    function getAccuracyCategory(accuracy) {
+      if (accuracy < 100) {
+        return 'high'; // 高精度 (<100米)
+      } else if (accuracy < 1000) {
+        return 'medium'; // 中等精度 (100-1000米)
+      } else {
+        return 'low'; // 低精度 (>1000米)
+      }
+    }
+    
+    // 初始化统计图表
+    function initCharts() {
+      // 方法使用次数图表
+      const methodCtx = document.getElementById('method-chart').getContext('2d');
+      new Chart(methodCtx, {
+        type: 'bar',
+        data: {
+          labels: ['IP定位', '网络定位', 'GPS定位'],
+          datasets: [{
+            label: '使用次数',
+            data: [
+              statsData.methods.ip || 0,
+              statsData.methods.network || 0,
+              statsData.methods.gps || 0
+            ],
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(245, 158, 11, 0.7)'
+            ],
+            borderColor: [
+              'rgba(59, 130, 246, 1)',
+              'rgba(16, 185, 129, 1)',
+              'rgba(245, 158, 11, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
+            }
+          }
+        }
+      });
+      
+      // 精度分布图表
+      const accuracyCtx = document.getElementById('accuracy-chart').getContext('2d');
+      new Chart(accuracyCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['低精度', '中等精度', '高精度'],
+          datasets: [{
+            data: [
+              statsData.accuracy.low || 0,
+              statsData.accuracy.medium || 0,
+              statsData.accuracy.high || 0
+            ],
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(16, 185, 129, 0.7)'
+            ],
+            borderColor: [
+              'rgba(59, 130, 246, 1)',
+              'rgba(245, 158, 11, 1)',
+              'rgba(16, 185, 129, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%'
+        }
+      });
+    }
+    
+    // 复制结果
+    function copyResults() {
+      const ip = document.getElementById('ip-address').textContent;
+      const country = document.getElementById('country').textContent;
+      const region = document.getElementById('region').textContent;
+      const city = document.getElementById('city').textContent;
+      const coordinates = document.getElementById('coordinates').textContent;
+      const accuracy = document.getElementById('accuracy').textContent;
+      const timestamp = document.getElementById('timestamp').textContent;
+      
+      const resultText = `位置信息:
+IP地址: ${ip}
+国家: ${country}
+地区: ${region}
+城市: ${city}
+经纬度: ${coordinates}
+精度: ${accuracy}
+获取时间: ${timestamp}`;
+      
+      // 创建临时textarea元素
+      const textarea = document.createElement('textarea');
+      textarea.value = resultText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      
+      showNotification('success', '位置信息已复制到剪贴板');
+    }
+    
+    // 分享结果
+    function shareResults() {
+      const coordinates = document.getElementById('coordinates').textContent;
+      const [latitude, longitude] = coordinates.split(', ');
+      
+      // 构建分享链接
+      const shareText = `我的位置: ${coordinates}`;
+      const shareUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      
+      // 检查是否支持Web Share API
+      if (navigator.share) {
+        navigator.share({
+          title: '位置分享',
+          text: shareText,
+          url: shareUrl
+        })
+        .catch(error => {
+          console.error('分享失败:', error);
+          fallbackShare(shareText, shareUrl);
+        });
+      } else {
+        // 不支持Web Share API时的降级方案
+        fallbackShare(shareText, shareUrl);
+      }
+    }
+    
+    // 分享降级方案
+    function fallbackShare(text, url) {
+      // 创建分享链接
+      const shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      
+      // 显示分享链接
+      showModal(
+        '分享位置',
+        `<p>您的位置链接:</p><p class="text-primary break-all mt-2">${url}</p><p class="mt-4">请复制链接或点击下面的按钮分享到Twitter</p>`,
+        function() {
+          window.open(shareLink, '_blank', 'width=600,height=400');
+        },
+        '分享到Twitter'
+      );
+    }
+    
+    // 显示弹窗
+    function showModal(title, content, confirmCallback, confirmText = '确定') {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-content').innerHTML = content;
+      document.getElementById('modal-confirm').textContent = confirmText;
+      
+      // 设置确认按钮的点击事件
+      document.getElementById('modal-confirm').onclick = function() {
+        if (typeof confirmCallback === 'function') {
+          confirmCallback();
+        }
+        closeModal();
+      };
+      
+      // 显示弹窗
+      document.getElementById('modal').classList.remove('hidden');
+    }
+    
+    // 关闭弹窗
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+    
+    // 显示通知
+    function showNotification(type, message) {
+      const notification = document.getElementById('notification');
+      const notificationTitle = document.getElementById('notification-title');
+      const notificationMessage = document.getElementById('notification-message');
+      const notificationIcon = document.getElementById('notification-icon');
+      
+      // 设置通知类型样式
+      const types = {
+        info: { title: '信息', icon: 'fa-info', color: 'bg-primary' },
+        success: { title: '成功', icon: 'fa-check', color: 'bg-success' },
+        error: { title: '错误', icon: 'fa-exclamation-circle', color: 'bg-danger' },
+        warning: { title: '警告', icon: 'fa-exclamation-triangle', color: 'bg-warning' }
+      };
+      
+      const config = types[type] || types.info;
+      
+      // 更新通知内容
+      notificationTitle.textContent = config.title;
+      notificationMessage.textContent = message;
+      notificationIcon.className = `flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 ${config.color}`;
+      notificationIcon.innerHTML = `<i class="fa ${config.icon} text-white"></i>`;
+      
+      // 显示通知
+      notification.classList.remove('hidden');
+      setTimeout(() => {
+        notification.classList.remove('translate-y-full');
+      }, 10);
+      
+      // 3秒后自动关闭通知
+      setTimeout(closeNotification, 3000);
+    }
+    
+    // 关闭通知
+    function closeNotification() {
+      const notification = document.getElementById('notification');
+      notification.classList.add('translate-y-full');
+      setTimeout(() => {
+        notification.classList.add('hidden');
+      }, 300);
+    }
+    
+    // 显示信息
+    function showInfo() {
+      showModal(
+        '关于位置获取工具',
+        `
+        <div class="space-y-4">
+          <p>位置获取工具提供三种不同方式获取您的地理位置信息：</p>
+          
+          <div class="flex items-start space-x-3 p-3 bg-blue-50 rounded-lg">
+            <i class="fa fa-globe text-primary mt-1"></i>
+            <div>
+              <h4 class="font-medium text-dark">IP定位</h4>
+              <p class="text-sm text-gray-600">通过您的IP地址获取粗略位置，无需授权，精度较低，通常只能定位到城市级别。</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3 p-3 bg-green-50 rounded-lg">
+            <i class="fa fa-wifi text-success mt-1"></i>
+            <div>
+              <h4 class="font-medium text-dark">网络定位</h4>
+              <p class="text-sm text-gray-600">通过基站或WiFi信号获取位置，需要授权，精度中等，通常可以定位到街道级别。</p>
+            </div>
+          </div>
+          
+          <div class="flex items-start space-x-3 p-3 bg-yellow-50 rounded-lg">
+            <i class="fa fa-satellite text-warning mt-1"></i>
+            <div>
+              <h4 class="font-medium text-dark">GPS定位</h4>
+              <p class="text-sm text-gray-600">通过设备的GPS传感器获取位置，需要授权，精度最高，通常可以定位到米级精度。</p>
+            </div>
+          </div>
+          
+          <p class="text-sm text-gray-500">
+            <i class="fa fa-info-circle mr-1"></i>
+            您的位置信息仅保存在本地浏览器中，不会发送到我们的服务器。
+          </p>
+        </div>
+        `
+      );
+    }
+    
+    // 切换主题
+    function toggleTheme() {
+      const body = document.body;
+      const themeIcon = document.querySelector('#theme-toggle i');
+      
+      if (body.classList.contains('dark')) {
+        // 切换到亮色主题
+        body.classList.remove('dark');
+        themeIcon.className = 'fa fa-moon-o text-dark';
+        localStorage.setItem('theme', 'light');
+      } else {
+        // 切换到暗色主题
+        body.classList.add('dark');
+        themeIcon.className = 'fa fa-sun-o text-yellow-400';
+        localStorage.setItem('theme', 'dark');
+      }
+    }
+    
+    // 检查主题设置
+    function checkTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      // 如果没有保存的主题，使用用户系统偏好
+      if (!savedTheme && prefersDark) {
+        document.body.classList.add('dark');
+        document.querySelector('#theme-toggle i').className = 'fa fa-sun-o text-yellow-400';
+      } else if (savedTheme === 'dark') {
+        // 如果保存的是暗色主题
+        document.body.classList.add('dark');
+        document.querySelector('#theme-toggle i').className = 'fa fa-sun-o text-yellow-400';
+      }
+    }
+  </script>
 </body>
 </html>
