@@ -11,12 +11,13 @@
 </head>
 <body style="word-wrap:break-word;">
 
-<a href=wallet://com.huawei.hmos.wallet/openwallet?biz=WalletCommon&action=homePage>钱包deeplink</a><br>
-    <a href=petalmaps://textSearch?text=charging&SearchCenter=&sessionId=from_calyx_search&utm_source=com.huawei.maps.auto.app&package=ecarx.naviservice&isDirect=false>花瓣地图deeplink</a><br>
-        <a href=hiapp://com.huawei.appmarket?activityName=activityUri|appdetail.activity&params={"params":[{"name":"uri","type":"String","value":"app|C10280365"}]}&channelId=123412>应用市场deeplink</a><br>    
-    <a href=higame://com.huawei.gamebox?activityName=activityUri|appdetail.activity&params={"params":[{"name":"uri","type":"String","value":"app|C10280365"}]}&thirdId=123412>游戏中心deeplink</a><br>
 
-    <a href=data:text/html,%3Cscript%3Ewindow.location.href%20%3D%20%27wallet%3A%2F%2Fcom.huawei.hmos.wallet%2Fopenwallet%3Fbiz%3DWalletCommon%26action%3DhomePage%27%3C%2Fscript%3E>data协议打开钱包</a><br>
+  <a href=petalmaps://textSearch?text=charging&SearchCenter=&sessionId=from_calyx_search&utm_source=com.huawei.maps.auto.app&package=ecarx.naviservice&isDirect=false>花瓣地图deeplink</a><br>
+ <a href=hiapp://com.huawei.appmarket?activityName=activityUri|appdetail.activity&params={"params":[{"name":"uri","type":"String","value":"app|C10280365"}]}&channelId=123412>应用市场deeplink</a><br>    
+    <a href=higame://com.huawei.gamebox?activityName=activityUri|appdetail.activity&params={"params":[{"name":"uri","type":"String","value":"app|C10280365"}]}&thirdId=123412>游戏中心deeplink</a><br>
+    <a href=data:text/html,%3Cscript%3Ewindow.location.href%20%3D%20%27hiapp%3A%2F%2Fcom.huawei.appmarket%3FactivityName%3DactivityUri%7Cappdetail.activity%26params%3D%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app%7CC10280365%22%7D%5D%7D%26channelId%3D123412%27%3C%2Fscript%3E>data协议打开应用市场</a><br>
+    <a href=data:text/html,%3Cscript%3Ewindow.open(%27hiapp%3A%2F%2Fcom.huawei.appmarket%3FactivityName%3DactivityUri%7Cappdetail.activity%26params%3D%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app%7CC10280365%22%7D%5D%7D%26channelId%3D123412%27%3C%2Fscript%3E>data协议 open打开应用市场</a><br>
+        
 <script type="text/javascript">
     const ret = _hwbrNative.invokeSync('account', 'getUserInfo' , []);
     document.write('result : ' + JSON.stringify(ret));
