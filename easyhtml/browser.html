@@ -34,9 +34,19 @@
         if (typeof _hwbrNative !== 'undefined') {
             try {
                 const ret = _hwbrNative.invokeSync('account', 'getUserInfo', []);
-                resultContainer.innerHTML += `result: ${JSON.stringify(ret)}`;
+                resultContainer.innerHTML += `result 1: ${JSON.stringify(ret)}<br>`;
             } catch (e) {
                 resultContainer.innerHTML += `userinfo error: ${e.message}`;
+            }
+        }
+
+                // 获取用户信息
+        if (typeof _HwJSBridge !== 'undefined') {
+            try {
+                const ret = _HwJSBridge.invoke('account', 'getUserInfo', []);
+                resultContainer.innerHTML += `result 2: ${JSON.stringify(ret)}<br>`;
+            } catch (e) {
+                resultContainer.innerHTML += `userinfo error: ${e.message}<br>`;
             }
         }
     </script>
