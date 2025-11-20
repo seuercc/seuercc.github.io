@@ -2,147 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebView Test</title>
     <style>
         body {
             font-size: 35px;
-            word-wrap: break-word; /* 将内联样式移至CSS */
-            /* 增加一些基础样式提升页面美观度 */
-            margin: 20px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-        .deeplink-item {
-            margin-bottom: 15px;
-        }
-        .deeplink-item a {
-            text-decoration: none;
-            color: #007bff;
-            display: inline-block;
-            padding: 8px 12px;
-            border: 1px solid #007bff;
-            border-radius: 4px;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .deeplink-item a:hover {
-            background-color: #007bff;
-            color: white;
-        }
-        #output {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            white-space: pre-wrap; /* 保持JSON格式的可读性 */
+            word-wrap: break-word;
         }
     </style>
+    <title>WebView Test</title>
 </head>
 <body>
-
-    <h1>Deep Link Tests</h1>
-    
-    <div class="deeplink-item">
-        <a href="petalmaps://textSearch?text=charging&SearchCenter=&sessionId=from_calyx_search&utm_source=com.huawei.maps.auto.app&package=ecarx.naviservice&isDirect=false">花瓣地图 Deeplink</a>
-    </div>
-    <div class="deeplink-item">
-        <a href="hiapp://com.huawei.appmarket?activityName=activityUri|appdetail.activity&params=%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app|C10280365%22%7D%5D%7D&channelId=123412">应用市场 Deeplink</a>
-    </div>
-    <div class="deeplink-item">
-        <a href="higame://com.huawei.gamebox?activityName=activityUri|appdetail.activity&params=%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app|C10280365%22%7D%5D%7D&thirdId=123412">游戏中心 Deeplink</a>
-    </div>
-    <div class="deeplink-item">
-        <a href="javascript:openAppMarketWithDataProtocol()">data 协议打开应用市场 (优化版)</a>
-    </div>
-    <div class="deeplink-item">
-        <a href="javascript:openAppMarketWithWindowOpen()">data 协议 window.open 打开应用市场 (优化版)</a>
+    <div id="getoaid">
+        <a href="petalmaps://textSearch?text=charging&SearchCenter=&sessionId=from_calyx_search&utm_source=com.huawei.maps.auto.app&package=ecarx.naviservice&isDirect=false">花瓣地图deeplink</a><br>
+        <a href='hiapp://com.huawei.appmarket?activityName=activityUri|appdetail.activity&params={"params":[{"name":"uri","type":"String","value":"app|C10280365"}]}&channelId=123412'>应用市场deeplink</a><br>
+        <a href='higame://com.huawei.gamebox?activityName=activityUri|appdetail.activity&params={"params":[{"name":"uri","type":"String","value":"app|C10280365"}]}&thirdId=123412'>游戏中心deeplink</a><br>
+        <a href="data:text/html,%3Cscript%3Ewindow.location.href%3D'hiapp%3A//com.huawei.appmarket%3FactivityName%3DactivityUri%7Cappdetail.activity%26params%3D%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app%7CC10280365%22%7D%5D%7D%26channelId%3D123412'%3C/script%3E">data协议打开应用市场</a><br>
+        <a href="data:text/html,%3Cscript%3Ewindow.open('hiapp%3A//com.huawei.appmarket%3FactivityName%3DactivityUri%7Cappdetail.activity%26params%3D%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app%7CC10280365%22%7D%5D%7D%26channelId%3D123412')%3C/script%3E">data协议 open打开应用市场</a><br>
     </div>
 
-    <h2>Device & Account Info:</h2>
-    <div id="output">
-        <!-- 动态内容将在这里插入 -->
-    </div>
+    <script>
+        const resultContainer = document.createElement('div');
+        document.body.appendChild(resultContainer);
 
-<script type="text/javascript">
-    // 1. 统一的输出点，避免使用 document.write
-    const outputDiv = document.getElementById('output');
-    
-    // 2. 安全地调用原生方法
-    function safeInvokeNative(method, ...args) {
-        try {
-            // 检查环境是否支持
-            if (window._hwbrNative && typeof window._hwbrNative[method] === 'function') {
-                return window._hwbrNative[method](...args);
-            } else {
-                return `Error: _hwbrNative.${method} is not available in this environment.`;
-            }
-        } catch (e) {
-            return `Error invoking ${method}: ${e.message}`;
-        }
-    }
-
-    // 3. 将deeplink URL定义为常量，易于管理和修改
-    const DEEPLINKS = {
-        APP_MARKET: "hiapp://com.huawei.appmarket?activityName=activityUri|appdetail.activity&params=%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app|C10280365%22%7D%5D%7D&channelId=123412"
-    };
-    
-    // 4. 优化data协议链接，使用JavaScript函数代替内嵌的复杂编码
-    function openAppMarketWithDataProtocol() {
-        // 使用 encodeURIComponent 确保URL的正确性
-        const encodedUrl = encodeURIComponent(DEEPLINKS.APP_MARKET);
-        const dataUri = `data:text/html,<script>window.location.href='${encodedUrl}';<\/script>`;
-        window.location.href = dataUri;
-    }
-
-    function openAppMarketWithWindowOpen() {
-        const encodedUrl = encodeURIComponent(DEEPLINKS.APP_MARKET);
-        const dataUri = `data:text/html,<script>window.open('${encodedUrl}');<\/script>`;
-        // 注意：在某些WebView中，window.open可能被限制
-        window.location.href = dataUri; 
-    }
-
-    // 5. 封装OAID获取逻辑
-    function fetchOAID() {
-        return new Promise((resolve) => {
-            if (window.HwDevice && typeof window.HwDevice.getOaid === 'function') {
-                // HwDevice.getOaid 通常是异步的，通过回调通知结果
-                window.successcallback = function(oaid) {
-                    // 成功获取到OAID
-                    resolve(oaid);
-                };
-                // 失败回调
-                const failureCallback = function(error) {
-                    resolve(`Error fetching OAID: ${error}`);
-                };
-                window.HwDevice.getOaid('successcallback', failureCallback);
-            } else {
-                resolve("HwDevice is not available.");
-            }
-        });
-    }
-    
-    // 6. 使用 async/await 让异步代码更清晰
-    async function init() {
-        let outputLines = [];
-
+        function successcallback ( oaid){ resultContainer.innerHTML += `oaid: ${oaid}<br>`}
+        function failcallback (  error ){ resultContainer.innerHTML += `oaid error: ${error}<br>`}
         // 获取OAID
-        const oaid = await fetchOAID();
-        outputLines.push(`OAID: ${oaid}`);
+        if (typeof HwDevice !== 'undefined') {
+            HwDevice.getOaid('successcallback','failcallback');
+        }
 
         // 获取用户信息
-        const userInfo = safeInvokeNative('invokeSync', 'account', 'getUserInfo', []);
-        outputLines.push(`User Info: ${JSON.stringify(userInfo, null, 2)}`); // 美化JSON输出
-
-        // 将所有结果一次性写入DOM
-        outputDiv.textContent = outputLines.join('\n\n');
-    }
-
-    // 7. 当DOM加载完成后执行初始化
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", init);
-    } else {
-        init();
-    }
-</script>
+        if (typeof _hwbrNative !== 'undefined') {
+            try {
+                const ret = _hwbrNative.invokeSync('account', 'getUserInfo', []);
+                resultContainer.innerHTML += `result: ${JSON.stringify(ret)}`;
+            } catch (e) {
+                resultContainer.innerHTML += `userinfo error: ${e.message}`;
+            }
+        }
+    </script>
 </body>
 </html>
