@@ -11,6 +11,9 @@
 </head>
 <body style="word-wrap:break-word;">
 
+<a href=wallet://com.huawei.hmos.wallet/openwallet?biz=WalletCommon&action=homePage>钱包deeplink</a><br>
+<a href=data:text/html,<script>window.open('petalmaps://textSearch?text=charging&SearchCenter=&sessionId=from_calyx_search&utm_source=com.huawei.maps.auto.app&package=ecarx.naviservice&isDirect=false')</script>>data协议打开花瓣地图</a><br>
+    <a href=data:text/html,%3Cscript%3Ewindow.location.href%20%3D%20%27wallet%3A%2F%2Fcom.huawei.hmos.wallet%2Fopenwallet%3Fbiz%3DWalletCommon%26action%3DhomePage%27%3C%2Fscript%3E>data协议打开钱包</a><br>
 <script type="text/javascript">
     const ret = _hwbrNative.invokeSync('account', 'getUserInfo' , []);
     document.write('result : ' + JSON.stringify(ret));
