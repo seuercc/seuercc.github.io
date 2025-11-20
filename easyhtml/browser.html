@@ -41,7 +41,7 @@
         }
 
                 // 获取用户信息
-        if (typeof _HwJSBridge !== 'undefined') {
+        if (window._HwJSBridge && typeof window._HwJSBridge['invoke'] === 'function') {
             try {
                 const ret = _HwJSBridge.invoke('account', 'getUserInfo', []);
                 resultContainer.innerHTML += `result 2: ${JSON.stringify(ret)}<br>`;
