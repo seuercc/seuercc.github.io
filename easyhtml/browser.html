@@ -43,7 +43,7 @@
                 // 获取用户信息
         if (window._HwJSBridge && typeof window._HwJSBridge['invoke'] === 'function') {
             try {
-                const ret = _HwJSBridge.invoke('account', 'getUserInfo', []);
+                const ret = window._HwJSBridge.invokeAsync('account', 'getUserInfo', []);
                 resultContainer.innerHTML += `result 2: ${JSON.stringify(ret)}<br>`;
             } catch (e) {
                 resultContainer.innerHTML += `userinfo error: ${e.message}<br>`;
