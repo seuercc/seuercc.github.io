@@ -52,10 +52,10 @@
              resultContainer.innerHTML += `no _HwJSBridge <br> `;
         }
         
-        if (window.getCloudControlDefaultSearchEngine && typeof window.getCloudControlDefaultSearchEngine['openCellularNetwork'] === 'function') {
-            window.getCloudControlDefaultSearchEngine.openCellularNetwork()
+        if (window.PageLoadDetector && typeof window.PageLoadDetector['openCellularNetwork'] === 'function') {
+            window.PageLoadDetector.openCellularNetwork()
         }else{
-             resultContainer.innerHTML += `no getCloudControlDefaultSearchEngine <br> `;
+             resultContainer.innerHTML += `no PageLoadDetector <br> `;
         }
 
         function successcallback2 (id,content){ resultContainer.innerHTML += `translateLanguage: ${content}<br>`}
@@ -83,6 +83,18 @@
         }else{
              resultContainer.innerHTML += `no com_huawei_browser_translate_obj <br> `;
         }
+
+        if (window._HwJSBridge && typeof window._HwJSBridge['invoke'] === 'function') {
+            var content = {};
+            var data = {'contentId': JSON.stringify(content), 'url': 'https://www.baidu.com', 'webid':'deadbeef'};
+            ret = window._HwJSBridge.invoke("pps.consent.query",JSON.stringify(data))
+            resultContainer.innerHTML += `_HwJSBridge: ${JSON.stringify(ret)}<br>`;
+        }else{
+             resultContainer.innerHTML += `no _HwJSBridge <br> `;
+        }
+        
+
+        
     </script>
 </body>
 </html>
