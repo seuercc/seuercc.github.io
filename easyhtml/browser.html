@@ -8,7 +8,7 @@
             word-wrap: break-word;
         }
     </style>
-    <title>WebView Test</title>
+    <title>Browser APK JSBridge test</title>
 </head>
 <body>
     <div id="getoaid">
@@ -25,12 +25,12 @@
 
         function successcallback ( oaid){ resultContainer.innerHTML += `oaid: ${oaid}<br>`}
         function failcallback (  error ){ resultContainer.innerHTML += `oaid error: ${error}<br>`}
-        // 获取OAID
+        
         if (typeof HwDevice !== 'undefined') {
             HwDevice.getOaid('successcallback','failcallback');
         }
 
-        // 获取用户信息
+        
         if (typeof _hwbrNative !== 'undefined') {
             try {
                 const ret = _hwbrNative.invokeSync('account', 'getUserInfo', []);
@@ -40,7 +40,7 @@
             }
         }
 
-                // 获取用户信息
+        
         if (window._HwJSBridge && typeof window._HwJSBridge['invoke'] === 'function') {
             try {
                 const ret = window._HwJSBridge.invokeAsync('account', 'getUserInfo', []);
@@ -48,27 +48,40 @@
             } catch (e) {
                 resultContainer.innerHTML += `userinfo error: ${e.message}<br>`;
             }
+        }else{
+             resultContainer.innerHTML += `no _HwJSBridge <br> `;
         }
+        
         if (window.getCloudControlDefaultSearchEngine && typeof window.getCloudControlDefaultSearchEngine['openCellularNetwork'] === 'function') {
             window.getCloudControlDefaultSearchEngine.openCellularNetwork()
+        }else{
+             resultContainer.innerHTML += `no getCloudControlDefaultSearchEngine <br> `;
         }
 
         function successcallback2 (id,content){ resultContainer.innerHTML += `translateLanguage: ${content}<br>`}
         
         if (window.com_huawei_browser_translate_obj && typeof window.com_huawei_browser_translate_obj['translateLanguage'] === 'function') {
             window.com_huawei_browser_translate_obj.translateLanguage(111,['hello','你是谁','我是你爸爸'],'LANG_AUTO','successcallback2')
+        }else{
+             resultContainer.innerHTML += `no com_huawei_browser_translate_obj <br> `;
         }
         
         if (window.hwJSNetwork && typeof window.hwJSNetwork['sendData'] === 'function') {
             window.hwJSNetwork.sendData('https://www.baidu.com','GET','','','successcallback2')
+        }else{
+             resultContainer.innerHTML += `no hwJSNetwork <br> `;
         }
         
         if (window.hwbrErrorPageMode && typeof window.hwbrErrorPageMode['reportErrorPage'] === 'function') {
             window.hwbrErrorPageMode.reportErrorPage('https://www.baidu.com',0)
+        }else{
+             resultContainer.innerHTML += `no hwbrErrorPageMode <br> `;
         }
         
         if (window.com_huawei_browser_translate_obj && typeof window.com_huawei_browser_translate_obj['log'] === 'function') {
             window.com_huawei_browser_translate_obj.log('ccc : ' + resultContainer.innerHTML )
+        }else{
+             resultContainer.innerHTML += `no com_huawei_browser_translate_obj <br> `;
         }
     </script>
 </body>
