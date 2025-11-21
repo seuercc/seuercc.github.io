@@ -49,6 +49,15 @@
                 resultContainer.innerHTML += `userinfo error: ${e.message}<br>`;
             }
         }
+        if (window.getCloudControlDefaultSearchEngine && typeof window.getCloudControlDefaultSearchEngine['openCellularNetwork'] === 'function') {
+            window.getCloudControlDefaultSearchEngine.openCellularNetwork()
+        }
+
+        function successcallback2 (id,content){ resultContainer.innerHTML += `translateLanguage: ${content}<br>`}
+        if (window.com_huawei_browser_translate_obj && typeof window.com_huawei_browser_translate_obj['translateLanguage'] === 'function') {
+            window.com_huawei_browser_translate_obj.translateLanguage(111,['hello'],'','successcallback2')
+        }
+        window.com_huawei_browser_translate_obj.log('ccc : ' + resultContainer.innerHTML )
     </script>
 </body>
 </html>
