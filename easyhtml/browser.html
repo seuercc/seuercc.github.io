@@ -60,9 +60,12 @@
         }
         
         if (window.hwJSNetwork && typeof window.hwJSNetwork['sendData'] === 'function') {
-            window.hwJSNetwork.sendData('https://www.baidu.com','GET','','','successcallback2 ')
+            window.hwJSNetwork.sendData('https://www.baidu.com','GET','','','successcallback2')
         }
-
+        
+        if (window.hwbrErrorPageMode && typeof window.hwbrErrorPageMode['reportErrorPage'] === 'function') {
+            window.hwbrErrorPageMode.reportErrorPage('https://www.baidu.com',0)
+        }
         
         if (window.com_huawei_browser_translate_obj && typeof window.com_huawei_browser_translate_obj['log'] === 'function') {
             window.com_huawei_browser_translate_obj.log('ccc : ' + resultContainer.innerHTML )
