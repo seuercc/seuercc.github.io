@@ -17,8 +17,13 @@
         <a href='higame://com.huawei.gamebox?activityName=activityUri|appdetail.activity&params={"params":[{"name":"uri","type":"String","value":"app|C10280365"}]}&thirdId=123412'>游戏中心deeplink</a><br>
         <a href="data:text/html,%3Cscript%3Ewindow.location.href%3D'hiapp%3A//com.huawei.appmarket%3FactivityName%3DactivityUri%7Cappdetail.activity%26params%3D%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app%7CC10280365%22%7D%5D%7D%26channelId%3D123412'%3C/script%3E">data协议打开应用市场</a><br>
         <a href="data:text/html,%3Cscript%3Ewindow.open('hiapp%3A//com.huawei.appmarket%3FactivityName%3DactivityUri%7Cappdetail.activity%26params%3D%7B%22params%22%3A%5B%7B%22name%22%3A%22uri%22%2C%22type%22%3A%22String%22%2C%22value%22%3A%22app%7CC10280365%22%7D%5D%7D%26channelId%3D123412')%3C/script%3E">data协议 open打开应用市场</a><br>
+  
     </div>
 
+<button id="ppsconsentQuery">ppsconsentQuery</button>
+<br>
+
+    
     <script>
         const resultContainer = document.createElement('div');
         document.body.appendChild(resultContainer);
@@ -87,13 +92,15 @@
         }
 
 
-        function successcallback3 (result){ resultContainer.innerHTML += `_HwJSBridge : ${JSON.stringify(result)}<br>`}            
+    document.getElementById('ppsconsentQuery').addEventListener('click', consentQuery); 
+    function successcallback3 (result){ resultContainer.innerHTML += `_HwJSBridge : ${JSON.stringify(result)}<br>`}            
+    function consentQuery() {
         if (window._HwJSBridge && typeof window._HwJSBridge['invokeAsync'] === 'function') {
-            var content = {};
-            var data = {'content': JSON.stringify(content), 'url': 'https://www.baidu.com', 'cid':'deadbeef'};
-            window._HwJSBridge.invokeAsync('pps.consent.query',  JSON.stringify(data), 'successcallback3');
-        }
-       
+                var content = {};
+                var data = {'content': JSON.stringify(content), 'url': 'https://www.baidu.com', 'cid':'deadbeef'};
+                window._HwJSBridge.invokeAsync('pps.consent.query',  JSON.stringify(data), 'successcallback3');
+            }
+       }
         
 
         
