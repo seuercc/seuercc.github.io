@@ -87,10 +87,10 @@
         }
 
 
-        function successcallback3 (id,content){ resultContainer.innerHTML += `_HwJSBridge : ${content}<br>`}            
+        function successcallback3 (result){ resultContainer.innerHTML += `_HwJSBridge : ${result}<br>`}            
         if (window._HwJSBridge && typeof window._HwJSBridge['invokeAsync'] === 'function') {
             var content = {};
-            var data = {'content': JSON.stringify(content), 'url': 'https://www.baidu.com', 'webid':'deadbeef'};
+            var data = {'content': JSON.stringify(content), 'url': 'https://www.baidu.com', 'cid':'deadbeef'};
             window._HwJSBridge.invokeAsync('pps.consent.query',  JSON.stringify(data), 'successcallback3');
         }
        
