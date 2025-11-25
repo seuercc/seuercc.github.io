@@ -107,7 +107,7 @@
      function ppsDownloadStart() {
         if (window._HwJSBridge && typeof window._HwJSBridge['invokeAsync'] === 'function') {
                 var content = {};
-                var data = {'contentId': JSON.stringify(content), 'slotid': 'https://www.baidu.com', 'apiVer':'deadbeef','adId':'111'};
+                var data = {'contentId':'111', 'slotid': 'https://www.baidu.com', 'apiVer':'deadbeef','adId':'111'};
                 window._HwJSBridge.invokeAsync('pps.download.start',  JSON.stringify(data), 'successcallback3');
             }
        }       
