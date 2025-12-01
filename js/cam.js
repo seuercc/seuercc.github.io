@@ -517,3 +517,27 @@ if (typeof window !== "undefined") {
     callbackFromNative
   };
 }
+
+// 1. 初始化（必须执行）
+init("wiseopercampaign");
+
+// 2. 异步调用（带多回调）
+invoke(
+  "wiseopercampaign",
+  "account",
+  "getUserId",
+  ["username", "password"],
+  (data) => console.log("登录成功：", JSON.stringify(data)),
+  (err) => console.log("登录失败：",JSON.stringify(err)),
+  (cancelData) => console.log("登录取消：", cancelData),
+  () => console.log("登录调用完成")
+);
+
+// 3. Promise 方式调用
+invokePromise("wiseopercampaign", "account", "checkLogin")
+  .then((data) => console.log("获取用户信息：", JSON.stringify(data)))
+  .catch((err) => console.log("获取失败：", JSON.stringify(err)));
+
+
+// 7. Native 调用回调（模拟 Native 触发）
+callbackFromNative("123", true, 1, { token: "xxx" }, false);
