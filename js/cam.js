@@ -1,13 +1,13 @@
-// ========================= 类型说明（JSDoc 替代 TypeScript 类型定义） =========================
+// ========================= 类型说明（JSDoc 替代 TypeScript 接口） =========================
 /**
- * 错误信息接口
+ * 错误信息
  * @typedef {Object} ErrorInfo
- * @property {number} errorCode - 错误码
+ * @property {number} errorCode - 错误码（[0, 9]为框架错误码，[1000, 1999]为业务错误码）
  * @property {string} errorInfo - 错误描述
  */
 
 /**
- * 框架错误码（与 invoke.js 一致）
+ * 框架错误码定义（必须和`invoke.js`中定义一致）
  * @typedef {0|1|2|3|4|5|6|7|8|9} ErrorCode
  */
 
@@ -24,487 +24,291 @@
  */
 
 /**
- * 事件订阅选项（兼容 EventTarget 标准）
- * @typedef {boolean|{capture?: boolean, once?: boolean, passive?: boolean}} EventListenerOptions
+ * 添加事件监听器选项（兼容 EventTarget 标准）
+ * @typedef {boolean|Object} EventListenerOptions
+ * @property {boolean} [capture] - 是否捕获阶段触发
+ * @property {boolean} [once] - 是否只触发一次
+ * @property {boolean} [passive] - 是否不阻止默认行为
  */
 
-// ========================= 核心常量与存储 =========================
-/** 状态常量（与 Native 约定） */
-const STATUS_SUCCESS = 1; // 移除 TypeScript as const 断言
-const STATUS_DEFAULT = 8;
-const STATUS_CANCEL = 9;
-
-/** 存储原生调用的回调函数（key: callbackId） */
-const callbackStore = new Map(); // 移除 TypeScript 泛型定义
-
-/** 事件总线（存储事件订阅关系） */
-const eventBus = new Map(); // 移除 TypeScript 泛型定义
-
-/** 消息队列（存储 Native 返回的原始消息） */
-const messageQueue = [];
-
-/** 生成唯一 callbackId 的计数器 */
-let callbackIdCounter = Math.floor(2e9 * Math.random());
-
-// ========================= 工具函数 =========================
-/**
- * 获取 Native 通信桥（优先取 window 上的，无则返回占位实现）
- * @param {string} bridgeName - 桥名称
- * @returns {{invoke: Function, invokeSync: Function, onNativeValueCallback?: Function, callbackFromNative?: Function}} 原生通信桥对象
- */
-function getNativeBridge(bridgeName) {
-  const globalBridge = window[bridgeName];
-  if (globalBridge) return globalBridge;
-
-  // 占位实现（无 Native 时的降级处理）
-  return {
-    invoke: (module, method, callbackId, argsStr, type) => {
-      console.warn(`[Native Bridge] 未找到原生对象 "${bridgeName}"，服务：${module}，操作：${method}`);
-      return `F08 ${callbackIdCounter} 未找到原生对象 ${bridgeName}`;
-    },
-    invokeSync: (module, method, argsStr) => {
-      console.warn(`[Native Bridge] 未找到原生对象 "${bridgeName}"，同步服务：${module}，操作：${method}`);
-      return `未找到原生对象 ${bridgeName}:${module}:${method}`;
-    }
-  };
-}
-
-/**
- * 生成唯一 callbackId
- * @returns {string} 唯一回调ID
- */
-function generateCallbackId() {
-  return (callbackIdCounter++).toString();
-}
-
-/**
- * 异步执行函数（兼容无 Promise 环境）
- * @type {(fn: () => void) => void}
- */
-const nextTick = typeof Promise !== "undefined"
-  ? (fn) => Promise.resolve().then(fn)
-  : (fn) => setTimeout(fn, 0);
-
-/**
- * 解析 Native 返回的参数字符串（还原原始类型）
- * @param {string} argsStr - 原生返回的参数字符串
- * @returns {any} 解析后的参数（单个参数返回值，多个参数返回数组）
- */
-function parseNativeArgs(argsStr) {
-  const result = [];
-  let str = argsStr.trim();
-
-  while (str) {
-    const type = str.charAt(0);
-    const rest = str.slice(1).trim();
-
-    switch (type) {
-      case "s": // 字符串
-        result.push(rest);
-        str = "";
-        break;
-      case "t": // boolean(true)
-        result.push(true);
-        str = "";
-        break;
-      case "f": // boolean(false)
-        result.push(false);
-        str = "";
-        break;
-      case "N": // null
-        result.push(null);
-        str = "";
-        break;
-      case "n": // 数字
-        result.push(Number(rest));
-        str = "";
-        break;
-      case "A": // ArrayBuffer（base64 解码）
-      case "S": // 加密字符串（base64 解码）
-        result.push(atob(rest));
-        str = "";
-        break;
-      case "M": // 复杂数组（递归解析）
-        const lenEnd = rest.indexOf(" ");
-        if (lenEnd === -1) break;
-        const itemLen = Number(rest.slice(0, lenEnd));
-        const itemStr = rest.slice(lenEnd + 1, lenEnd + 1 + itemLen).trim();
-        result.push(parseNativeArgs(itemStr));
-        str = rest.slice(lenEnd + itemLen + 1).trim();
-        break;
-      default: // JSON 格式
-        try {
-          result.push(JSON.parse(rest));
-        } catch (err) {
-          result.push(rest); // 解析失败直接存原始字符串
+// ========================= 核心 JS 逻辑（保留原有功能，未做修改） =========================
+(() => {
+    "use strict";
+    var e = {
+        d: (n, t) => {
+            for (var r in t) e.o(t, r) && !e.o(n, r) && Object.defineProperty(n, r, { enumerable: !0, get: t[r] })
+        }, o: (e, n) => Object.prototype.hasOwnProperty.call(e, n), r: e => {
+            "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(e, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(e, "__esModule", { value: !0 })
         }
-        str = "";
-        break;
-    }
-  }
-
-  // 单个参数直接返回值，多个参数返回数组
-  return result.length === 1 ? result[0] : result;
-}
-
-/**
- * 序列化调用参数（处理 ArrayBuffer 转 base64）
- * @param {any[]} [args] - 调用参数数组
- * @returns {string} 序列化后的参数字符串
- */
-function serializeArgs(args) {
-  if (!args || args.length === 0) return "[]";
-
-  const processedArgs = args.map(arg => {
-    // ArrayBuffer 转 base64（兼容浏览器）
-    if (Object.prototype.toString.call(arg) === "[object ArrayBuffer]") {
-      const uint8Array = new Uint8Array(arg);
-      return btoa(String.fromCharCode(...uint8Array));
-    }
-    // 其他类型直接 JSON 序列化
-    return arg;
-  });
-
-  return JSON.stringify(processedArgs);
-}
-
-// ========================= 消息队列处理 =========================
-/** 处理 Native 返回的消息队列（循环消费） */
-function processMessageQueue() {
-  if (messageQueue.length === 0) return;
-
-  try {
-    const rawMsg = messageQueue.shift();
-    if (rawMsg === "*") return; // 忽略占位消息
-
-    // 解析消息格式：[S/F][是否保留回调] [状态码] [callbackId] [参数字符串]
-    const isSuccess = rawMsg.charAt(0) === "S";
-    const keepCallback = rawMsg.charAt(1) === "1";
-    const statusEndIndex = rawMsg.indexOf(" ", 2);
-    const status = Number(rawMsg.slice(2, statusEndIndex));
-    const callbackIdEndIndex = rawMsg.indexOf(" ", statusEndIndex + 1);
-    const callbackId = rawMsg.slice(statusEndIndex + 1, callbackIdEndIndex);
-    const argsStr = rawMsg.slice(callbackIdEndIndex + 1);
-    const args = parseNativeArgs(argsStr);
-
-    // 触发 Native 回调处理
-    callbackFromNative(callbackId, isSuccess, status, args, keepCallback);
-  } catch (err) {
-    console.error("[Native Bridge] 消息处理失败：", err);
-  } finally {
-    // 还有消息则继续异步处理
-    if (messageQueue.length > 0) {
-      nextTick(processMessageQueue);
-    }
-  }
-}
-
-// ========================= 核心接口实现 =========================
-/**
- * 初始化函数（必须执行，建立 H5 与 Native 通道）
- * @param {string} apiName - 原生 API 名称（如 "wiseopercampaign"）
- */
-function init(apiName) {
-  const nativeBridge = getNativeBridge(apiName);
-  // 挂载 Native 所需的回调方法
-  nativeBridge.onNativeValueCallback = onNativeValueCallback;
-  nativeBridge.callbackFromNative = callbackFromNative;
-
-  // 若 window 上无该 API，直接挂载（确保 Native 能访问）
-  if (!window[apiName]) {
-    window[apiName] = nativeBridge;
-  }
-
-  console.log(`[Native Bridge] 初始化成功，API 名称：${apiName}`);
-}
-
-/**
- * 异步调用 Native 方法（支持多回调）
- * @param {string} bridgeName - 桥名称
- * @param {string} service - 服务名称（原生类名）
- * @param {string} action - 操作名称（原生方法名）
- * @param {any[]} [args] - 调用参数（可选）
- * @param {Function} [success] - 成功回调（可选）
- * @param {Function} [fail] - 失败回调（可选）
- * @param {Function} [cancel] - 取消回调（可选）
- * @param {Function} [complete] - 完成回调（可选）
- */
-function invoke(
-  bridgeName,
-  service,
-  action,
-  args,
-  success,
-  fail,
-  cancel,
-  complete
-) {
-  // 存储回调（有任一回调才生成 callbackId）
-  const hasCallbacks = !!success || !!fail || !!cancel || !!complete;
-  const callbackId = hasCallbacks ? generateCallbackId() : "";
-
-  if (hasCallbacks) {
-    callbackStore.set(callbackId, { success, fail, cancel, complete });
-  }
-
-  // 序列化参数 + 调用 Native 方法
-  const serializedArgs = serializeArgs(args);
-  const nativeBridge = getNativeBridge(bridgeName);
-  const result = nativeBridge.invoke(service, action, callbackId, serializedArgs, -1);
-
-  console.debug(
-    `[Native Bridge] 调用 Native：bridge=${bridgeName}, service=${service}, action=${action}, args=${JSON.stringify(args)}`
-  );
-
-  // Native 返回结果存入队列，异步处理
-  if (result) messageQueue.push(result);
-  nextTick(processMessageQueue);
-}
-
-/**
- * 异步调用 Native 方法（返回 Promise）
- * @param {string} bridgeName - 桥名称
- * @param {string} service - 服务名称
- * @param {string} action - 操作名称
- * @param {any[]} [args] - 调用参数（可选）
- * @returns {Promise<any>} 成功返回结果，失败抛出错误
- */
-function invokePromise(bridgeName, service, action, args) {
-  return new Promise((resolve, reject) => {
-    invoke(
-      bridgeName,
-      service,
-      action,
-      args,
-      (data) => resolve(data), // success
-      (err) => reject(err),    // fail
-      (cancelData) => reject({ errorCode: STATUS_CANCEL, errorInfo: "操作被取消", data: cancelData }), // cancel
-      () => {} // complete（Promise 无需额外处理）
-    );
-  });
-}
-
-/**
- * 同步调用 Native 方法
- * @param {string} bridgeName - 桥名称
- * @param {string} service - 服务名称
- * @param {string} action - 操作名称
- * @param {any[]} [args] - 调用参数（可选）
- * @returns {SyncInvokeResult} 同步调用结果
- */
-function invokeSync(bridgeName, service, action, args) {
-  const serializedArgs = serializeArgs(args);
-  const nativeBridge = getNativeBridge(bridgeName);
-  const rawResult = nativeBridge.invokeSync(service, action, serializedArgs);
-
-  console.debug(
-    `[Native Bridge] 同步调用 Native：bridge=${bridgeName}, service=${service}, action=${action}, args=${JSON.stringify(args)}`
-  );
-
-  // 解析 Native 返回结果
-  try {
-    const parsedResult = JSON.parse(rawResult);
-    return {
-      status: parsedResult.status ?? STATUS_DEFAULT,
-      result: parsedResult.result
+    }, n = {};
+    e.r(n), e.d(n, {
+        callbackFromNative: () => k,
+        init: () => x,
+        invoke: () => S,
+        invokePromise: () => w,
+        invokeSync: () => N,
+        off: () => P,
+        on: () => O,
+        onNativeValueCallback: () => j
+    });
+    var t = function (e, n) {
+        this.type = e, this.handlers = {}, this.numHandlers = 0, this.state = n ? 1 : 0, this.fireArgs = null, this.nextGuid = 1
     };
-  } catch (err) {
-    // 解析失败返回默认状态
-    return { status: STATUS_DEFAULT };
-  }
-}
+    t.prototype.subscribe = function (e) {
+        if (2 !== this.state) {
+            var n = e.observer_guid;
+            n || (n = String(this.nextGuid++)), e.observer_guid = n, this.handlers[n] || (this.handlers[n] = e, this.numHandlers++)
+        } else e.apply(this, this.fireArgs)
+    }, t.prototype.unsubscribe = function (e) {
+        var n = e.observer_guid;
+        this.handlers[n] && (delete this.handlers[n], this.numHandlers--)
+    }, t.prototype.fire = function (e, n) {
+        var t = this, r = n ? [e, n] : [e];
+        if (1 === this.state && (this.state = 2, this.fireArgs = r), this.handlers.size <= 0) return [];
+        var i = [];
+        for (var s in this.handlers) Object.prototype.hasOwnProperty.call(this.handlers, s) && i.push(this.handlers[s]);
+        var a = i.map((function (e) {
+            return e.apply(t, r)
+        }));
+        return 2 === this.state && this.numHandlers > 0 && (this.handlers = {}, this.numHandlers = 0), a
+    };
+    var r = {};
 
-/**
- * 添加事件监听器
- * @param {string} event - 事件类型
- * @param {EventListener} listener - 事件处理函数
- * @param {boolean} [isValueCallback=false] - 是否支持值回调（默认 false）
- * @param {EventListenerOptions} [options] - 事件选项（可选）
- */
-function on(event, listener, isValueCallback = false, options) {
-  if (!eventBus.has(event)) {
-    eventBus.set(event, []);
-  }
-
-  const eventListeners = eventBus.get(event);
-  const once = typeof options === "object" ? options.once ?? false : false;
-
-  // 避免重复添加相同监听器（基于引用判断）
-  const isDuplicate = eventListeners.some(item => item.listener === listener);
-  if (isDuplicate) return;
-
-  eventListeners.push({
-    listener,
-    options: options ?? false,
-    isValueCallback,
-    once,
-    executed: false
-  });
-
-  console.debug(`[Native Bridge] 订阅事件：${event}，是否值回调：${isValueCallback}`);
-}
-
-/**
- * 移除事件监听器
- * @param {string} event - 事件类型
- * @param {EventListener} listener - 事件处理函数
- * @param {boolean} [isValueCallback=false] - 是否支持值回调（默认 false）
- * @param {EventListenerOptions} [options] - 事件选项（可选）
- */
-function off(event, listener, isValueCallback = false, options) {
-  const eventListeners = eventBus.get(event);
-  if (!eventListeners) return;
-
-  // 过滤掉要移除的监听器（匹配 listener + isValueCallback）
-  const filteredListeners = eventListeners.filter(item =>
-    item.listener !== listener || item.isValueCallback !== isValueCallback
-  );
-
-  if (filteredListeners.length === eventListeners.length) {
-    console.warn(`[Native Bridge] 未找到事件 ${event} 的监听器：`, listener);
-    return;
-  }
-
-  // 更新事件监听器列表
-  eventBus.set(event, filteredListeners);
-  console.debug(`[Native Bridge] 取消订阅事件：${event}，是否值回调：${isValueCallback}`);
-}
-
-/**
- * Native 事件触发接口（供 Native 调用）
- * @param {string} type - 事件类型
- * @param {any} args - 事件参数
- * @param {boolean} isValueCallback - 是否支持值回调
- * @returns {void|any} 最后一个监听器的返回值（值回调模式下）
- */
-function onNativeValueCallback(type, args, isValueCallback) {
-  const eventListeners = eventBus.get(type);
-  if (!eventListeners || eventListeners.length === 0) {
-    console.warn(`[Native Bridge] 事件 ${type} 无监听器`);
-    return;
-  }
-
-  console.debug(`[Native Bridge] 触发事件：${type}，参数：${JSON.stringify(args)}，是否值回调：${isValueCallback}`);
-
-  let lastResult;
-  const remainingListeners = [];
-
-  // 执行所有监听器
-  for (const item of eventListeners) {
-    // 只处理匹配 isValueCallback 的监听器
-    if (item.isValueCallback !== isValueCallback) {
-      remainingListeners.push(item);
-      continue;
+    function i(e, n) {
+        var t;
+        return null === (t = r[e]) || void 0 === t ? void 0 : t.fire(n)
     }
 
-    // 已执行过的 once 监听器跳过
-    if (item.once && item.executed) continue;
-
-    try {
-      // 执行监听器，记录最后一个返回值（值回调模式）
-      const result = item.listener(args);
-      if (isValueCallback) lastResult = result;
-
-      // once 监听器标记为已执行
-      if (item.once) item.executed = true;
-    } catch (err) {
-      console.error(`[Native Bridge] 事件 ${type} 监听器执行失败：`, err);
+    function s(e, n, i) {
+        var s;
+        r[e] || function (e) {
+            r[e] = new t(e, !1)
+        }(e), null === (s = r[e]) || void 0 === s || s.subscribe(n, i)
     }
 
-    // non-once 监听器保留
-    if (!item.once) remainingListeners.push(item);
-  }
-
-  // 更新监听器列表（移除已执行的 once 监听器）
-  eventBus.set(type, remainingListeners);
-
-  // 值回调模式返回最后一个监听器的结果
-  return isValueCallback ? lastResult : undefined;
-}
-
-/**
- * Native 异步回调通知接口（供 Native 调用）
- * @param {string} callbackId - 回调 ID
- * @param {boolean} isSuccess - 是否成功
- * @param {number} status - 状态码（与 ErrorCode 对应）
- * @param {any} args - 回调参数
- * @param {boolean} keepCallback - 是否保留回调（不删除）
- */
-function callbackFromNative(callbackId, isSuccess, status, args, keepCallback) {
-  const callbacks = callbackStore.get(callbackId);
-  if (!callbacks) {
-    console.warn(`[Native Bridge] 未找到 callbackId: ${callbackId} 的回调`);
-    return;
-  }
-
-  console.debug(
-    `[Native Bridge] 收到 Native 回调：callbackId=${callbackId}，成功=${isSuccess}，状态=${status}，参数=${JSON.stringify(args)}`
-  );
-
-  try {
-    // 根据状态触发对应回调
-    if (isSuccess && status === STATUS_SUCCESS) {
-      // 成功：触发 success 回调
-      callbacks.success?.(args);
-    } else if (status === STATUS_CANCEL) {
-      // 取消：触发 cancel 回调
-      callbacks.cancel?.(args);
-    } else {
-      // 失败：触发 fail 回调（包装成 ErrorInfo 格式）
-      const errorInfo = {
-        errorCode: status,
-        errorInfo: args?.errorInfo || `操作失败（状态码：${status}）`
-      };
-      callbacks.fail?.(errorInfo);
+    function a(e, n) {
+        var t;
+        null === (t = r[e]) || void 0 === t || t.unsubscribe(n)
     }
 
-    // 无论成功/失败，触发 complete 回调
-    callbacks.complete?.();
-  } catch (err) {
-    console.error(`[Native Bridge] 回调处理失败：callbackId=${callbackId}`, err);
-  } finally {
-    // 不保留回调则删除（避免内存泄漏）
-    if (!keepCallback) {
-      callbackStore.delete(callbackId);
+    var c = {
+        invoke: function (e, n, t, r, i) {
+            var s = "no native object ".concat(e, ":").concat(n);
+            console.warn(s);
+            var a = "F08 ".concat(t, " s").concat(s);
+            return a.length + " " + a
+        }, invokeSync: function (e, n, t) {
+            return "no native object ".concat(e, ":").concat(n)
+        }
+    };
+
+    function o(e) {
+        return window[e] ? window[e] : c
     }
-  }
-}
 
-// ========================= 全局暴露（供 Native 直接访问） =========================
-// 若在浏览器环境，挂载到 window 供 Native 调用
-if (typeof window !== "undefined") {
-  window.nativeBridge = {
-    init,
-    invoke,
-    invokePromise,
-    invokeSync,
-    on,
-    off,
-    onNativeValueCallback,
-    callbackFromNative
-  };
-}
+    var l = 1, u = 8, f = 9, h = [], v = Math.floor(2e9 * Math.random()), d = {};
+    var b = "undefined" == typeof Promise ? function (e) {
+        setTimeout(e)
+    } : function (e) {
+        Promise.resolve().then(e)
+    };
 
-// ========================= 示例调用 =========================
-// 1. 初始化（必须执行）
-init("wiseopercampaign");
+    function p() {
+        return v++
+    }
 
-// 2. 异步调用（带多回调）
-invoke(
-  "wiseopercampaign",
-  "account",
-  "getUserId",
-  ["username", "password"],
-  (data) => console.log("登录成功：", JSON.stringify(data)),
-  (err) => console.log("登录失败：", JSON.stringify(err)),
-  (cancelData) => console.log("登录取消：", cancelData),
-  () => console.log("登录调用完成")
-);
+    function g(e, n, t, r, i, s) {
+        s = s || [];
+        for (var a = 0; a < s.length; a++) "ArrayBuffer" === (c = s[a], Object.prototype.toString.call(c).slice(8, -1)) && (s[a] = btoa(s[a]));
+        var c, l = r + p(), u = JSON.stringify(s);
+        (n || t) && (d[l] = { success: n, fail: t });
+        var f = o(e).invoke(r, i, l, u, -1);
+        console.debug("exec ".concat(r, ".").concat(i, " with args: ").concat(s, ", result: ").concat(f)), f && h.push(f), b(y)
+    }
 
-// 3. Promise 方式调用
-invokePromise("wiseopercampaign", "account", "checkLogin")
-  .then((data) => console.log("获取用户信息：", JSON.stringify(data)))
-  .catch((err) => console.log("获取失败：", JSON.stringify(err)));
+    function y() {
+        if (0 !== h.length) try {
+            var e = function (e) {
+                var n = e.charAt(0);
+                if ("S" !== n && "F" !== n) return void console.error("processMessage failed: invalid message: " + JSON.stringify(e));
+                var t = "S" === n, r = "1" === e.charAt(1), i = e.indexOf(" ", 2), s = Number(e.slice(2, i)),
+                    a = e.indexOf(" ", i + 1), c = e.slice(i + 1, a), o = e.slice(a + 1), l = [];
+                m(l, o);
+                var u = l;
+                1 === l.length && (u = l[0]);
+                return { callbackId: c, success: t, status: s, args: u, keepCallback: r }
+            }(function () {
+                var e = h.shift();
+                if ("*" === e) return "*";
+                var n = e.indexOf(" "), t = Number(e.slice(0, n)), r = e.substring(n + 1, n + 1 + t);
+                (e = e.slice(n + t + 1)) && h.unshift(e);
+                return r
+            }());
+            k(e.callbackId, e.success, e.status, e.args, e.keepCallback)
+        } finally {
+            h.length > 0 && b(y)
+        }
+    }
 
-// 4. 模拟 Native 触发回调（测试用）
-callbackFromNative("123", true, 1, { token: "xxx" }, false);
+    function m(e, n) {
+        var t = n.charAt(0);
+        if ("s" === t) e.push(n.slice(1)); else if ("t" === t) e.push(!0); else if ("f" === t) e.push(!1); else if ("N" === t) e.push(null); else if ("n" === t) e.push(Number(n.slice(1))); else if ("A" === t) {
+            var r = n.slice(1);
+            e.push(atob(r))
+        } else if ("S" === t) e.push(atob(n.slice(1))); else if ("M" === t) for (var i = n.slice(1); "" !== i;) {
+            var s = i.indexOf(" "), a = Number(i.slice(0, s)), c = i.substring(s + 1, s + 1 + a);
+            i = i.slice(s + a + 1), m(e, c)
+        } else e.push(JSON.parse(n))
+    }
+
+    function k(e, n, t, r, i) {
+        try {
+            var s = d[e];
+            s && (console.debug("callbackFromNative callbackId: ".concat(e, ", isSuccess: ").concat(n, ", status: ").concat(t, ", args: ").concat(r)), n && t === l ? s.success && s.success.call(null, r) : n || s.fail && s.fail.call(null, r, t), i || delete d[e])
+        } catch (t) {
+            var a = "Error in ".concat(n ? "Success" : "Error", " callbackId: ").concat(e, " : ").concat(t);
+            console.error(a)
+        }
+    }
+
+    /**
+     * 通过指定相应的服务名称、操作和可选参数来调用功能。
+     * @param {string} bridgeName - bridge name
+     * @param {string} service - 在本机端调用的服务名称（对应于本机类）
+     * @param {string} action - 在本机端调用的操作名称（通常对应于本机类方法）
+     * @param {any[]} [args] - 要传递到本机环境中的参数数组（可选）
+     * @param {Function} [success] - 成功回调函数（可选）
+     * @param {Function} [fail] - 错误回调函数（可选）
+     * @param {Function} [cancel] - 取消回调函数（可选）
+     * @param {Function} [complete] - 完成回调函数（可选）
+     */
+    function S(e, n, t, r, i, s, a, c) {
+        var o = i || s || a || c;
+        g(e, o ? function (e) {
+            null == i || i(e), null == c || c(e)
+        } : null, o ? function (e, n) {
+            n === f && a ? a(e) : null == s || s(e, n), c && c(e, n)
+        } : null, n, t, r)
+    }
+
+    /**
+     * Promise 方式调用 Native 方法
+     * @param {string} bridgeName - bridge name
+     * @param {string} service - service 名称
+     * @param {string} action - action 名称
+     * @param {any[]} [args] - 调用参数（可选）
+     * @returns {Promise<any>} 成功返回结果，失败抛出错误
+     */
+    function w(e, n, t, r) {
+        return new Promise((function (i, s) {
+            g(e, (function (e) {
+                return i(e)
+            }), (function (e) {
+                return s(e)
+            }), n, t, r)
+        }))
+    }
+
+    /**
+     * invoke的同步版本
+     * @param {string} bridgeName - bridge name
+     * @param {string} service - service 名称
+     * @param {string} action - action 名称
+     * @param {any[]} [args] - 调用参数（可选）
+     * @returns {SyncInvokeResult} 同步调用结果
+     */
+    function N(e, n, t, r) {
+        var i, s = o(e).invokeSync(n, t, r);
+        try {
+            s && (i = JSON.parse(s))
+        } catch (e) {
+        }
+        return i ? { status: void 0 === i.status ? u : i.status, result: i.result } : { status: u }
+    }
+
+    /**
+     * 添加事件监听器，类似于EventTarget.addEventListener()接口。
+     * 当isValueCallback设置为ture时，事件发送者等待结果返回，然后再处理下一步。
+     * @param {string} event - 字符串，指定要增加listener事件类型
+     * @param {EventListener} listener - 要从事件目标中增加的事件处理程序的EventListener函数
+     * @param {EventListenerOptions} [options] - 可选，选项对象，用于指定有关事件侦听器的特征
+     * @param {boolean} [isValueCallback=false] - 是否支持值回调（默认false，只处理最后一次回调的响应）
+     */
+    function O(e, n, t, r) {
+        s(e, n)
+    }
+
+    /**
+     * 删除事件监听器，类似于EventTarget.remoEventListener()接口。
+     * 删除接口事件后，不会收到回调。
+     * @param {string} event - 字符串，指定要删除事件侦听器的事件类型
+     * @param {EventListener} listener - 要从事件目标中删除的事件处理程序的EventListener函数
+     * @param {EventListenerOptions} [options] - 可选，选项对象，用于指定有关事件侦听器的特征
+     * @param {boolean} [isValueCallback=false] - 是否支持值回调（默认false，只处理最后一次回调的响应）
+     */
+    function P(e, n, t, r) {
+        a(e, n)
+    }
+
+    /**
+     * [FOR NATIVE] 提供给native的事件触发接口
+     * @param {string} type - event type
+     * @param {any} args - 事件参数
+     * @param {boolean} isValueCallback - 是否支持值回调
+     * @returns {null|*} 回调结果
+     */
+    function j(e, n, t) {
+        return i(e, n)
+    }
+
+    /**
+     * 初始化函数，必须执行，否则无法建立H5和Native的通道
+     * @param {string} apiName - api name
+     */
+    function x(e) {
+        window[e] ? (window[e].onNativeValueCallback = j, window[e].callbackFromNative = k) : window[e] = {
+            onNativeValueCallback: j,
+            callbackFromNative: k
+        }
+    }
+
+    // ========================= 全局暴露（供外部调用，保持原有导出逻辑） =========================
+    // 支持 CommonJS 导出（原代码逻辑）
+    if (typeof module !== "undefined" && module.exports) {
+        module.exports = n;
+    }
+    // 支持浏览器全局暴露（供 Native 直接访问）
+    if (typeof window !== "undefined") {
+        window.nativeBridge = {
+            init: x,
+            invoke: S,
+            invokePromise: w,
+            invokeSync: N,
+            on: O,
+            off: P,
+            onNativeValueCallback: j,
+            callbackFromNative: k
+        };
+    }
+
+    // ========================= 直接调用 init 方法（核心修改） =========================
+    // 传入你的 API 名称（示例："wiseopercampaign"，请根据实际需求修改）
+    if (typeof window !== "undefined") { // 确保在浏览器环境中才执行
+        x("wiseopercampaignbridge"); // 直接调用 init 对应的函数 x，无需全局访问
+        console.log("[Native Bridge] init 方法已自动执行，API 名称：wiseopercampaign");
+    }
+	
+	// 调用 Native 的「账号服务-获取用户ID」接口
+	wiseopercampaignbridge.invoke(
+	  "wiseopercampaignbridge", 
+	  "account",          // service（Native 端的服务名称/类名）
+	  "getUserId",        // action（Native 端的方法名）
+	  ["testUser", 123],  // args（传递给 Native 的参数数组，可选）
+	  (data) => {         // success 成功回调（可选）
+		console.log("获取用户ID成功：", data);		
+	  },
+	  (err, errorCode) => {
+		console.error(`获取用户ID失败：${err}，错误码：${errorCode}`);			
+	  }
+	);	
+})();
