@@ -325,5 +325,9 @@ function getUserId(params, success, fail) {
 		for(j in window[qjd_attr[i]])
 			result += '----'+typeof(window[qjd_attr[i]][j])+': '+j+'<br>'
 	}
-	document.write(result);
+	
+	const tipElement = document.createElement('div');
+	tipElement.id = 'native-bridge-tip';
+	tipElement.textContent = '初始化完成';
+	document.body.appendChild(result);	
 })();
