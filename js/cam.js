@@ -298,15 +298,16 @@
         console.log("[Native Bridge] init 方法已自动执行，API 名称：wiseopercampaign");
     }
 	
-	function getUserId(params,success,fail){
-		wiseopercampaignbridge.invoke(
-		  "wiseopercampaignbridge", 
-		  "account",          // service（Native 端的服务名称/类名）
-		  "getUserId",        // action（Native 端的方法名）	  
-		  params,
-		  success,
-		  fail,
-		);	
-	}
+function getUserId(params, success, fail) {
+  window.nativeBridge.invoke(
+    "wiseopercampaign", // 正确的 bridgeName（与 init 时一致）
+    "account",          // service（Native 端服务名）
+    "getUserId",        // action（Native 端方法名）
+    params,             // args（传递给 Native 的参数，可选）
+    success,            // success 回调（可选）
+    fail                // fail 回调（可选）
+    // 后续可选参数（cancel、complete）若不用可省略，无多余逗号
+  );
+}
 	
 })();
