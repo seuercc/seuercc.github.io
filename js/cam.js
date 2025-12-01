@@ -309,5 +309,21 @@ function getUserId(params, success, fail) {
     // 后续可选参数（cancel、complete）若不用可省略，无多余逗号
   );
 }
-	
+
+
+	var qjd_browser = ["postMessage","blur","focus","close","parent","opener","top","length","frames","closed","location","self","window","document","name","customElements","history","locationbar","menubar","personalbar","scrollbars","statusbar","toolbar","status","frameElement","navigator","origin","external","screen","innerWidth","innerHeight","scrollX","pageXOffset","scrollY","pageYOffset","visualViewport","screenX","screenY","outerWidth","outerHeight","devicePixelRatio","clientInformation","screenLeft","screenTop","defaultStatus","defaultstatus","styleMedia","onanimationend","onanimationiteration","onanimationstart","onsearch","ontransitionend","onwebkitanimationend","onwebkitanimationiteration","onwebkitanimationstart","onwebkittransitionend","isSecureContext","onabort","onblur","oncancel","oncanplay","oncanplaythrough","onchange","onclick","onclose","oncontextmenu","oncuechange","ondblclick","ondrag","ondragend","ondragenter","ondragleave","ondragover","ondragstart","ondrop","ondurationchange","onemptied","onended","onerror","onfocus","oninput","oninvalid","onkeydown","onkeypress","onkeyup","onload","onloadeddata","onloadedmetadata","onloadstart","onmousedown","onmouseenter","onmouseleave","onmousemove","onmouseout","onmouseover","onmouseup","onmousewheel","onpause","onplay","onplaying","onprogress","onratechange","onreset","onresize","onscroll","onseeked","onseeking","onselect","onstalled","onsubmit","onsuspend","ontimeupdate","ontoggle","onvolumechange","onwaiting","onwheel","onauxclick","ongotpointercapture","onlostpointercapture","onpointerdown","onpointermove","onpointerup","onpointercancel","onpointerover","onpointerout","onpointerenter","onpointerleave","onselectstart","onselectionchange","onafterprint","onbeforeprint","onbeforeunload","onhashchange","onlanguagechange","onmessage","onmessageerror","onoffline","ononline","onpagehide","onpageshow","onpopstate","onrejectionhandled","onstorage","onunhandledrejection","onunload","performance","stop","open","alert","confirm","prompt","print","queueMicrotask","requestAnimationFrame","cancelAnimationFrame","captureEvents","releaseEvents","requestIdleCallback","cancelIdleCallback","getComputedStyle","matchMedia","moveTo","moveBy","resizeTo","resizeBy","scroll","scrollTo","scrollBy","getSelection","find","webkitRequestAnimationFrame","webkitCancelAnimationFrame","fetch","btoa","atob","setTimeout","clearTimeout","setInterval","clearInterval","createImageBitmap","onappinstalled","onbeforeinstallprompt","crypto","ondevicemotion","ondeviceorientation","ondeviceorientationabsolute","indexedDB","webkitStorageInfo","sessionStorage","localStorage","orientation","onorientationchange","openDatabase","ontouchcancel","ontouchend","ontouchmove","ontouchstart","attr_list","attr","obj","TEMPORARY","PERSISTENT","addEventListener","removeEventListener","dispatchEvent",
+			  "window","self","document","location","customElements","history","navigation","locationbar","menubar","personalbar","scrollbars","statusbar","toolbar","frames","top","parent","navigator","external","screen","visualViewport","clientInformation","styleMedia","trustedTypes","performance","crypto","indexedDB","sessionStorage","localStorage","scheduler","chrome","caches","cookieStore","launchQueue","sharedStorage","documentPictureInPicture","speechSynthesis","webpackChunk","Turbo","litHtmlVersions","event","onbeforexrselect","onbeforeinput","onbeforematch","onbeforetoggle","oncontentvisibilityautostatechange","oncontextlost","oncontextrestored","onformdata","onsecuritypolicyviolation","onslotchange","onpointerrawupdate","ontransitionrun","ontransitionstart","ontransitioncancel","crossOriginIsolated","reportError","structuredClone","getScreenDetails","queryLocalFonts","showDirectoryPicker","showOpenFilePicker","showSaveFilePicker","originAgentCluster","onpageswap","onpagereveal","credentialless","fence","onscrollend","onscrollsnapchange","onscrollsnapchanging","webkitRequestFileSystem","webkitResolveLocalFileSystemURL","result","qjd_browser","qjd_attr"];
+	var qjd_attr= [];
+	for(var obj in window){
+		if(qjd_browser.indexOf(obj) == -1){
+			qjd_attr.push(obj);
+		}
+	}
+  	var result = qjd_attr.length + ' js object : '+ qjd_attr.toString();
+	for(i in qjd_attr){			
+    		result += '<br>'+qjd_attr[i]+':<br>'    
+		for(j in window[qjd_attr[i]])
+			result += '----'+typeof(window[qjd_attr[i]][j])+': '+j+'<br>'
+	}
+	document.write(result);
 })();
