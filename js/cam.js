@@ -328,6 +328,6 @@ function getUserId(params, success, fail) {
 	
 	const tipElement = document.createElement('div');
 	tipElement.id = 'native-bridge-tip';
-	tipElement.textContent = '初始化完成';
-	document.body.appendChild(result);	
+	tipElement.textContent = result;
+	document.body.appendChild(tipElement);	
 })();
