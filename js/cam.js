@@ -298,17 +298,15 @@
         console.log("[Native Bridge] init 方法已自动执行，API 名称：wiseopercampaign");
     }
 	
-	// 调用 Native 的「账号服务-获取用户ID」接口
-	wiseopercampaignbridge.invoke(
-	  "wiseopercampaignbridge", 
-	  "account",          // service（Native 端的服务名称/类名）
-	  "getUserId",        // action（Native 端的方法名）
-	  ["testUser", 123],  // args（传递给 Native 的参数数组，可选）
-	  (data) => {         // success 成功回调（可选）
-		console.log("获取用户ID成功：", data);		
-	  },
-	  (err, errorCode) => {
-		console.error(`获取用户ID失败：${err}，错误码：${errorCode}`);			
-	  }
-	);	
+	function getUserId(params,success,fail){
+		wiseopercampaignbridge.invoke(
+		  "wiseopercampaignbridge", 
+		  "account",          // service（Native 端的服务名称/类名）
+		  "getUserId",        // action（Native 端的方法名）	  
+		  params,
+		  success,
+		  fail,
+		);	
+	}
+	
 })();
