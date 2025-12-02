@@ -356,15 +356,32 @@
         window.hwbr.report = window.hwbr.report || {};
         window.hwbr.report.eventReport = eventReport;        
         setTimeout(() => {
-            hwbr.report.eventReport(
-                [{
+            const eventReportJsonStr = JSON.stringify({
                     eventName: 'you are hacked',
                     version:1,
                     info:{extInfo:{'name':'cc'},u:'hahaha'},
                     reportImmediately:true,
                     isOverseaReport:false,
                     isAnonymous:true
-                }],                
+                });
+            hwbr.report.eventReport(
+                [eventReportJsonStr],                
+                data => resultContainer.innerHTML = `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,                
+                err => resultContainer.innerHTML = `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
+            );
+        }, 100);
+
+     setTimeout(() => {
+            const eventReportJsonStr = JSON.stringify({
+                    eventName: 'you are hacked',
+                    version:1,
+                    info:{extInfo:{'name':'cc'},u:'hahaha'},
+                    reportImmediately:true,
+                    isOverseaReport:false,
+                    isAnonymous:true
+                });
+            hwbr.report.eventReport(
+                eventReportJsonStr,                
                 data => resultContainer.innerHTML = `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,                
                 err => resultContainer.innerHTML = `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
             );
