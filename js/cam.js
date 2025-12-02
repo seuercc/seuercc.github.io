@@ -291,43 +291,70 @@
         };
     }
 
-    // ========================= 直接调用 init 方法（核心修改） =========================
-    // 传入你的 API 名称（示例："wiseopercampaign"，请根据实际需求修改）
-    if (typeof window !== "undefined") { // 确保在浏览器环境中才执行
-        x("wiseopercampaignbridge"); // 直接调用 init 对应的函数 x，无需全局访问
-        console.log("[Native Bridge] init 方法已自动执行，API 名称：wiseopercampaign");
+    // ========================= 修复后的 getUserId 函数 =========================
+    function getUserId(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaign", // 修复1：bridgeName 与初始化一致
+            "account",
+            "getUserId",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
     }
-	
-function getUserId(params, success, fail) {
-  window.nativeBridge.invoke(
-    "wiseopercampaign", // 正确的 bridgeName（与 init 时一致）
-    "account",          // service（Native 端服务名）
-    "getUserId",        // action（Native 端方法名）
-    params,             // args（传递给 Native 的参数，可选）
-    success,            // success 回调（可选）
-    fail                // fail 回调（可选）
-    // 后续可选参数（cancel、complete）若不用可省略，无多余逗号
-  );
-}
+    
+    // 初始化（保持不变）
+    x("wiseopercampaign");
 
+    // 修复3：先创建 account 属性，再挂载 getUserId（避免 account 未定义）
+    window.wiseopercampaign.account = window.wiseopercampaign.account || {};
+    window.wiseopercampaign.account.getUserId = getUserId;
+
+    // 优化4：延迟调用（确保初始化完成），或添加判断
+    setTimeout(() => {
+        // 调用示例：传入合法参数和回调
+        wiseopercampaign.account.getUserId(
+            { username: "test" }, // params（对象类型，内部会序列化）
+            (data) => { console.log("获取用户ID成功：", data); },
+            (err, code) => { console.error("获取用户ID失败：", err, "错误码：", code); }
+        );
+    }, 100); // 延迟100ms，确保 Native 桥接初始化完成
 
 	var qjd_browser = ["postMessage","blur","focus","close","parent","opener","top","length","frames","closed","location","self","window","document","name","customElements","history","locationbar","menubar","personalbar","scrollbars","statusbar","toolbar","status","frameElement","navigator","origin","external","screen","innerWidth","innerHeight","scrollX","pageXOffset","scrollY","pageYOffset","visualViewport","screenX","screenY","outerWidth","outerHeight","devicePixelRatio","clientInformation","screenLeft","screenTop","defaultStatus","defaultstatus","styleMedia","onanimationend","onanimationiteration","onanimationstart","onsearch","ontransitionend","onwebkitanimationend","onwebkitanimationiteration","onwebkitanimationstart","onwebkittransitionend","isSecureContext","onabort","onblur","oncancel","oncanplay","oncanplaythrough","onchange","onclick","onclose","oncontextmenu","oncuechange","ondblclick","ondrag","ondragend","ondragenter","ondragleave","ondragover","ondragstart","ondrop","ondurationchange","onemptied","onended","onerror","onfocus","oninput","oninvalid","onkeydown","onkeypress","onkeyup","onload","onloadeddata","onloadedmetadata","onloadstart","onmousedown","onmouseenter","onmouseleave","onmousemove","onmouseout","onmouseover","onmouseup","onmousewheel","onpause","onplay","onplaying","onprogress","onratechange","onreset","onresize","onscroll","onseeked","onseeking","onselect","onstalled","onsubmit","onsuspend","ontimeupdate","ontoggle","onvolumechange","onwaiting","onwheel","onauxclick","ongotpointercapture","onlostpointercapture","onpointerdown","onpointermove","onpointerup","onpointercancel","onpointerover","onpointerout","onpointerenter","onpointerleave","onselectstart","onselectionchange","onafterprint","onbeforeprint","onbeforeunload","onhashchange","onlanguagechange","onmessage","onmessageerror","onoffline","ononline","onpagehide","onpageshow","onpopstate","onrejectionhandled","onstorage","onunhandledrejection","onunload","performance","stop","open","alert","confirm","prompt","print","queueMicrotask","requestAnimationFrame","cancelAnimationFrame","captureEvents","releaseEvents","requestIdleCallback","cancelIdleCallback","getComputedStyle","matchMedia","moveTo","moveBy","resizeTo","resizeBy","scroll","scrollTo","scrollBy","getSelection","find","webkitRequestAnimationFrame","webkitCancelAnimationFrame","fetch","btoa","atob","setTimeout","clearTimeout","setInterval","clearInterval","createImageBitmap","onappinstalled","onbeforeinstallprompt","crypto","ondevicemotion","ondeviceorientation","ondeviceorientationabsolute","indexedDB","webkitStorageInfo","sessionStorage","localStorage","orientation","onorientationchange","openDatabase","ontouchcancel","ontouchend","ontouchmove","ontouchstart","attr_list","attr","obj","TEMPORARY","PERSISTENT","addEventListener","removeEventListener","dispatchEvent",
 			  "window","self","document","location","customElements","history","navigation","locationbar","menubar","personalbar","scrollbars","statusbar","toolbar","frames","top","parent","navigator","external","screen","visualViewport","clientInformation","styleMedia","trustedTypes","performance","crypto","indexedDB","sessionStorage","localStorage","scheduler","chrome","caches","cookieStore","launchQueue","sharedStorage","documentPictureInPicture","speechSynthesis","webpackChunk","Turbo","litHtmlVersions","event","onbeforexrselect","onbeforeinput","onbeforematch","onbeforetoggle","oncontentvisibilityautostatechange","oncontextlost","oncontextrestored","onformdata","onsecuritypolicyviolation","onslotchange","onpointerrawupdate","ontransitionrun","ontransitionstart","ontransitioncancel","crossOriginIsolated","reportError","structuredClone","getScreenDetails","queryLocalFonts","showDirectoryPicker","showOpenFilePicker","showSaveFilePicker","originAgentCluster","onpageswap","onpagereveal","credentialless","fence","onscrollend","onscrollsnapchange","onscrollsnapchanging","webkitRequestFileSystem","webkitResolveLocalFileSystemURL","result","qjd_browser","qjd_attr"];
-	var qjd_attr= [];
-	for(var obj in window){
-		if(qjd_browser.indexOf(obj) == -1){
-			qjd_attr.push(obj);
-		}
-	}
-  	var result = qjd_attr.length + ' js object : '+ qjd_attr.toString();
-	for(i in qjd_attr){			
-    		result += '<br>'+qjd_attr[i]+':<br>'    
-		for(j in window[qjd_attr[i]])
-			result += '----'+typeof(window[qjd_attr[i]][j])+': '+j+'<br>'
-	}
-	
-	const tipElement = document.createElement('div');
-	tipElement.id = 'native-bridge-tip';
-	tipElement.textContent = result;
-	document.body.appendChild(tipElement);	
+var qjd_attr= [];
+for(var obj in window){
+    if(qjd_browser.indexOf(obj) == -1){
+        qjd_attr.push(obj);
+    }
+}
+var result = qjd_attr.length + ' js object : '+ qjd_attr.toString();
+for(i in qjd_attr){			
+    result += '<br>'+qjd_attr[i]+':<br>'    
+    for(j in window[qjd_attr[i]])
+        result += '----'+typeof(window[qjd_attr[i]][j])+': '+j+'<br>'
+}
+
+// ========================= 关键修改：支持 HTML 渲染 =========================
+const tipElement = document.createElement('div');
+tipElement.id = 'native-bridge-tip';
+// 改为 innerHTML：解析 HTML 标签（如 <br>），而不是作为纯文本
+tipElement.innerHTML = result; 
+// 可选：添加样式，让内容更易读（避免文字挤在一起）
+tipElement.style.cssText = `
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: calc(100% - 40px);
+    max-height: 80vh;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 15px;
+    font-size: 12px;
+    line-height: 1.5;
+    z-index: 9999;
+    color: #333;
+`;
+document.body.appendChild(tipElement);
 })();
