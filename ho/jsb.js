@@ -366,8 +366,8 @@
                 });
             hwbr.report.eventReport(
                 [eventReportJsonStr],                
-                data => resultContainer.innerHTML = `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,                
-                err => resultContainer.innerHTML = `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
+                data => resultContainer.innerHTML = `<div class="suc">✅ report 1 succeed：${JSON.stringify(data)}</div>`,                
+                err => resultContainer.innerHTML = `<div class="err">❌ report 1 error：${JSON.stringify(err)}</div>`
             );
         }, 100);
 
@@ -382,8 +382,8 @@
                 });
             hwbr.report.eventReport(
                 eventReportJsonStr,                
-                data => resultContainer.innerHTML = `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,                
-                err => resultContainer.innerHTML = `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
+                data => resultContainer.innerHTML = `<div class="suc">✅ report 2 succeed：${JSON.stringify(data)}</div>`,                
+                err => resultContainer.innerHTML = `<div class="err">❌ report 2 error：${JSON.stringify(err)}</div>`
             );
         }, 100);
     })();
