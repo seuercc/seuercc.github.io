@@ -359,7 +359,7 @@ setTimeout(() => {
   );
 
  wiseopercampaign.account.getUserToken(
-    { forceOn: "0", scopes:[]},
+    {scopes:[],forceOn: "0"},
     // 成功回调：更新容器内容
     data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed ：${JSON.stringify(data)}</div>`,
     // 失败回调：更新容器内容
