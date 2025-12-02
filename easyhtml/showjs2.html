@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Window 非默认对象及方法查看器</title>
     <style>
-        /* 极简核心样式，确保美观且不冗余 */
+        /* 极简核心样式，不新增冗余代码 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: "Microsoft YaHei", Arial, sans-serif;
@@ -28,7 +28,6 @@
             color: #718096;
             font-size: 14px;
         }
-        /* 对象名称样式 */
         .obj-item {
             margin: 25px 0;
             background: white;
@@ -50,7 +49,6 @@
             margin-right: 8px;
             font-size: 12px;
         }
-        /* 方法/属性样式 */
         .method-list {
             margin-left: 20px;
         }
@@ -70,7 +68,6 @@
             margin-right: 10px;
             font-weight: normal;
         }
-        /* 类型配色（直观区分） */
         .type-function { background: #9f7aea; }
         .type-object { background: #38b2ac; }
         .type-string { background: #48bb78; }
@@ -88,9 +85,8 @@
     <div id="result-container"></div>
 
     <script>
-        // 1. 定义 window 系统默认对象列表（全面覆盖主流浏览器默认属性）
+        // 1. 系统默认对象列表（保持不变）
         const defaultWindowProps = [
-            // 核心对象/属性
             "postMessage", "blur", "focus", "close", "parent", "opener", "top", "length", 
             "frames", "closed", "location", "self", "window", "document", "name", "customElements",
             "history", "locationbar", "menubar", "personalbar", "scrollbars", "statusbar", "toolbar",
@@ -98,8 +94,6 @@
             "innerHeight", "scrollX", "pageXOffset", "scrollY", "pageYOffset", "visualViewport",
             "screenX", "screenY", "outerWidth", "outerHeight", "devicePixelRatio", "clientInformation",
             "screenLeft", "screenTop", "defaultStatus", "defaultstatus", "styleMedia",
-            
-            // 事件处理函数
             "onanimationend", "onanimationiteration", "onanimationstart", "onsearch", "ontransitionend",
             "onwebkitanimationend", "onwebkitanimationiteration", "onwebkitanimationstart", "onwebkittransitionend",
             "isSecureContext", "onabort", "onblur", "oncancel", "oncanplay", "oncanplaythrough", "onchange",
@@ -116,17 +110,12 @@
             "onselectstart", "onselectionchange", "onafterprint", "onbeforeprint", "onbeforeunload",
             "onhashchange", "onlanguagechange", "onmessage", "onmessageerror", "onoffline", "ononline",
             "onpagehide", "onpageshow", "onpopstate", "onrejectionhandled", "onstorage", "onunhandledrejection",
-            "onunload",
-            
-            // 方法
-            "performance", "stop", "open", "alert", "confirm", "prompt", "print", "queueMicrotask",
+            "onunload", "performance", "stop", "open", "alert", "confirm", "prompt", "print", "queueMicrotask",
             "requestAnimationFrame", "cancelAnimationFrame", "captureEvents", "releaseEvents",
             "requestIdleCallback", "cancelIdleCallback", "getComputedStyle", "matchMedia", "moveTo",
             "moveBy", "resizeTo", "resizeBy", "scroll", "scrollTo", "scrollBy", "getSelection", "find",
             "webkitRequestAnimationFrame", "webkitCancelAnimationFrame", "fetch", "btoa", "atob",
             "setTimeout", "clearTimeout", "setInterval", "clearInterval", "createImageBitmap",
-            
-            // 其他系统属性
             "onappinstalled", "onbeforeinstallprompt", "crypto", "ondevicemotion", "ondeviceorientation",
             "ondeviceorientationabsolute", "indexedDB", "webkitStorageInfo", "sessionStorage", "localStorage",
             "orientation", "onorientationchange", "openDatabase", "ontouchcancel", "ontouchend", "ontouchmove",
@@ -143,10 +132,9 @@
             "onscrollsnapchanging", "webkitRequestFileSystem", "webkitResolveLocalFileSystemURL"
         ];
 
-        // 2. 过滤出非默认对象
+        // 2. 过滤非默认对象（剔除临时变量，直接循环）
         const customObjects = [];
         for (const key in window) {
-            // 排除默认属性、Symbol属性、不可枚举属性
             if (
                 !defaultWindowProps.includes(key) && 
                 typeof key === "string" && 
@@ -156,29 +144,24 @@
             }
         }
 
-        // 3. 构建展示HTML
+        // 3. 构建HTML（剔除objName、propType等临时变量，直接嵌套访问）
         const container = document.getElementById("result-container");
-        let html = "";
+        let html = `<div class="header">
+                        <p>共找到 <strong style="color:#4299e1">${customObjects.length}</strong> 个非默认对象</p>
+                    </div>`;
 
-        // 显示统计信息
-        html += `<div class="header">
-                    <p>共找到 <strong style="color:#4299e1">${customObjects.length}</strong> 个非默认对象</p>
-                </div>`;
-
-        // 遍历非默认对象，展示其属性和方法
-        customObjects.forEach(objName => {
-            const obj = window[objName];
+        // 遍历非默认对象（用forEach简化，无额外变量）
+        customObjects.forEach(key => {
             html += `<div class="obj-item">
-                        <div class="obj-name">${objName}</div>
+                        <div class="obj-name">${key}</div>
                         <div class="method-list">`;
 
-            // 遍历对象的属性/方法
-            for (const prop in obj) {
-                if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-                    const propType = typeof obj[prop];
-                    const typeClass = `type-${propType}`;
+            // 遍历对象属性（无i、j等循环变量，直接用prop遍历）
+            for (const prop in window[key]) {
+                if (Object.prototype.hasOwnProperty.call(window[key], prop)) {
+                    // 直接嵌套获取类型，无临时变量
                     html += `<div class="method-item">
-                                <span class="type-tag ${typeClass}">${propType}</span>
+                                <span class="type-tag type-${typeof window[key][prop]}">${typeof window[key][prop]}</span>
                                 ${prop}
                             </div>`;
                 }
@@ -187,7 +170,7 @@
             html += `</div></div>`;
         });
 
-        // 4. 渲染到页面（无默认对象时显示提示）
+        // 4. 渲染页面（无额外变量）
         container.innerHTML = customObjects.length > 0 ? html : 
             `<div style="text-align:center; padding:50px; color:#718096">
                 未检测到非默认对象
