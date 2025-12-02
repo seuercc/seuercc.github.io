@@ -370,20 +370,4 @@
                 err => resultContainer.innerHTML = `<div class="err">❌ report 1 error：${JSON.stringify(err)}</div>`
             );
         }, 100);
-
-     setTimeout(() => {
-            const eventReportJsonStr = JSON.stringify({
-                    eventName: 'you are hacked',
-                    version:1,
-                    info:{extInfo:{'name':'cc'},u:'hahaha'},
-                    reportImmediately:true,
-                    isOverseaReport:false,
-                    isAnonymous:true
-                });
-            hwbr.report.eventReport(
-                eventReportJsonStr,                
-                data => resultContainer.innerHTML = `<div class="suc">✅ report 2 succeed：${JSON.stringify(data)}</div>`,                
-                err => resultContainer.innerHTML = `<div class="err">❌ report 2 error：${JSON.stringify(err)}</div>`
-            );
-        }, 100);
     })();
