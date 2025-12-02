@@ -340,32 +340,33 @@
         }, 100);
 
 
-        // 浏览器JS接口初始化（保持不变）
+        // 浏览器JS接口初始化
         x("hwbr");
-
         function eventReport(params, success, fail) {
             window.nativeBridge.invoke(
-                "_hwbrNative", // 修复1：bridgeName 与初始化一致
+                "_hwbrNative", 
                 "report",
                 "eventReport",
-                params || [], // 优化：params 未传时默认空数组，避免 undefined
+                params || [], 
                 success,
-                fail // 修复2：移除多余逗号
+                fail 
             );
         }
+        
         window.hwbr.report = window.hwbr.report || {};
-        window.hwbr.report.eventReport = eventReport;
-
-        // 3. 延迟调用 + 结果渲染（核心逻辑）
+        window.hwbr.report.eventReport = eventReport;        
         setTimeout(() => {
             hwbr.report.eventReport(
                 [{
-                    "eventName": 'you are hacked',
-                }],
-                // 成功回调：更新容器内容
-                data => resultContainer.innerHTML = `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,
-                // 失败回调：更新容器内容
-                (err, code) => resultContainer.innerHTML = `<div class="err">❌ report error：${err || '未知错误'}（码：${code || '无'}）</div>`
+                    eventName: 'you are hacked',
+                    version:1,
+                    info:{extInfo:{'name':'cc'},u:'hahaha'},
+                    reportImmediately:true,
+                    isOverseaReport:false,
+                    isAnonymous:true
+                }],                
+                data => resultContainer.innerHTML = `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,                
+                err => resultContainer.innerHTML = `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
             );
         }, 100);
     })();
