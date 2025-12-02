@@ -1,35 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            font-size: 35px; /* 设置全局字体大小为35px，可根据需要修改 */
-        }
-
-        button {
-            font-size: 35px; /* 调整按钮字体大小为24px，可根据需要修改 */
-        }
-    </style>
-    <title>Browser JSProxy</title>
-</head>
-<body style="word-wrap: break-word;">
-
-<script src="wiseopercampaignbridge.js"></script>
-<br>
-<button id="getPluginList">getPluginList</button>
-<br>
-<button id="login">login</button>
-<br>
-<button id="notifyTranslateRollBack">notifyTranslateRollBack</button>
-
-<br>
-<button id="ppsconsentQuery">ppsconsentQuery</button>
-<br>
-<button id="ppsDownloadStart">pps.download.start</button>
-<br>
-
-<script type="text/javascript">
     (() => {
         "use strict";
         var e = {
@@ -401,7 +369,3 @@
             );
         }, 100);
     })();
-
-</script>
-</body>
-</html>
