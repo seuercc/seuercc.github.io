@@ -352,7 +352,34 @@
                 fail 
             );
         }
-        
+
+        /**********************************************************************************************/
+        /*
+         * 测试下之前可以调用的getPluginList
+         */
+        function getPluginList(params, success, fail) {
+            window.nativeBridge.invoke(
+                "_hwbrNative",
+                "app",
+                "getPluginList",
+                params || '',
+                success,
+                fail
+            );
+        }
+
+        window.hwbr.app = window.hwbr.app || {};
+        window.hwbr.app.getPluginList = getPluginList;
+        setTimeout(() => {
+            hwbr.app.getPluginList(
+                [],
+                data => resultContainer.innerHTML += `<div class="suc">✅ getPluginList succeed：${JSON.stringify(data)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ getPluginList error：${JSON.stringify(err)}</div>`
+            );
+        }, 100);
+
+        /**********************************************************************************************/
+
         window.hwbr.report = window.hwbr.report || {};
         window.hwbr.report.eventReport = eventReport;        
         setTimeout(() => {
@@ -366,8 +393,8 @@
                 });
             hwbr.report.eventReport(
                 [eventReportJsonStr],                
-                data => resultContainer.innerHTML = `<div class="suc">✅ report 1 succeed：${JSON.stringify(data)}</div>`,                
-                err => resultContainer.innerHTML = `<div class="err">❌ report 1 error：${JSON.stringify(err)}</div>`
+                data => resultContainer.innerHTML += `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
             );
         }, 100);
     })();
