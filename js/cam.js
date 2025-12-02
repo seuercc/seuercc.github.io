@@ -297,7 +297,7 @@
     // ========================= 修复后的 getUserId 函数 =========================
     function getUserId(params, success, fail) {
         window.nativeBridge.invoke(
-            "wiseopercampaign", // 修复1：bridgeName 与初始化一致
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
             "account",
             "getUserId",
             params || [], // 优化：params 未传时默认空数组，避免 undefined
