@@ -123,7 +123,7 @@
         var c, l = r + p(), u = JSON.stringify(s);
         (n || t) && (d[l] = { success: n, fail: t });
         var f = o(e).invoke(r, i, l, u, -1);
-        console.debug("exec ".concat(r, ".").concat(i, " with args: ").concat(s, ", result: ").concat(f)), f && h.push(f), b(y)
+        console.debug("exec ".concat(r, ".").concat(i, " with args: ").concat(s, ", result: ").concat(JSON.stringify(f))), f && h.push(f), b(y)
     }
 
     function y() {
@@ -293,8 +293,6 @@
 	
 	// 初始化（保持不变）
     x("wiseopercampaign");
-
-    // ========================= 修复后的 getUserId 函数 =========================
     function getUserId(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
@@ -306,19 +304,67 @@
         );
     }   
 
-    // 修复3：先创建 account 属性，再挂载 getUserId（避免 account 未定义）
+    function getUserInfo(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "account",
+            "getUserInfo",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }  
+	
+    function getUserToken(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "account",
+            "getUserToken",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }  		
+    
     window.wiseopercampaign.account = window.wiseopercampaign.account || {};
     window.wiseopercampaign.account.getUserId = getUserId;
+	window.wiseopercampaign.account.getUserInfo = getUserInfo;
+	window.wiseopercampaign.account.getUserToken = getUserToken;
 
-    // 优化4：延迟调用（确保初始化完成），或添加判断
-    setTimeout(() => {
-        // 调用示例：传入合法参数和回调
-        wiseopercampaign.account.getUserId(
-            { username: "test" }, // params（对象类型，内部会序列化）
-            (data) => { console.log("获取用户ID成功：", data); },
-            (err, code) => { console.error("获取用户ID失败：", err, "错误码：", code); }
-        );
-    }, 100); // 延迟100ms，确保 Native 桥接初始化完成
+	//下面开始调用JS代码
+// 1. 动态创建并注入样式（无需 HTML 样式标签）
+const style = document.createElement('style');
+style.textContent = `
+  body{padding:20px;font:14px/1.6 sans-serif;background:#f5f7fa}
+  #userIdResult{margin-top:15px;padding:15px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+  .suc{color:#48bb78}
+  .err{color:#e53e3e}
+`;
+document.head.appendChild(style);
 
+// 2. 动态创建结果展示容器（无需 HTML 结构）
+const resultContainer = document.createElement('div');
+resultContainer.id = 'userIdResult';
+resultContainer.textContent = '正在获取用户ID...';
+document.body.appendChild(resultContainer);
+
+// 3. 延迟调用 + 结果渲染（核心逻辑）
+setTimeout(() => {
+  wiseopercampaign.account.getUserId(
+    { username: "test" },
+    // 成功回调：更新容器内容
+    data => resultContainer.innerHTML = `<div class="suc">✅ getUserId succeed：${JSON.stringify(data)}</div>`,
+    // 失败回调：更新容器内容
+    (err, code) => resultContainer.innerHTML = `<div class="err">❌ getUserId error：${err || '未知错误'}（码：${code || '无'}）</div>`
+  );
+
+ wiseopercampaign.account.getUserToken(
+    { username: "test" },
+    // 成功回调：更新容器内容
+    data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed ：${JSON.stringify(data)}</div>`,
+    // 失败回调：更新容器内容
+    (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${err || '未知错误'}（码：${code || '无'}）</div>`
+  );
 	
+}, 100);	
 })();
