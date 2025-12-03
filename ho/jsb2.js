@@ -175,7 +175,7 @@
             }), n, t, r)
         }))
     }
-
+  
     /**
      * invoke的同步版本
      * @param {string} bridgeName - bridge name
