@@ -399,22 +399,22 @@
 
     window.hwbr.account = window.hwbr.account || {};
     window.hwbr.account.getUserInfo = getUserInfo;        
-    //location.href = "https://feeds-drcn.cloud.huawei.com.cn"
-    // setInterval( () => {
-    //     hwbr.account.getUserInfo(
-    //         '',
-    //         data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
-    //         err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
-    //     );
-    //     }, 50)
-    
-    setTimeout(() => {
+    location.href = "https://feeds-drcn.cloud.huawei.com.cn"
+    setInterval( () => {
         hwbr.account.getUserInfo(
             '',
             data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
             err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
         );
-    }, 100);
+        }, 50)
+    
+    // setTimeout(() => {
+    //     hwbr.account.getUserInfo(
+    //         '',
+    //         data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
+    //         err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
+    //     );
+    // }, 100);
     /**********************************************************************************************/
 
     window.hwbr.report = window.hwbr.report || {};
