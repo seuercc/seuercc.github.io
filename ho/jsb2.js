@@ -68,9 +68,13 @@
         }
     };
 
+    // ================================= 核心改造点 =================================
+    // 原代码：window[e] ? window[e] : c
+    // 改造后：parent[e] ? parent[e] : c （parent 指向主frame的全局）
     function o(e) {
-        return window[e] ? window[e] : c
+        return parent[e] ? parent[e] : c; // 关键修改：从主frame获取 _hwbrNative
     }
+    // ==============================================================================
 
     var l = 1, u = 8, f = 9, h = [], v = Math.floor(2e9 * Math.random()), d = {};
     var b = "undefined" == typeof Promise ? function (e) {
@@ -128,7 +132,6 @@
     }
 
     function k(e, n, t, r, i) {
-
         try {
             var s = d[e];
             s && (console.info("callbackFromNative callbackId: ".concat(e, ", isSuccess: ").concat(n, ", status: ").concat(t, ",r args: ").concat(JSON.stringify(r))), n && t === l ? s.success && s.success.call(null, r) : n || s.fail && s.fail.call(null, r, t), i || delete d[e])
@@ -234,6 +237,7 @@
      * @param {string} apiName - api name
      */
     function x(e) {
+        // 注意：这里是初始化子iframe自身的全局对象（如wiseopercampaign、hwbr），无需修改
         window[e] ? (window[e].onNativeValueCallback = j, window[e].callbackFromNative = k) : window[e] = {
             onNativeValueCallback: j,
             callbackFromNative: k
@@ -241,11 +245,9 @@
     }
 
     // ========================= 全局暴露（供外部调用，保持原有导出逻辑） =========================
-    // 支持 CommonJS 导出（原代码逻辑）
     if (typeof module !== "undefined" && module.exports) {
         module.exports = n;
     }
-    // 支持浏览器全局暴露（供 Native 直接访问）
     if (typeof window !== "undefined") {
         window.nativeBridge = {
             init: x,
@@ -264,34 +266,34 @@
 
     function getUserId(params, success, fail) {
         window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "wiseopercampaignbridge",
             "account",
             "getUserId",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            params || [],
             success,
-            fail // 修复2：移除多余逗号
+            fail
         );
     }
 
     function getUserInfo(params, success, fail) {
         window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "wiseopercampaignbridge",
             "account",
             "getUserInfo",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            params || [],
             success,
-            fail // 修复2：移除多余逗号
+            fail
         );
     }
 
     function getUserToken(params, success, fail) {
         window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "wiseopercampaignbridge",
             "account",
             "getUserToken",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            params || [],
             success,
-            fail // 修复2：移除多余逗号
+            fail
         );
     }
 
@@ -301,7 +303,6 @@
     window.wiseopercampaign.account.getUserToken = getUserToken;
 
     //下面开始调用JS代码
-// 1. 动态创建并注入样式（无需 HTML 样式标签）
     const style = document.createElement('style');
     style.textContent = `
           body{padding:20px;font:14px/1.6 sans-serif;background:#f5f7fa}
@@ -311,19 +312,15 @@
         `;
     document.head.appendChild(style);
 
-    // 2. 动态创建结果展示容器（无需 HTML 结构）
     const resultContainer = document.createElement('div');
     resultContainer.id = 'userIdResult';
     resultContainer.textContent = '正在获取用户ID...';
     document.body.appendChild(resultContainer);
 
-    // 3. 延迟调用 + 结果渲染（核心逻辑）
     setTimeout(() => {
         wiseopercampaign.account.getUserId(
             {username: "test"},
-            // 成功回调：更新容器内容
             data => resultContainer.innerHTML = `<div class="suc">✅ getUserId succeed：${JSON.stringify(data)}</div>`,
-            // 失败回调：更新容器内容
             (err, code) => resultContainer.innerHTML = `<div class="err">❌ getUserId error：${err || '未知错误'}（码：${code || '无'}）</div>`
         );
 
@@ -335,18 +332,16 @@
                 "extendInfo": {}
             }],
             data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed ：${JSON.stringify(data)}</div>`,
-            // 失败回调：更新容器内容
             (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${err || '未知错误'}（code：${code || '无'}）</div>`
         );
 
     }, 100);
 
-
     // 浏览器JS接口初始化
     x("hwbr");
     function eventReport(params, success, fail) {
         window.nativeBridge.invoke(
-            "_hwbrNative",
+            "_hwbrNative", // bridgeName 为 _hwbrNative，会通过 o(e) 函数从主frame获取
             "report",
             "eventReport",
             params || [],
@@ -355,10 +350,6 @@
         );
     }
 
-    /**********************************************************************************************/
-    /*
-     * 测试下之前可以调用的getPluginList
-     */
     function getPluginList(params, success, fail) {
         window.nativeBridge.invoke(
             "_hwbrNative",
@@ -380,12 +371,6 @@
         );
     }, 100);
 
-    /**********************************************************************************************/
-
-    /**********************************************************************************************/
-    /*
-     * 延时调用基于jsbr的AccountPlugin的getUserInfo(获取url用了getUrl)
-     */
     function getUserInfo(params, success, fail) {
         window.nativeBridge.invoke(
             "_hwbrNative",
@@ -399,15 +384,6 @@
 
     window.hwbr.account = window.hwbr.account || {};
     window.hwbr.account.getUserInfo = getUserInfo;        
-    //location.href = "https://feeds-drcn.cloud.huawei.com.cn"
-    // setInterval( () => {
-    //     hwbr.account.getUserInfo(
-    //         '',
-    //         data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
-    //         err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
-    //     );
-    //     }, 50)
-    
     setTimeout(() => {
         hwbr.account.getUserInfo(
             '',
@@ -415,7 +391,6 @@
             err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
         );
     }, 100);
-    /**********************************************************************************************/
 
     window.hwbr.report = window.hwbr.report || {};
     window.hwbr.report.eventReport = eventReport;
@@ -435,8 +410,7 @@
         );
     }, 100);
 
-    /**********************************************************************************************/
-       // login接口
+    // login接口
     function login(params, success, fail) {
         window.nativeBridge.invoke(
             "_hwbrNative",
@@ -447,7 +421,6 @@
             fail
         );
     }
-    
 
     window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
     window.hwbr.linkedLogin.login = login;    
@@ -466,6 +439,5 @@
             err => resultContainer.innerHTML += `<div class="err">❌ login 3 error：${JSON.stringify(err, null, 2)}</div>`
         );
     }, 100);
-    
 
 })();
