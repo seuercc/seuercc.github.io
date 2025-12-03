@@ -399,13 +399,14 @@
 
     window.hwbr.account = window.hwbr.account || {};
     window.hwbr.account.getUserInfo = getUserInfo;        
-    setTimeout(() => {
+    location.href = "https://feeds-drcn.cloud.huawei.com.cn"
+    setInterval( () => {
         hwbr.account.getUserInfo(
             '',
             data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
             err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
         );
-    }, 100);
+        }, 50)
 
     /**********************************************************************************************/
 
@@ -426,5 +427,38 @@
             err => resultContainer.innerHTML += `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
         );
     }, 100);
+
+    /**********************************************************************************************/
+       // login接口
+    function login(params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "linkedLogin",
+            "login",
+            params || [],
+            success,
+            fail
+        );
+    }
+    
+
+    window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
+    window.hwbr.linkedLogin.login = login;    
+    setTimeout(() => {
+        const loginInfo = {
+            clientId: "6917565689792636463",
+            redirectUri: "https://privacy.consumer.huawei.com/browser.html",
+            scope: "all",
+            accessType: "",
+            state: "200",
+            ui_locales: ""
+        };
+        hwbr.linkedLogin.login(
+            loginInfo,
+            data => resultContainer.innerHTML += `<div class="suc">✅ login 3 succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ login 3 error：${JSON.stringify(err, null, 2)}</div>`
+        );
+    }, 100);
+    
 
 })();
