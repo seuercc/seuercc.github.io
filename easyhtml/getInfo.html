@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- 优化viewport设置，增加viewport-fit=cover适配刘海屏 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>设备信息获取工具</title>
   
   <style>
@@ -123,14 +124,20 @@
       color: #1e293b;
       min-height: 100vh;
       line-height: 1.5;
+      /* 增加body内边距，避免内容被刘海遮挡 */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
     }
     
-    /* 布局组件 */
+    /* 布局组件 - 关键优化点 */
     .container {
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 16px;
+      /* 优化内边距，确保左右边距一致 */
+      padding: 0 clamp(16px, 5vw, 24px);
     }
     
     header {
@@ -166,25 +173,52 @@
       text-align: center;
     }
     
-    /* 卡片样式 */
+    /* 卡片样式 - 关键优化点 */
     .card-container {
       display: grid;
+      /* 使用fr单位确保等分，增加gap确保间距一致 */
       grid-template-columns: 1fr;
-      gap: 24px;
+      gap: 20px;
     }
     
-    @media (min-width: 768px) {
+    /* 新增平板设备适配（768px-1024px）- 关键修复 */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .card-container {
+        grid-template-columns: 1fr 1fr;
+        /* 增加间距，避免拥挤 */
+        gap: 16px;
+      }
+      /* 确保卡片内边距一致 */
+      .card {
+        padding: 16px;
+      }
+      /* 调整按钮组，避免挤压 */
+      .btn-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .btn-group .btn {
+        width: 100%;
+      }
+    }
+    
+    /* 桌面设备（1024px以上） */
+    @media (min-width: 1025px) {
       .card-container {
         grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
       }
     }
     
     .card {
       background-color: white;
       border-radius: 12px;
+      /* 统一内边距 */
       padding: 20px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       animation: fadeIn 0.5s ease-in-out;
+      /* 确保卡片宽度100% */
+      width: 100%;
     }
     
     .card-full {
@@ -196,6 +230,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
     
     .card-title {
@@ -215,6 +251,7 @@
       padding: 4px 10px;
       border-radius: 999px;
       background-color: #f1f5f9;
+      white-space: nowrap;
     }
     
     .card-content {
@@ -246,6 +283,8 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
+      /* 确保按钮宽度一致 */
+      width: 100%;
     }
     
     .btn:hover {
@@ -284,10 +323,6 @@
       gap: 12px;
     }
     
-    .btn-group .btn {
-      flex: 1;
-    }
-    
     /* 状态提示 */
     .status-box {
       padding: 16px;
@@ -307,10 +342,11 @@
       color: #b91c1c;
     }
     
-    /* 摄像头预览 */
+    /* 摄像头预览 - 优化高度适配 */
     .camera-preview {
       width: 100%;
-      height: 160px;
+      /* 使用aspect-ratio确保视频比例正确 */
+      aspect-ratio: 4/3;
       object-fit: cover;
       border-radius: 8px;
       background-color: #f1f5f9;
@@ -320,6 +356,8 @@
     /* 录制视频预览 */
     .recorded-video {
       width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
       border-radius: 8px;
       margin-bottom: 8px;
     }
@@ -385,6 +423,23 @@
     
     .theme-toggle:hover {
       background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* 修复小屏幕上的文本溢出问题 */
+    @media (max-width: 767px) {
+      .card-title {
+        font-size: 1.1rem;
+      }
+      .card-content {
+        font-size: 0.95rem;
+      }
+      .btn-group {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .btn-group .btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
