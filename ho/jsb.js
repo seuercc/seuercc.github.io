@@ -128,6 +128,7 @@
         }
 
         function k(e, n, t, r, i) {
+            console.info('call callbackFromNative e :' + JSON.stringify(e) + ',n :' + JSON.stringify(n) + ', t :' + JSON.stringify(t) + ', r :' + JSON.stringify(r) + ', i :' + JSON.stringify(i));
             try {
                 var s = d[e];
                 s && (console.debug("callbackFromNative callbackId: ".concat(e, ", isSuccess: ").concat(n, ", status: ").concat(t, ", args: ").concat(r)), n && t === l ? s.success && s.success.call(null, r) : n || s.fail && s.fail.call(null, r, t), i || delete d[e])
@@ -224,6 +225,7 @@
          * @returns {null|*} 回调结果
          */
         function j(e, n, t) {
+            console.info('call onNativeValueCallback e :' + JSON.stringify(e) + ',n :' + JSON.stringify(n) + ', t :' + JSON.stringify(t));
             return i(e, n)
         }
 
