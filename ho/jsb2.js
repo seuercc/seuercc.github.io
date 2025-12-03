@@ -371,26 +371,26 @@
         );
     }, 100);
 
-    function getUserInfo(params, success, fail) {
-        window.nativeBridge.invoke(
-            "_hwbrNative",
-            "account",
-            "getUserInfo",
-            params || '',
-            success,
-            fail
-        );
-    }
-
-    window.hwbr.account = window.hwbr.account || {};
-    window.hwbr.account.getUserInfo = getUserInfo;
-    setTimeout(() => {
-        hwbr.account.getUserInfo(
-            '',
-            data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
-        );
-    }, 100);
+    // function getUserInfo(params, success, fail) {
+    //     window.nativeBridge.invoke(
+    //         "_hwbrNative",
+    //         "account",
+    //         "getUserInfo",
+    //         params || '',
+    //         success,
+    //         fail
+    //     );
+    // }
+    //
+    // window.hwbr.account = window.hwbr.account || {};
+    // window.hwbr.account.getUserInfo = getUserInfo;
+    // setTimeout(() => {
+    //     hwbr.account.getUserInfo(
+    //         '',
+    //         data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
+    //         err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
+    //     );
+    // }, 100);
 
     window.hwbr.report = window.hwbr.report || {};
     window.hwbr.report.eventReport = eventReport;
@@ -441,8 +441,19 @@
     }, 100);
 
 
+    function getUserInfo(params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "mcpAccount",
+            "getUserInfo",
+            params || [],
+            success,
+            fail
+        );
+    }
+
     window.hwbr.mcpAccount = window.hwbr.mcpAccount || {};
-    window.hwbr.mcpAccount.getUserInfo = mcpAccount;
+    window.hwbr.mcpAccount.getUserInfo = getUserInfo;
     setTimeout(() => {
         const SubAppAuthCodePara = JSON.stringify({
             subAppId: '112938007',
