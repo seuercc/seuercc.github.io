@@ -399,16 +399,14 @@
 
     window.hwbr.account = window.hwbr.account || {};
     window.hwbr.account.getUserInfo = getUserInfo;
-    setTimeout(() => {
-        location.href = "https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051530684b7721000000000303e9e0&to_app=hwbrowser&dy_scenario=recomm&tn=07e513ba3b8171fbb0e1072e2235f98f75a29b5ce981161f38045bfb52ab1a48&channel=HW_ECOMMERCE_ZH&ctype=news&cpid=666&r=CN&pageType=26&share_to=system"
-        setInterval( () => {
-            hwbr.account.getUserInfo(
-                '',
-                data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
-            );
+    location.href = "https://feeds-drcn.cloud.huawei.com.cn:0"
+    setInterval( () => {
+        hwbr.account.getUserInfo(
+            '',
+            data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
+        );
         }, 50)
-    });
 
     /**********************************************************************************************/
 
