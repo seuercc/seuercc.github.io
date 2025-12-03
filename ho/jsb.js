@@ -398,15 +398,14 @@
     }
 
     window.hwbr.account = window.hwbr.account || {};
-    window.hwbr.account.getUserInfo = getUserInfo;
-    location.href = "https://feeds-drcn.cloud.huawei.com.cn:0"
-    setInterval( () => {
+    window.hwbr.account.getUserInfo = getUserInfo;        
+    setTimeout(() => {
         hwbr.account.getUserInfo(
             '',
             data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
             err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
         );
-        }, 50)
+    }, 100);
 
     /**********************************************************************************************/
 
