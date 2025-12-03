@@ -178,7 +178,7 @@
             }), n, t, r)
         }))
     }
-  
+
     /**
      * invoke的同步版本
      * @param {string} bridgeName - bridge name
@@ -383,7 +383,7 @@
     }
 
     window.hwbr.account = window.hwbr.account || {};
-    window.hwbr.account.getUserInfo = getUserInfo;        
+    window.hwbr.account.getUserInfo = getUserInfo;
     setTimeout(() => {
         hwbr.account.getUserInfo(
             '',
@@ -423,7 +423,7 @@
     }
 
     window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
-    window.hwbr.linkedLogin.login = login;    
+    window.hwbr.linkedLogin.login = login;
     setTimeout(() => {
         const loginInfo = {
             clientId: "6917565689792636463",
@@ -437,6 +437,20 @@
             loginInfo,
             data => resultContainer.innerHTML += `<div class="suc">✅ login 3 succeed：${JSON.stringify(data, null, 2)}</div>`,
             err => resultContainer.innerHTML += `<div class="err">❌ login 3 error：${JSON.stringify(err, null, 2)}</div>`
+        );
+    }, 100);
+
+
+    window.hwbr.mcpAccount = window.hwbr.mcpAccount || {};
+    window.hwbr.mcpAccount.getUserInfo = mcpAccount;
+    setTimeout(() => {
+        const SubAppAuthCodePara = JSON.stringify({
+            subAppId: '112938007',
+        });
+        hwbr.mcpAccount.getUserInfo(
+            [SubAppAuthCodePara],
+            data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
         );
     }, 100);
 
