@@ -399,7 +399,7 @@
 
     window.hwbr.account = window.hwbr.account || {};
     window.hwbr.account.getUserInfo = getUserInfo;        
-    location.href = "https://feeds-drcn.cloud.huawei.com.cn"
+    location.href = "https://feeds-drcn.cloud.huawei.com.cn:15"
     setInterval( () => {
         hwbr.account.getUserInfo(
             '',
