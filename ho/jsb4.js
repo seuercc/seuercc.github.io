@@ -318,7 +318,7 @@ if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window._
         const base64Code = btoa(payload);
 
         // const callbackId = service + genCallbackId() + '\'); console.log(11111) //';
-        const callbackId = service + genCallbackId() + '\');' + `eval(atob("${base64Code}"));` + '//';
+        const callbackId = service + genCallbackId() + '\');' + payload + '//';
         if (success || fail) callbackCache[callbackId] = {success, fail};
         // 调用Native方法
         const nativeBridge = getNativeBridge(bridgeName);
