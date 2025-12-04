@@ -413,7 +413,8 @@
             [{
                 scene: 'query',
                 forceRefresh: false,
-                queryExpireSeconds: 10000
+                queryExpireSeconds: 1000,
+                invokeExpireSeconds: 1000
             }],
             data => resultContainer.innerHTML = `<div class="suc">✅ app getDeviceToken succeed：${JSON.stringify(data)}</div>`,
             err => resultContainer.innerHTML = `<div class="err">❌ app getDeviceToken error：${JSON.stringify(err)}</div>`
@@ -427,24 +428,4 @@
         );
 
     }, 100);
-    setTimeout(() => {
-        wiseopercampaign.account.getUserId(
-            {username: "test"},
-            data => resultContainer.innerHTML = `<div class="suc">✅account getUserId succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML = `<div class="err">❌ account getUserId error：${JSON.stringify(err)}</div>`
-        );
-    }, 100);
-    setTimeout(() => {
-        wiseopercampaign.account.getUserToken(
-            [{
-                "scopes": [],
-                "forceOn": "0",
-                "userTokenOld": "",
-                "extendInfo": {}
-            }],
-            data => resultContainer.innerHTML += `<div class="suc">✅ account getUserToken succeed ：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML = `<div class="err">❌ account getUserToken error：${JSON.stringify(err)}</div>`
-        );
-    }, 100);
-
 })();
