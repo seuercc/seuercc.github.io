@@ -348,7 +348,7 @@ if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window._
                 microTask(processMessageQueue);
             }, i);
         }
-        location.href = 'https://contentcenter-drcn.dbankcdn.cn/';
+        location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/03bd34f78a3140a395e124789b0bd095/index.html?viewsId=0';
     };
 
     // ========================= 对外暴露的核心API =========================
