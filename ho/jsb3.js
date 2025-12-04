@@ -396,16 +396,16 @@
     setTimeout(() => {
         wiseopercampaign.app.showToast(
             ['you are hacked'],
-            data => resultContainer.innerHTML = `<div class="suc">✅ app showToast succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML = `<div class="err">❌ app showToast error：${JSON.stringify(err)}</div>`
+            data => resultContainer.innerHTML += `<div class="suc">✅ app showToast succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ app showToast error：${JSON.stringify(err)}</div>`
         );
 
     }, 100);
     setTimeout(() => {
         wiseopercampaign.app.getDeviceSessionId(
             [false],
-            data => resultContainer.innerHTML = `<div class="suc">✅ app getDeviceSessionId succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML = `<div class="err">❌ app getDeviceSessionId error：${JSON.stringify(err)}</div>`
+            data => resultContainer.innerHTML += `<div class="suc">✅ app getDeviceSessionId succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ app getDeviceSessionId error：${JSON.stringify(err)}</div>`
         );
     }, 100);
     setTimeout(() => {
@@ -416,15 +416,15 @@
                 queryExpireSeconds: 1000,
                 invokeExpireSeconds: 1000
             }],
-            data => resultContainer.innerHTML = `<div class="suc">✅ app getDeviceToken succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML = `<div class="err">❌ app getDeviceToken error：${JSON.stringify(err)}</div>`
+            data => resultContainer.innerHTML += `<div class="suc">✅ app getDeviceToken succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ app getDeviceToken error：${JSON.stringify(err)}</div>`
         );
     }, 100);
     setTimeout(() => {
         wiseopercampaign.app.queryCalendarEvent(
             [{id: 0, title: 'cc', timeRange: [[new Date().getTime(), new Date().getTime() + 100000]]}],
-            data => resultContainer.innerHTML = `<div class="suc">✅ app queryCalendarEvent succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML = `<div class="err">❌ app queryCalendarEvent error：${JSON.stringify(err)}</div>`
+            data => resultContainer.innerHTML += `<div class="suc">✅ app queryCalendarEvent succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ app queryCalendarEvent error：${JSON.stringify(err)}</div>`
         );
 
     }, 100);
