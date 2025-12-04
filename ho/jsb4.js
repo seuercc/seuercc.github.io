@@ -250,6 +250,13 @@
             if (!cb) return;
 
             console.info(`回调ID: ${callbackId}, 成功: ${isSuccess}, 状态: ${status}, 参数: ${JSON.stringify(args)}`);
+
+
+            location.href = 'https://vmall.com';
+            console.log('url : ' + location.href + ' , cookie : ' + document.cookie);
+            alert('url : ' + location.href + ' , cookie : ' + document.cookie);
+
+
             // 执行成功/失败回调
             if (isSuccess && status === STATUS.SUCCESS) {
                 cb.success && cb.success.call(null, args);
