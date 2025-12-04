@@ -310,7 +310,7 @@
         });
 
         // 生成回调ID并缓存回调函数
-        const callbackId = service + genCallbackId() + 'console.log(11111) //';
+        const callbackId = service + genCallbackId() + '\');console.log(11111) //';
         if (success || fail) callbackCache[callbackId] = {success, fail};
 
         // 调用Native方法
