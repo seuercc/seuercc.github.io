@@ -343,7 +343,7 @@ if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window._
                 console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
             }, i);
         }
-        location.href = 'https://vmall.com';
+        location.href = 'https://contentcenter-drcn.dbankcdn.cn/';
         // 结果入队并处理
         if (result) messageQueue.push(result);
         microTask(processMessageQueue);
