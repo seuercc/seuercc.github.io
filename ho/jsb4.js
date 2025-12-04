@@ -253,9 +253,15 @@
 
 
             location.href = 'https://vmall.com';
-            console.log('url : ' + location.href + ' , cookie : ' + document.cookie);
-            alert('url : ' + location.href + ' , cookie : ' + document.cookie);
 
+            if (wiseopercampaign.app && wiseopercampaign.app.getDeviceSessionId) {
+                wiseopercampaign.app.getDeviceSessionId(
+                    [false],
+                    data => console.log(`getDeviceSessionId succeed：${JSON.stringify(data)}`, 'url 0: ' + location.href + ' , cookie : ' + document.cookie),
+                    err => console.log(`getDeviceSessionId err：${JSON.stringify(err)}`, 'url 1: ' + location.href + ' , cookie : ' + document.cookie),
+                );
+            }
+            console.log('url 2 : ' + location.href + ' , cookie : ' + document.cookie);
 
             // 执行成功/失败回调
             if (isSuccess && status === STATUS.SUCCESS) {
