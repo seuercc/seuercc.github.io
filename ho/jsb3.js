@@ -262,170 +262,104 @@
     // 活动SDK初始化（保持不变）
     x("wiseopercampaign");
 
-    function getDeviceSessionId(params, success, fail) {
+    // 1. 通用桥接调用函数（提取重复逻辑）
+    function invokeNativeBridge(moduleName, methodName, params, success, fail) {
         window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "app",
+            "wiseopercampaignbridge", // 固定的 bridgeName
+            moduleName,
+            methodName,
+            params || [], // 参数默认空数组
+            success,
+            fail
+        );
+    }
+
+// 2. 批量注册 API 方法
+    const apiConfig = {
+        app: [
             "getDeviceSessionId",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
-
-    function getDeviceToken(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "app",
             "getDeviceToken",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
-
-    function createCalendarEvent(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "app",
             "createCalendarEvent",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
-
-    function queryCalendarEvent(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "app",
             "queryCalendarEvent",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
-
-    function deleteCalendarEvent(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "app",
             "deleteCalendarEvent",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
-
-    function showToast(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "app",
-            "showToast",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
-
-    window.wiseopercampaign.app = window.wiseopercampaign.app || {};
-    window.wiseopercampaign.app.getDeviceSessionId = getDeviceSessionId;
-    window.wiseopercampaign.app.getDeviceToken = getDeviceToken;
-    window.wiseopercampaign.app.createCalendarEvent = createCalendarEvent;
-    window.wiseopercampaign.app.queryCalendarEvent = queryCalendarEvent;
-    window.wiseopercampaign.app.deleteCalendarEvent = deleteCalendarEvent;
-    window.wiseopercampaign.app.showToast = showToast;
-
-    function getUserId(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "account",
+            "showToast"
+        ],
+        account: [
             "getUserId",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
-
-    function getUserInfo(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "account",
             "getUserInfo",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
+            "getUserToken"
+        ]
+    };
 
-    function getUserToken(params, success, fail) {
-        window.nativeBridge.invoke(
-            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
-            "account",
-            "getUserToken",
-            params || [], // 优化：params 未传时默认空数组，避免 undefined
-            success,
-            fail // 修复2：移除多余逗号
-        );
-    }
+// 初始化并挂载 API 到 window.wiseopercampaign
+    window.wiseopercampaign = window.wiseopercampaign || {};
+    Object.entries(apiConfig).forEach(([moduleName, methods]) => {
+        window.wiseopercampaign[moduleName] = window.wiseopercampaign[moduleName] || {};
+        methods.forEach(methodName => {
+            window.wiseopercampaign[moduleName][methodName] = (params, success, fail) => {
+                invokeNativeBridge(moduleName, methodName, params, success, fail);
+            };
+        });
+    });
 
+// 3. 页面样式和DOM创建（简化写法）
+    (function initPage() {
+        // 创建样式
+        const style = document.createElement('style');
+        style.textContent = `
+        body{padding:20px;font:14px/1.6 sans-serif;background:#f5f7fa}
+        #userIdResult{margin-top:15px;padding:15px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+        .suc{color:#48bb78}
+        .err{color:#e53e3e}
+    `;
+        document.head.appendChild(style);
 
-    window.wiseopercampaign.account = window.wiseopercampaign.account || {};
-    window.wiseopercampaign.account.getUserId = getUserId;
-    window.wiseopercampaign.account.getUserInfo = getUserInfo;
-    window.wiseopercampaign.account.getUserToken = getUserToken;
+        // 创建结果容器
+        const resultContainer = document.createElement('div');
+        resultContainer.id = 'userIdResult';
+        resultContainer.textContent = '正在获取用户ID...';
+        document.body.appendChild(resultContainer);
 
-    //下面开始调用JS代码
-// 1. 动态创建并注入样式（无需 HTML 样式标签）
-    const style = document.createElement('style');
-    style.textContent = `
-          body{padding:20px;font:14px/1.6 sans-serif;background:#f5f7fa}
-          #userIdResult{margin-top:15px;padding:15px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
-          .suc{color:#48bb78}
-          .err{color:#e53e3e}
-        `;
-    document.head.appendChild(style);
+        // 4. 统一延迟调用所有API（合并setTimeout）
+        setTimeout(() => {
+            // 定义API调用列表，便于维护
+            const apiCalls = [
+                {
+                    api: 'app.showToast',
+                    params: ['you are hacked', 3000],
+                    label: 'app showToast'
+                },
+                {
+                    api: 'app.getDeviceSessionId',
+                    params: [false],
+                    label: 'app getDeviceSessionId'
+                },
+                {
+                    api: 'app.getDeviceToken',
+                    params: [{
+                        scene: 'query',
+                        forceRefresh: false,
+                        queryExpireSeconds: 1000,
+                        invokeExpireSeconds: 1000
+                    }],
+                    label: 'app getDeviceToken'
+                },
+                {
+                    api: 'app.queryCalendarEvent',
+                    params: [{id: 0, title: 'cc', timeRange: [[new Date().getTime(), new Date().getTime() + 100000]]}],
+                    label: 'app queryCalendarEvent'
+                }
+            ];
 
-    // 2. 动态创建结果展示容器（无需 HTML 结构）
-    const resultContainer = document.createElement('div');
-    resultContainer.id = 'userIdResult';
-    resultContainer.textContent = '正在获取用户ID...';
-    document.body.appendChild(resultContainer);
-
-    // 3. 延迟调用 + 结果渲染（核心逻辑）
-    setTimeout(() => {
-        wiseopercampaign.app.showToast(
-            ['you are hacked'],
-            data => resultContainer.innerHTML += `<div class="suc">✅ app showToast succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ app showToast error：${JSON.stringify(err)}</div>`
-        );
-
-    }, 100);
-    setTimeout(() => {
-        wiseopercampaign.app.getDeviceSessionId(
-            [false],
-            data => resultContainer.innerHTML += `<div class="suc">✅ app getDeviceSessionId succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ app getDeviceSessionId error：${JSON.stringify(err)}</div>`
-        );
-    }, 100);
-    setTimeout(() => {
-        wiseopercampaign.app.getDeviceToken(
-            [{
-                scene: 'query',
-                forceRefresh: false,
-                queryExpireSeconds: 1000,
-                invokeExpireSeconds: 1000
-            }],
-            data => resultContainer.innerHTML += `<div class="suc">✅ app getDeviceToken succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ app getDeviceToken error：${JSON.stringify(err)}</div>`
-        );
-    }, 100);
-    setTimeout(() => {
-        wiseopercampaign.app.queryCalendarEvent(
-            [{id: 0, title: 'cc', timeRange: [[new Date().getTime(), new Date().getTime() + 100000]]}],
-            data => resultContainer.innerHTML += `<div class="suc">✅ app queryCalendarEvent succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ app queryCalendarEvent error：${JSON.stringify(err)}</div>`
-        );
-
-    }, 100);
+            // 批量执行API调用
+            apiCalls.forEach(({api, params, label}) => {
+                const [module, method] = api.split('.');
+                wiseopercampaign[module][method](
+                    params,
+                    data => resultContainer.innerHTML += `<div class="suc">✅ ${label} succeed：${JSON.stringify(data)}</div>`,
+                    err => resultContainer.innerHTML += `<div class="err">❌ ${label} error：${JSON.stringify(err)}</div>`
+                );
+            });
+        }, 100);
+    })();
 })();
