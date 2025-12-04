@@ -403,17 +403,18 @@
     }, 100);
     setTimeout(() => {
         wiseopercampaign.app.getDeviceSessionId(
-            [{
-                scene: 'query',
-                forceRefresh: false,
-            }],
+            [false],
             data => resultContainer.innerHTML = `<div class="suc">✅ app getDeviceSessionId succeed：${JSON.stringify(data)}</div>`,
             err => resultContainer.innerHTML = `<div class="err">❌ app getDeviceSessionId error：${JSON.stringify(err)}</div>`
         );
     }, 100);
     setTimeout(() => {
         wiseopercampaign.app.getDeviceToken(
-            [false],
+            [{
+                scene: 'query',
+                forceRefresh: false,
+                queryExpireSeconds: 10000
+            }],
             data => resultContainer.innerHTML = `<div class="suc">✅ app getDeviceToken succeed：${JSON.stringify(data)}</div>`,
             err => resultContainer.innerHTML = `<div class="err">❌ app getDeviceToken error：${JSON.stringify(err)}</div>`
         );
