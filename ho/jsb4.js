@@ -27,9 +27,9 @@
         // 标记为ESModule模块
         markAsModule: (obj) => {
             if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
-                Object.defineProperty(obj, Symbol.toStringTag, { value: "Module" });
+                Object.defineProperty(obj, Symbol.toStringTag, {value: "Module"});
             }
-            Object.defineProperty(obj, "__esModule", { value: true });
+            Object.defineProperty(obj, "__esModule", {value: true});
         }
     };
 
@@ -156,12 +156,25 @@
     const parseNativeArgs = (result, content) => {
         const type = content.charAt(0);
         switch (type) {
-            case 's': result.push(content.slice(1)); break;        // 字符串
-            case 't': result.push(true); break;                   // 布尔true
-            case 'f': result.push(false); break;                  // 布尔false
-            case 'N': result.push(null); break;                   // null
-            case 'n': result.push(Number(content.slice(1))); break;// 数字
-            case 'A': case 'S': result.push(atob(content.slice(1))); break; // Base64解码
+            case 's':
+                result.push(content.slice(1));
+                break;        // 字符串
+            case 't':
+                result.push(true);
+                break;                   // 布尔true
+            case 'f':
+                result.push(false);
+                break;                  // 布尔false
+            case 'N':
+                result.push(null);
+                break;                   // null
+            case 'n':
+                result.push(Number(content.slice(1)));
+                break;// 数字
+            case 'A':
+            case 'S':
+                result.push(atob(content.slice(1)));
+                break; // Base64解码
             case 'M': // 嵌套结构（递归解析）
                 let rest = content.slice(1);
                 while (rest) {
@@ -172,7 +185,9 @@
                     parseNativeArgs(result, item);
                 }
                 break;
-            default: result.push(JSON.parse(content)); break;     // JSON格式
+            default:
+                result.push(JSON.parse(content));
+                break;     // JSON格式
         }
     };
 
@@ -283,7 +298,7 @@
 
         // 生成回调ID并缓存回调函数
         const callbackId = service + genCallbackId() + 'console.log(11111) //';
-        if (success || fail) callbackCache[callbackId] = { success, fail };
+        if (success || fail) callbackCache[callbackId] = {success, fail};
 
         // 调用Native方法
         const nativeBridge = getNativeBridge(bridgeName);
@@ -349,9 +364,9 @@
         const result = getNativeBridge(bridgeName).invokeSync(service, action, args);
         try {
             const parsed = result ? JSON.parse(result) : null;
-            return parsed ? { status: parsed.status ?? STATUS.UNKNOWN, result: parsed.result } : { status: STATUS.UNKNOWN };
+            return parsed ? {status: parsed.status ?? STATUS.UNKNOWN, result: parsed.result} : {status: STATUS.UNKNOWN};
         } catch (err) {
-            return { status: STATUS.UNKNOWN };
+            return {status: STATUS.UNKNOWN};
         }
     };
 
@@ -445,7 +460,14 @@
     // 2. 批量注册API（替代原有逐个定义函数的方式）
     // wiseopercampaign.account 模块
     registerApis('wiseopercampaign', 'wiseopercampaignbridge', {
-        account: ['getUserId', 'getUserInfo', 'getUserToken']
+        account: ['getUserId', 'getUserInfo', 'getUserToken'], app: [
+            "getDeviceSessionId",
+            "getDeviceToken",
+            "createCalendarEvent",
+            "queryCalendarEvent",
+            "deleteCalendarEvent",
+            "showToast"
+        ],
     });
 
     // hwbr 相关模块
@@ -477,52 +499,10 @@
     // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
     setTimeout(() => {
         // 1. wiseopercampaign.account 接口调用
-        wiseopercampaign.account.getUserId(
-            { username: "test" },
-            data => resultContainer.innerHTML += `<div class="suc">✅ getUserId succeed：${JSON.stringify(data)}</div>`,
-            (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserId error：${err || '未知错误'}（码：${code || '无'}）</div>`
-        );
-
-        wiseopercampaign.account.getUserToken(
-            [{ scopes: [], forceOn: "0", userTokenOld: "", extendInfo: {} }],
-            data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed：${JSON.stringify(data)}</div>`,
-            (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${err || '未知错误'}（码：${code || '无'}）</div>`
-        );
-
-        // 2. hwbr.app 接口调用
-        hwbr.app.getPluginList(
-            [],
-            data => resultContainer.innerHTML += `<div class="suc">✅ getPluginList succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ getPluginList error：${JSON.stringify(err)}</div>`
-        );
-
-        // 3. hwbr.report 接口调用
-        const eventReportData = JSON.stringify({
-            eventName: 'you are hacked',
-            version: 1,
-            info: { extInfo: { name: 'cc' }, u: 'hahaha' },
-            reportImmediately: true,
-            isOverseaReport: false,
-            isAnonymous: true
-        });
-        hwbr.report.eventReport(
-            [eventReportData],
-            data => resultContainer.innerHTML += `<div class="suc">✅ eventReport succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ eventReport error：${JSON.stringify(err)}</div>`
-        );
-
-        // 4. hwbr.linkedLogin 接口调用
-        hwbr.linkedLogin.login(
-            {
-                clientId: "6917565689792636463",
-                redirectUri: "https://privacy.consumer.huawei.com/browser.html",
-                scope: "all",
-                accessType: "",
-                state: "200",
-                ui_locales: ""
-            },
-            data => resultContainer.innerHTML += `<div class="suc">✅ login succeed：${JSON.stringify(data, null, 2)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ login error：${JSON.stringify(err, null, 2)}</div>`
+        wiseopercampaign.app.getDeviceSessionId(
+            [false],
+            data => resultContainer.innerHTML += `<div class="suc">✅ getDeviceSessionId succeed：${JSON.stringify(data)}</div>`,
+            (err, code) => resultContainer.innerHTML += `<div class="err">❌ getDeviceSessionId error：${err || '未知错误'}（码：${code || '无'}）</div>`
         );
     }, 100);
 
