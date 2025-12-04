@@ -261,7 +261,68 @@
 
     // 活动SDK初始化（保持不变）
     x("wiseopercampaign");
+    
+      function getExtParams(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "app",
+            "getExtParams",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }  
+    
+   function createCalendarEvent(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "app",
+            "createCalendarEvent",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }  
 
+       function queryCalendarEvent(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "app",
+            "queryCalendarEvent",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }  
+    
+       function deleteCalendarEvent(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "app",
+            "deleteCalendarEvent",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }  
+       function showToast(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "app",
+            "showToast",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }  
+
+    window.wiseopercampaign.app = window.wiseopercampaign.app || {};
+    window.wiseopercampaign.app.getExtParams = getExtParams;
+    window.wiseopercampaign.app.createCalendarEvent = createCalendarEvent;
+    window.wiseopercampaign.app.queryCalendarEvent = queryCalendarEvent;
+    window.wiseopercampaign.app.queryCalendarEvent = deleteCalendarEvent;
+    window.wiseopercampaign.app.showToast = showToast;
+    
     function getUserId(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
@@ -295,6 +356,8 @@
         );
     }
 
+
+
     window.wiseopercampaign.account = window.wiseopercampaign.account || {};
     window.wiseopercampaign.account.getUserId = getUserId;
     window.wiseopercampaign.account.getUserInfo = getUserInfo;
@@ -319,6 +382,24 @@
 
     // 3. 延迟调用 + 结果渲染（核心逻辑）
     setTimeout(() => {
+        wiseopercampaign.app.showToast(
+            {username: "test"},
+            data => resultContainer.innerHTML = `<div class="suc">✅ app showToast succeed：${JSON.stringify(data)}</div>`,
+            (err) => resultContainer.innerHTML = `<div class="err">❌ app showToast error：${JSON.stringify(err)}</div>`
+        );
+        
+       wiseopercampaign.app.getExtParams(
+            {username: "test"},
+            data => resultContainer.innerHTML = `<div class="suc">✅ app getExtParams succeed：${JSON.stringify(data)}</div>`,
+            (err) => resultContainer.innerHTML = `<div class="err">❌ app getExtParams error：${JSON.stringify(err)}</div>`
+        );
+        
+       wiseopercampaign.app.queryCalendarEvent(
+            {id: 0,title:'cc',timeRange:[[new Date().getTime(), new Date().getTime() + 100000]]},
+            data => resultContainer.innerHTML = `<div class="suc">✅ app queryCalendarEvent succeed：${JSON.stringify(data)}</div>`,
+            (err) => resultContainer.innerHTML = `<div class="err">❌ app queryCalendarEvent error：${JSON.stringify(err)}</div>`
+        );
+        
         wiseopercampaign.account.getUserId(
             {username: "test"},
             // 成功回调：更新容器内容
