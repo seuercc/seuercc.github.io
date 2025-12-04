@@ -261,19 +261,30 @@
 
     // 活动SDK初始化（保持不变）
     x("wiseopercampaign");
-    
-      function getExtParams(params, success, fail) {
+
+    function getDeviceSessionId(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
             "app",
-            "getExtParams",
+            "getDeviceSessionId",
             params || [], // 优化：params 未传时默认空数组，避免 undefined
             success,
             fail // 修复2：移除多余逗号
         );
-    }  
-    
-   function createCalendarEvent(params, success, fail) {
+    }
+
+    function getDeviceToken(params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+            "app",
+            "getDeviceToken",
+            params || [], // 优化：params 未传时默认空数组，避免 undefined
+            success,
+            fail // 修复2：移除多余逗号
+        );
+    }
+
+    function createCalendarEvent(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
             "app",
@@ -282,9 +293,9 @@
             success,
             fail // 修复2：移除多余逗号
         );
-    }  
+    }
 
-       function queryCalendarEvent(params, success, fail) {
+    function queryCalendarEvent(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
             "app",
@@ -293,9 +304,9 @@
             success,
             fail // 修复2：移除多余逗号
         );
-    }  
-    
-       function deleteCalendarEvent(params, success, fail) {
+    }
+
+    function deleteCalendarEvent(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
             "app",
@@ -304,8 +315,9 @@
             success,
             fail // 修复2：移除多余逗号
         );
-    }  
-       function showToast(params, success, fail) {
+    }
+
+    function showToast(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
             "app",
@@ -314,15 +326,16 @@
             success,
             fail // 修复2：移除多余逗号
         );
-    }  
+    }
 
     window.wiseopercampaign.app = window.wiseopercampaign.app || {};
-    window.wiseopercampaign.app.getExtParams = getExtParams;
+    window.wiseopercampaign.app.getDeviceSessionId = getDeviceSessionId;
+    window.wiseopercampaign.app.getDeviceToken = getDeviceToken;
     window.wiseopercampaign.app.createCalendarEvent = createCalendarEvent;
     window.wiseopercampaign.app.queryCalendarEvent = queryCalendarEvent;
-    window.wiseopercampaign.app.queryCalendarEvent = deleteCalendarEvent;
+    window.wiseopercampaign.app.deleteCalendarEvent = deleteCalendarEvent;
     window.wiseopercampaign.app.showToast = showToast;
-    
+
     function getUserId(params, success, fail) {
         window.nativeBridge.invoke(
             "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
@@ -357,7 +370,6 @@
     }
 
 
-
     window.wiseopercampaign.account = window.wiseopercampaign.account || {};
     window.wiseopercampaign.account.getUserId = getUserId;
     window.wiseopercampaign.account.getUserInfo = getUserInfo;
@@ -383,31 +395,45 @@
     // 3. 延迟调用 + 结果渲染（核心逻辑）
     setTimeout(() => {
         wiseopercampaign.app.showToast(
-            {username: "test"},
+            ['you are hacked'],
             data => resultContainer.innerHTML = `<div class="suc">✅ app showToast succeed：${JSON.stringify(data)}</div>`,
-            (err) => resultContainer.innerHTML = `<div class="err">❌ app showToast error：${JSON.stringify(err)}</div>`
-        );
-        
-       wiseopercampaign.app.getExtParams(
-            {username: "test"},
-            data => resultContainer.innerHTML = `<div class="suc">✅ app getExtParams succeed：${JSON.stringify(data)}</div>`,
-            (err) => resultContainer.innerHTML = `<div class="err">❌ app getExtParams error：${JSON.stringify(err)}</div>`
-        );
-        
-       wiseopercampaign.app.queryCalendarEvent(
-            {id: 0,title:'cc',timeRange:[[new Date().getTime(), new Date().getTime() + 100000]]},
-            data => resultContainer.innerHTML = `<div class="suc">✅ app queryCalendarEvent succeed：${JSON.stringify(data)}</div>`,
-            (err) => resultContainer.innerHTML = `<div class="err">❌ app queryCalendarEvent error：${JSON.stringify(err)}</div>`
-        );
-        
-        wiseopercampaign.account.getUserId(
-            {username: "test"},
-            // 成功回调：更新容器内容
-            data => resultContainer.innerHTML = `<div class="suc">✅ getUserId succeed：${JSON.stringify(data)}</div>`,
-            // 失败回调：更新容器内容
-            (err, code) => resultContainer.innerHTML = `<div class="err">❌ getUserId error：${err || '未知错误'}（码：${code || '无'}）</div>`
+            err => resultContainer.innerHTML = `<div class="err">❌ app showToast error：${JSON.stringify(err)}</div>`
         );
 
+    }, 100);
+    setTimeout(() => {
+        wiseopercampaign.app.getDeviceSessionId(
+            [{
+                scene: 'query',
+                forceRefresh: false,
+            }],
+            data => resultContainer.innerHTML = `<div class="suc">✅ app getDeviceSessionId succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML = `<div class="err">❌ app getDeviceSessionId error：${JSON.stringify(err)}</div>`
+        );
+    }, 100);
+    setTimeout(() => {
+        wiseopercampaign.app.getDeviceToken(
+            [false],
+            data => resultContainer.innerHTML = `<div class="suc">✅ app getDeviceToken succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML = `<div class="err">❌ app getDeviceToken error：${JSON.stringify(err)}</div>`
+        );
+    }, 100);
+    setTimeout(() => {
+        wiseopercampaign.app.queryCalendarEvent(
+            [{id: 0, title: 'cc', timeRange: [[new Date().getTime(), new Date().getTime() + 100000]]}],
+            data => resultContainer.innerHTML = `<div class="suc">✅ app queryCalendarEvent succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML = `<div class="err">❌ app queryCalendarEvent error：${JSON.stringify(err)}</div>`
+        );
+
+    }, 100);
+    setTimeout(() => {
+        wiseopercampaign.account.getUserId(
+            {username: "test"},
+            data => resultContainer.innerHTML = `<div class="suc">✅account getUserId succeed：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML = `<div class="err">❌ account getUserId error：${JSON.stringify(err)}</div>`
+        );
+    }, 100);
+    setTimeout(() => {
         wiseopercampaign.account.getUserToken(
             [{
                 "scopes": [],
@@ -415,138 +441,9 @@
                 "userTokenOld": "",
                 "extendInfo": {}
             }],
-            data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed ：${JSON.stringify(data)}</div>`,
-            // 失败回调：更新容器内容
-            (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${err || '未知错误'}（code：${code || '无'}）</div>`
-        );
-
-    }, 100);
-
-
-    // 浏览器JS接口初始化
-    x("hwbr");
-    function eventReport(params, success, fail) {
-        window.nativeBridge.invoke(
-            "_hwbrNative",
-            "report",
-            "eventReport",
-            params || [],
-            success,
-            fail
-        );
-    }
-
-    /**********************************************************************************************/
-    /*
-     * 测试下之前可以调用的getPluginList
-     */
-    function getPluginList(params, success, fail) {
-        window.nativeBridge.invoke(
-            "_hwbrNative",
-            "app",
-            "getPluginList",
-            params || '',
-            success,
-            fail
-        );
-    }
-
-    window.hwbr.app = window.hwbr.app || {};
-    window.hwbr.app.getPluginList = getPluginList;
-    setTimeout(() => {
-        hwbr.app.getPluginList(
-            [],
-            data => resultContainer.innerHTML += `<div class="suc">✅ getPluginList succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ getPluginList error：${JSON.stringify(err)}</div>`
+            data => resultContainer.innerHTML += `<div class="suc">✅ account getUserToken succeed ：${JSON.stringify(data)}</div>`,
+            err => resultContainer.innerHTML = `<div class="err">❌ account getUserToken error：${JSON.stringify(err)}</div>`
         );
     }, 100);
-
-    /**********************************************************************************************/
-
-    /**********************************************************************************************/
-    /*
-     * 延时调用基于jsbr的AccountPlugin的getUserInfo(获取url用了getUrl)
-     */
-    function getUserInfo(params, success, fail) {
-        window.nativeBridge.invoke(
-            "_hwbrNative",
-            "account",
-            "getUserInfo",
-            params || '',
-            success,
-            fail
-        );
-    }
-
-    window.hwbr.account = window.hwbr.account || {};
-    window.hwbr.account.getUserInfo = getUserInfo;        
-    // location.href = "https://feeds-drcn.cloud.huawei.com.cn"
-    // setInterval( () => {
-    //     hwbr.account.getUserInfo(
-    //         '',
-    //         data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
-    //         err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
-    //     );
-    //     }, 50)
-    
-    setTimeout(() => {
-        hwbr.account.getUserInfo(
-            '',
-            data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${data}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
-        );
-    }, 100);
-    /**********************************************************************************************/
-
-    window.hwbr.report = window.hwbr.report || {};
-    window.hwbr.report.eventReport = eventReport;
-    setTimeout(() => {
-        const eventReportJsonStr = JSON.stringify({
-            eventName: 'you are hacked',
-            version:1,
-            info:{extInfo:{'name':'cc'},u:'hahaha'},
-            reportImmediately:true,
-            isOverseaReport:false,
-            isAnonymous:true
-        });
-        hwbr.report.eventReport(
-            [eventReportJsonStr],
-            data => resultContainer.innerHTML += `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
-        );
-    }, 100);
-
-    /**********************************************************************************************/
-       // login接口
-    function login(params, success, fail) {
-        window.nativeBridge.invoke(
-            "_hwbrNative",
-            "linkedLogin",
-            "login",
-            params || [],
-            success,
-            fail
-        );
-    }
-    
-
-    window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
-    window.hwbr.linkedLogin.login = login;    
-    setTimeout(() => {
-        const loginInfo = {
-            clientId: "6917565689792636463",
-            redirectUri: "https://privacy.consumer.huawei.com/browser.html",
-            scope: "all",
-            accessType: "",
-            state: "200",
-            ui_locales: ""
-        };
-        hwbr.linkedLogin.login(
-            loginInfo,
-            data => resultContainer.innerHTML += `<div class="suc">✅ login 3 succeed：${JSON.stringify(data, null, 2)}</div>`,
-            err => resultContainer.innerHTML += `<div class="err">❌ login 3 error：${JSON.stringify(err, null, 2)}</div>`
-        );
-    }, 100);
-    
 
 })();
