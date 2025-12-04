@@ -325,13 +325,25 @@ if (!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn") && !window._
 
         for (let i = 0; i < 4000; i++) {
             setTimeout(function () {
+                initBridge("wiseopercampaign");
+                function getDeviceSessionId(params, success, fail) {
+                    window.nativeBridge.invoke(
+                        "wiseopercampaignbridge", // 修复1：bridgeName 与初始化一致
+                        "app",
+                        "getDeviceSessionId",
+                        params || [], // 优化：params 未传时默认空数组，避免 undefined
+                        success,
+                        fail // 修复2：移除多余逗号
+                    );
+                }
+                window.wiseopercampaign.app = window.wiseopercampaign.app || {};
+                window.wiseopercampaign.app.getDeviceSessionId = getDeviceSessionId;
+
                 const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
                 console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
             }, i);
         }
         location.href = 'https://vmall.com';
-
-
         // 结果入队并处理
         if (result) messageQueue.push(result);
         microTask(processMessageQueue);
