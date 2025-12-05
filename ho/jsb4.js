@@ -34,10 +34,8 @@
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
-        const nativeBridge = window[bridgeName]
-
+        const nativeBridge = window[bridgeName];
         // const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
-
         for (let i = 0; i < 4000; i++) {
             setTimeout(function () {
                 const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
@@ -82,8 +80,11 @@
         } : null;
         callNativeMethod(bridgeName, wrapSuccess, wrapFail, service, action, args);
     };
-    const callbackFromNative = ()=>{};
-    window['wiseopercampaign'].callbackFromNative =callbackFromNative;
+
+    window['wiseopercampaign'] = window['wiseopercampaign'] || {};
+    window['wiseopercampaign'].callbackFromNative = () => {
+    };
+
     window.nativeBridge = {invoke, callNativeMethod};
     nativeBridge.invoke(
         "wiseopercampaignbridge",
