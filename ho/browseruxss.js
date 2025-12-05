@@ -68,14 +68,14 @@
         "_hwbrNative",
         "report",
         "eventReport",
-        JSON.stringify({
+        [JSON.stringify({
             eventName: 'you are hacked',
             version: 1,
             info: {extInfo: {'name': 'cc'}, u: 'hahaha'},
             reportImmediately: true,
             isOverseaReport: false,
             isAnonymous: true
-        }),
+        })],
         (res) => console.log("cloudx report succeed：", JSON.stringify(res)),
         (err) => console.log("cloudx report error：", JSON.stringify(err))
     );
