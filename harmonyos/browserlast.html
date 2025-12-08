@@ -86,6 +86,7 @@
     <button id="startSearch" onclick="startSearch()">startSearch</button>
     <button id="openFeedsPage" onclick="openFeedsPage()">openFeedsPage</button>
     <button id="share" onclick="share()">share</button>
+    <button id="getGeoLocation" onclick="getGeoLocation()">getGeoLocation</button>
 </div>
 <script src="../ho/fullbr.js"></script>
 <!--<script src="jsb.js"></script>-->
@@ -102,151 +103,150 @@
     window.nativeBridge.init("hwbr");
 
     function getUserId() {
-        setTimeout(() => {
-            window.nativeBridge.invoke(
-                "wiseopercampaignbridge",
-                "account",
-                "getUserId",
-                {username: "test"},
-                data => resultContainer.innerHTML += `<div class="suc">✅ getUserId succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ getUserId error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge",
+            "account",
+            "getUserId",
+            {username: "test"},
+            data => resultContainer.innerHTML += `<div class="suc">✅ getUserId succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ getUserId error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
     function getUserToken() {
-        setTimeout(() => {
-            window.nativeBridge.invoke(
-                "wiseopercampaignbridge",
-                "account",
-                "getUserToken",
-                [{
-                    "scopes": [],
-                    "forceOn": "0",
-                    "userTokenOld": "",
-                    "extendInfo": {}
-                }],
-                data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge",
+            "account",
+            "getUserToken",
+            [{
+                "scopes": [],
+                "forceOn": "0",
+                "userTokenOld": "",
+                "extendInfo": {}
+            }],
+            data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
 
     function eventReport() {
-        setTimeout(() => {
-            const eventReportJsonStr = JSON.stringify({
-                eventName: 'you are hacked',
-                version: 1,
-                info: {extInfo: {'name': 'cc'}, u: 'hahaha'},
-                reportImmediately: true,
-                isOverseaReport: false,
-                isAnonymous: true
-            });
-            window.nativeBridge.invoke(
-                "_hwbrNative",
-                "report",
-                "eventReport",
-                [eventReportJsonStr],
-                data => resultContainer.innerHTML += `<div class="suc">✅ report 1 succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ report 1 error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+
+        const eventReportJsonStr = JSON.stringify({
+            eventName: 'you are hacked',
+            version: 1,
+            info: {extInfo: {'name': 'cc'}, u: 'hahaha'},
+            reportImmediately: true,
+            isOverseaReport: false,
+            isAnonymous: true
+        });
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "report",
+            "eventReport",
+            [eventReportJsonStr],
+            data => resultContainer.innerHTML += `<div class="suc">✅ report 1 succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ report 1 error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
     function login() {
-        setTimeout(() => {
-            const loginInfo = {
-                clientId: "6917565689792636463",
-                redirectUri: "https://privacy.consumer.huawei.com/browser.html",
-                scope: "all",
-                accessType: "",
-                state: "200",
-                ui_locales: ""
-            };
 
-            window.nativeBridge.invoke(
-                "_hwbrNative",
-                "linkedLogin",
-                "login",
-                loginInfo,
-                data => resultContainer.innerHTML += `<div class="suc">✅ login 3 succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ login 3 error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+        const loginInfo = {
+            clientId: "6917565689792636463",
+            redirectUri: "https://privacy.consumer.huawei.com/browser.html",
+            scope: "all",
+            accessType: "",
+            state: "200",
+            ui_locales: ""
+        };
+
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "linkedLogin",
+            "login",
+            loginInfo,
+            data => resultContainer.innerHTML += `<div class="suc">✅ login 3 succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ login 3 error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
     function notifyTranslateRollBack() {
-        setTimeout(() => {
-            const RollBackResult = JSON.stringify({
-                token: "6917565689792636463",
-            });
-            window.nativeBridge.invoke(
-                "_hwbrNative",
-                "translation",
-                "notifyTranslateRollBack",
-                [RollBackResult],
-                data => resultContainer.innerHTML += `<div class="suc">✅ notifyTranslateRollBack succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ notifyTranslateRollBack error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+
+        const RollBackResult = JSON.stringify({
+            token: "6917565689792636463",
+        });
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "translation",
+            "notifyTranslateRollBack",
+            [RollBackResult],
+            data => resultContainer.innerHTML += `<div class="suc">✅ notifyTranslateRollBack succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ notifyTranslateRollBack error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
 
     function translateLanguage() {
-        setTimeout(() => {
-            const translateData = JSON.stringify([{
-                token: "6917565689792636463",
-                id: 1,
-                originContent: ['你好'],
-                dstLanguage: 'en'
-            }]);
-            window.nativeBridge.invoke(
-                "_hwbrNative",
-                "translation",
-                "translateLanguage",
-                [translateData],
-                data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+
+        const translateData = JSON.stringify([{
+            token: "6917565689792636463",
+            id: 1,
+            originContent: ['你好'],
+            dstLanguage: 'en'
+        }]);
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "translation",
+            "translateLanguage",
+            [translateData],
+            data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
     function startSearch() {
-        setTimeout(() => {
-            const search = JSON.stringify({
-                scene: 10001,
-                searchMode: '0',
-                searchEngine: '0',
-                keyword: "马云",
 
-            });
-            window.nativeBridge.invoke(
-                "_hwbrNative",
-                "browser",
-                "startSearch",
-                [search],
-                data => resultContainer.innerHTML += `<div class="suc">✅ startSearch succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ startSearch error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+        const search = JSON.stringify({
+            scene: 10001,
+            searchMode: '0',
+            searchEngine: '0',
+            keyword: "马云",
+
+        });
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "browser",
+            "startSearch",
+            [search],
+            data => resultContainer.innerHTML += `<div class="suc">✅ startSearch succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ startSearch error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
     function openFeedsPage() {
-        setTimeout(() => {
-            window.nativeBridge.invoke(
-                "_hwbrNative",
-                "browser",
-                "openFeedsPage",
-                [0, 'https://seuercc.github.io/easyhtml/showjs.html'],
-                data => resultContainer.innerHTML += `<div class="suc">✅ openFeedsPage succeed：${JSON.stringify(data, null, 2)}</div>`,
-                err => resultContainer.innerHTML += `<div class="err">❌ openFeedsPage error：${JSON.stringify(err, null, 2)}</div>`
-            );
-        }, 100);
+
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "browser",
+            "openFeedsPage",
+            [0, 'https://seuercc.github.io/easyhtml/showjs.html'],
+            data => resultContainer.innerHTML += `<div class="suc">✅ openFeedsPage succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ openFeedsPage error：${JSON.stringify(err, null, 2)}</div>`
+        );
+
     }
 
     function share() {
-
         const ShareData = JSON.stringify({
             id: 1,
             url: 'https://www.baidu.com',
@@ -262,7 +262,17 @@
             data => resultContainer.innerHTML += `<div class="suc">✅ share succeed：${JSON.stringify(data, null, 2)}</div>`,
             err => resultContainer.innerHTML += `<div class="err">❌ share error：${JSON.stringify(err, null, 2)}</div>`
         );
-      
+    }
+
+    function getGeoLocation() {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "geoLocation",
+            "getGeoLocation",
+            [1],
+            data => resultContainer.innerHTML += `<div class="suc">✅ getGeoLocation succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ getGeoLocation error：${JSON.stringify(err, null, 2)}</div>`
+        );
     }
 </script>
 </body>
