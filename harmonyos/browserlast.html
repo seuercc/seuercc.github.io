@@ -85,6 +85,7 @@
     <button id="translateLanguage" onclick="translateLanguage()">translateLanguage</button>
     <button id="startSearch" onclick="startSearch()">startSearch</button>
     <button id="openFeedsPage" onclick="openFeedsPage()">openFeedsPage</button>
+    <button id="share" onclick="share()">share</button>
 </div>
 <script src="../ho/fullbr.js"></script>
 <!--<script src="jsb.js"></script>-->
@@ -204,7 +205,7 @@
                 "_hwbrNative",
                 "translation",
                 "translateLanguage",
-                translateData,
+                [translateData],
                 data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
                 err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
             );
@@ -242,6 +243,26 @@
                 err => resultContainer.innerHTML += `<div class="err">❌ openFeedsPage error：${JSON.stringify(err, null, 2)}</div>`
             );
         }, 100);
+    }
+
+    function share() {
+
+        const ShareData = JSON.stringify({
+            id: 1,
+            url: 'https://www.baidu.com',
+            image: '',
+            title: 'hello',
+            summary: 'worl'
+        });
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "share",
+            "share",
+            [ShareData],
+            data => resultContainer.innerHTML += `<div class="suc">✅ share succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ share error：${JSON.stringify(err, null, 2)}</div>`
+        );
+      
     }
 </script>
 </body>
