@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser JSProxy</title>
+    <style>
+        /* 基础样式优化，保持简洁 */
+        body {
+            margin: 0;
+            padding: 15px;
+            font: 14px/1.5 sans-serif;
+            background: #f5f7fa;
+            word-wrap: break-word;
+        }
+
+        /* 按钮容器：移动端2列，大屏自适应，缩小间距 */
+        .btn-container {
+            display: grid;
+            /* 移动端最小宽度140px，每行2个；大屏自动适配更多列 */
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* 按钮缩小：调整内边距和字体大小 */
+        button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+            background: #4299e1;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #3182ce;
+            transform: translateY(-1px); /* 缩小hover上浮距离 */
+            box-shadow: 0 2px 4px rgba(66, 153, 225, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* 结果容器优化：适配小屏 */
+        #userIdResult {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            white-space: pre-wrap;
+            font-size: 13px; /* 缩小结果字体，适配小屏 */
+        }
+
+        /* 状态提示样式 */
+        .suc {
+            color: #22c55e;
+            margin: 6px 0;
+            padding: 8px;
+            background: #f0fdf4;
+            border-radius: 4px;
+        }
+
+        .err {
+            color: #ef4444;
+            margin: 6px 0;
+            padding: 8px;
+            background: #fee2e2;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<!-- 按钮容器 -->
+<div class="btn-container">
+    <button id="getUserId" onclick="getUserId()">getUserId</button>
+    <button id="getUserToken" onclick="getUserToken()">getUserToken</button>
+
+    <button id="eventReport" onclick="eventReport()">eventReport</button>
+    <button id="login" onclick="login()">login</button>
+</div>
+
+<script src="../ho/fullbr.js"></script>
+<script type="text/javascript">
+    // 动态创建结果展示容器
+    const resultContainer = document.createElement('div');
+    resultContainer.id = 'userIdResult';
+    resultContainer.textContent = '正在获取用户ID...';
+    document.body.appendChild(resultContainer);
+
+    // 活动SDK初始化
+    window.nativeBridge.init("wiseopercampaign");
+    // 浏览器JS接口初始化
+    window.nativeBridge.init("hwbr");
+
+    function getUserId() {
+        setTimeout(() => {
+            window.nativeBridge.invoke(
+                "wiseopercampaignbridge",
+                "account",
+                "getUserId",
+                {username: "test"},
+                data => resultContainer.innerHTML += `<div class="suc">✅ getUserId succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ getUserId error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
+    }
+
+    function getUserToken() {
+        setTimeout(() => {
+            window.nativeBridge.invoke(
+                "wiseopercampaignbridge",
+                "account",
+                "getUserToken",
+                [{
+                    "scopes": [],
+                    "forceOn": "0",
+                    "userTokenOld": "",
+                    "extendInfo": {}
+                }],
+                data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
+    }
+
+
+    function eventReport() {
+        setTimeout(() => {
+            const eventReportJsonStr = JSON.stringify({
+                eventName: 'you are hacked',
+                version: 1,
+                info: {extInfo: {'name': 'cc'}, u: 'hahaha'},
+                reportImmediately: true,
+                isOverseaReport: false,
+                isAnonymous: true
+            });
+            window.nativeBridge.invoke(
+                "_hwbrNative",
+                "report",
+                "eventReport",
+                [eventReportJsonStr],
+                data => resultContainer.innerHTML += `<div class="suc">✅ report 1 succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ report 1 error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
+    }
+
+    function login() {
+        setTimeout(() => {
+            const loginInfo = {
+                clientId: "6917565689792636463",
+                redirectUri: "https://privacy.consumer.huawei.com/browser.html",
+                scope: "all",
+                accessType: "",
+                state: "200",
+                ui_locales: ""
+            };
+            window.nativeBridge.invoke(
+                "_hwbrNative",
+                "linkedLogin",
+                "login",
+                loginInfo,
+                data => resultContainer.innerHTML += `<div class="suc">✅ login 3 succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ login 3 error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
+    }
+
+</script>
+</body>
+</html>
