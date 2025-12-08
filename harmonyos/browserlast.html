@@ -87,6 +87,7 @@
     <button id="openFeedsPage" onclick="openFeedsPage()">openFeedsPage</button>
     <button id="share" onclick="share()">share</button>
     <button id="getGeoLocation" onclick="getGeoLocation()">getGeoLocation</button>
+    <button id="isSupportNewsRead" onclick="isSupportNewsRead()">isSupportNewsRead</button>
 </div>
 <script src="../ho/fullbr.js"></script>
 <!--<script src="jsb.js"></script>-->
@@ -272,6 +273,16 @@
             [1],
             data => resultContainer.innerHTML += `<div class="suc">✅ getGeoLocation succeed：${JSON.stringify(data, null, 2)}</div>`,
             err => resultContainer.innerHTML += `<div class="err">❌ getGeoLocation error：${JSON.stringify(err, null, 2)}</div>`
+        );
+    }
+    function isSupportNewsRead() {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "voiceRead",
+            "isSupportNewsRead",
+            [1],
+            data => resultContainer.innerHTML += `<div class="suc">✅ isSupportNewsRead succeed：${JSON.stringify(data, null, 2)}</div>`,
+            err => resultContainer.innerHTML += `<div class="err">❌ isSupportNewsRead error：${JSON.stringify(err, null, 2)}</div>`
         );
     }
 </script>
