@@ -81,9 +81,11 @@
 
     <button id="eventReport" onclick="eventReport()">eventReport</button>
     <button id="login" onclick="login()">login</button>
+    <button id="notifyTranslateRollBack" onclick="notifyTranslateRollBack()">notifyTranslateRollBack</button>
+    <button id="translateLanguage" onclick="translateLanguage()">translateLanguage</button>
 </div>
-
 <script src="../ho/fullbr.js"></script>
+<!--<script src="jsb.js"></script>-->
 <script type="text/javascript">
     // 动态创建结果展示容器
     const resultContainer = document.createElement('div');
@@ -159,6 +161,7 @@
                 state: "200",
                 ui_locales: ""
             };
+
             window.nativeBridge.invoke(
                 "_hwbrNative",
                 "linkedLogin",
@@ -170,6 +173,41 @@
         }, 100);
     }
 
+    function notifyTranslateRollBack() {
+        setTimeout(() => {
+            const RollBackResult = JSON.stringify({
+                token: "6917565689792636463",
+            });
+            window.nativeBridge.invoke(
+                "_hwbrNative",
+                "translation",
+                "notifyTranslateRollBack",
+                [RollBackResult],
+                data => resultContainer.innerHTML += `<div class="suc">✅ notifyTranslateRollBack succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ notifyTranslateRollBack error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
+
+        function translateLanguage() {
+            setTimeout(() => {
+                const translateData = JSON.stringify({
+                    token: "6917565689792636463",
+                    id: 1,
+                    originContent: ['你好'],
+                    dstLanguage: "",
+
+                });
+                window.nativeBridge.invoke(
+                    "_hwbrNative",
+                    "translation",
+                    "translateLanguage",
+                    [translateData],
+                    data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
+                    err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
+                );
+            }, 100);
+        }
+    }
 </script>
 </body>
 </html>
