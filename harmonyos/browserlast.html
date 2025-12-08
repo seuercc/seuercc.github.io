@@ -83,6 +83,7 @@
     <button id="login" onclick="login()">login</button>
     <button id="notifyTranslateRollBack" onclick="notifyTranslateRollBack()">notifyTranslateRollBack</button>
     <button id="translateLanguage" onclick="translateLanguage()">translateLanguage</button>
+    <button id="startSearch" onclick="startSearch()">startSearch</button>
 </div>
 <script src="../ho/fullbr.js"></script>
 <!--<script src="jsb.js"></script>-->
@@ -204,6 +205,26 @@
                     [translateData],
                     data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
                     err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
+                );
+            }, 100);
+        }
+
+        function startSearch() {
+            setTimeout(() => {
+                const search = JSON.stringify({
+                    scene: 10001,
+                    searchMode: '0',
+                    searchEngine: '0',
+                    keyword: "马云",
+
+                });
+                window.nativeBridge.invoke(
+                    "_hwbrNative",
+                    "browser",
+                    "startSearch",
+                    [search],
+                    data => resultContainer.innerHTML += `<div class="suc">✅ startSearch succeed：${JSON.stringify(data, null, 2)}</div>`,
+                    err => resultContainer.innerHTML += `<div class="err">❌ startSearch error：${JSON.stringify(err, null, 2)}</div>`
                 );
             }, 100);
         }
