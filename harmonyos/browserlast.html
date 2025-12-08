@@ -84,6 +84,7 @@
     <button id="notifyTranslateRollBack" onclick="notifyTranslateRollBack()">notifyTranslateRollBack</button>
     <button id="translateLanguage" onclick="translateLanguage()">translateLanguage</button>
     <button id="startSearch" onclick="startSearch()">startSearch</button>
+    <button id="openFeedsPage" onclick="openFeedsPage()">openFeedsPage</button>
 </div>
 <script src="../ho/fullbr.js"></script>
 <!--<script src="jsb.js"></script>-->
@@ -228,7 +229,18 @@
                 err => resultContainer.innerHTML += `<div class="err">❌ startSearch error：${JSON.stringify(err, null, 2)}</div>`
             );
         }, 100);
-        
+    }
+    function openFeedsPage() {
+        setTimeout(() => {
+            window.nativeBridge.invoke(
+                "_hwbrNative",
+                "browser",
+                "openFeedsPage",
+                [0,'https://seuercc.github.io/easyhtml/showjs.html'],
+                data => resultContainer.innerHTML += `<div class="suc">✅ openFeedsPage succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ openFeedsPage error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
     }
 </script>
 </body>
