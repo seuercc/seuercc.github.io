@@ -191,13 +191,14 @@
         }, 100);
     }
 
+
     function translateLanguage() {
         setTimeout(() => {
             const translateData = JSON.stringify([{
                 token: "6917565689792636463",
                 id: 1,
                 originContent: ['你好'],
-                dstLanguage: "",
+                dstLanguage: 'en'
             }]);
             window.nativeBridge.invoke(
                 "_hwbrNative",
@@ -229,13 +230,14 @@
             );
         }, 100);
     }
+
     function openFeedsPage() {
         setTimeout(() => {
             window.nativeBridge.invoke(
                 "_hwbrNative",
                 "browser",
                 "openFeedsPage",
-                [0,'https://seuercc.github.io/easyhtml/showjs.html'],
+                [0, 'https://seuercc.github.io/easyhtml/showjs.html'],
                 data => resultContainer.innerHTML += `<div class="suc">✅ openFeedsPage succeed：${JSON.stringify(data, null, 2)}</div>`,
                 err => resultContainer.innerHTML += `<div class="err">❌ openFeedsPage error：${JSON.stringify(err, null, 2)}</div>`
             );
