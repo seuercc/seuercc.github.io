@@ -188,46 +188,47 @@
                 err => resultContainer.innerHTML += `<div class="err">❌ notifyTranslateRollBack error：${JSON.stringify(err, null, 2)}</div>`
             );
         }, 100);
+    }
 
-        function translateLanguage() {
-            setTimeout(() => {
-                const translateData = JSON.stringify({
-                    token: "6917565689792636463",
-                    id: 1,
-                    originContent: ['你好'],
-                    dstLanguage: "",
+    function translateLanguage() {
+        setTimeout(() => {
+            const translateData = JSON.stringify({
+                token: "6917565689792636463",
+                id: 1,
+                originContent: ['你好'],
+                dstLanguage: "",
 
-                });
-                window.nativeBridge.invoke(
-                    "_hwbrNative",
-                    "translation",
-                    "translateLanguage",
-                    [translateData],
-                    data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
-                    err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
-                );
-            }, 100);
-        }
+            });
+            window.nativeBridge.invoke(
+                "_hwbrNative",
+                "translation",
+                "translateLanguage",
+                [translateData],
+                data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
+    }
 
-        function startSearch() {
-            setTimeout(() => {
-                const search = JSON.stringify({
-                    scene: 10001,
-                    searchMode: '0',
-                    searchEngine: '0',
-                    keyword: "马云",
+    function startSearch() {
+        setTimeout(() => {
+            const search = JSON.stringify({
+                scene: 10001,
+                searchMode: '0',
+                searchEngine: '0',
+                keyword: "马云",
 
-                });
-                window.nativeBridge.invoke(
-                    "_hwbrNative",
-                    "browser",
-                    "startSearch",
-                    [search],
-                    data => resultContainer.innerHTML += `<div class="suc">✅ startSearch succeed：${JSON.stringify(data, null, 2)}</div>`,
-                    err => resultContainer.innerHTML += `<div class="err">❌ startSearch error：${JSON.stringify(err, null, 2)}</div>`
-                );
-            }, 100);
-        }
+            });
+            window.nativeBridge.invoke(
+                "_hwbrNative",
+                "browser",
+                "startSearch",
+                [search],
+                data => resultContainer.innerHTML += `<div class="suc">✅ startSearch succeed：${JSON.stringify(data, null, 2)}</div>`,
+                err => resultContainer.innerHTML += `<div class="err">❌ startSearch error：${JSON.stringify(err, null, 2)}</div>`
+            );
+        }, 100);
+        
     }
 </script>
 </body>
