@@ -193,18 +193,17 @@
 
     function translateLanguage() {
         setTimeout(() => {
-            const translateData = JSON.stringify({
+            const translateData = JSON.stringify([{
                 token: "6917565689792636463",
                 id: 1,
                 originContent: ['你好'],
                 dstLanguage: "",
-
-            });
+            }]);
             window.nativeBridge.invoke(
                 "_hwbrNative",
                 "translation",
                 "translateLanguage",
-                [translateData],
+                translateData,
                 data => resultContainer.innerHTML += `<div class="suc">✅ translateLanguage succeed：${JSON.stringify(data, null, 2)}</div>`,
                 err => resultContainer.innerHTML += `<div class="err">❌ translateLanguage error：${JSON.stringify(err, null, 2)}</div>`
             );
