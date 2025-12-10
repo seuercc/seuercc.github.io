@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Window 自定义属性查看器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", Arial, sans-serif;
+        }
+
+        body {
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .section {
+            margin: 25px 0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 4px solid #007bff;
+        }
+
+        .item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #212529;
+            margin-bottom: 5px;
+        }
+
+        .item-content {
+            font-family: "Consolas", monospace;
+            font-size: 14px;
+            color: #666;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .empty-tip {
+            color: #999;
+            font-style: italic;
+            padding: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Window 自定义属性/方法查看</h1>
+    <button id="refreshBtn">刷新自定义属性列表</button>
+
+    <div class="section">
+        <div class="section-title">1. Window 级自定义方法</div>
+        <div id="windowMethods" class="content"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">2. Window 级自定义对象</div>
+        <div id="windowObjects" class="content"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">3. Window 级自定义普通值</div>
+        <div id="windowValues" class="content"></div>
+    </div>
+</div>
+
+<script>
+    // 修复核心：简化过滤逻辑，确保递归遍历所有自定义对象方法
+    function getCustomWindowProps() {
+        const excludeProps = new Set(['getCustomWindowProps', 'renderContent']);
+        let nativeProps = new Set();
+
+        // 1. 获取原生window的属性名（仅用于过滤window级原生属性）
+        try {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            for (let prop in iframe.contentWindow) nativeProps.add(prop);
+            document.body.removeChild(iframe);
+        } catch (e) {
+            console.error('获取原生属性失败：', e.message);
+            return {methods: {}, objects: {}, values: {}};
+        }
+
+        // 修复点1：简化辅助函数，移除错误的原生对象过滤逻辑
+        // 核心：只过滤原生方法（[native code]），不过滤自定义对象的递归
+        const getObjectMethods = (obj, parentName = '') => {
+            const methods = {};
+            // 终止条件：非对象/空/循环引用（指向window）
+            if (typeof obj !== 'object' || obj === null || obj === window) {
+                return methods;
+            }
+
+            // 遍历当前对象的所有可枚举属性
+            Object.keys(obj).forEach(key => {
+                try {
+                    const val = obj[key];
+                    // 只收集自定义方法（排除原生方法）
+                    if (typeof val === 'function') {
+                        const fnStr = val.toString();
+                        if (!fnStr.includes('[native code]')) {
+                            const fullKey = parentName ? `${parentName}.${key}` : key;
+                            methods[fullKey] = val;
+                        }
+                    }
+                    // 修复点2：递归遍历子对象（所有非原生方法的对象都递归）
+                    if (typeof val === 'object' && val !== null && val !== window) {
+                        Object.assign(methods, getObjectMethods(val, parentName ? `${parentName}.${key}` : key));
+                    }
+                } catch (e) {
+                    console.warn(`遍历属性 ${key} 失败：`, e.message);
+                    return;
+                }
+            });
+            return methods;
+        };
+
+        // 筛选window级自定义内容
+        const result = {methods: {}, objects: {}, values: {}};
+        for (let prop in window) {
+            try {
+                // 跳过：原生属性 | 自身代码属性 | 不可枚举属性
+                const descriptor = Object.getOwnPropertyDescriptor(window, prop);
+                if (nativeProps.has(prop) || excludeProps.has(prop) || (descriptor && !descriptor.enumerable)) {
+                    continue;
+                }
+
+                const val = window[prop];
+                // Window级方法：排除原生方法
+                if (typeof val === 'function') {
+                    if (!val.toString().includes('[native code]')) {
+                        result.methods[prop] = val;
+                    }
+                }
+                // Window级对象：收集并递归遍历内部方法
+                else if (typeof val === 'object' && val !== null) {
+                    result.objects[prop] = {
+                        raw: val,
+                        methods: getObjectMethods(val, prop) // 现在能正确收集内部方法
+                    };
+                }
+                // Window级普通值
+                else {
+                    result.values[prop] = val;
+                }
+            } catch (e) {
+                console.warn(`处理window属性 ${prop} 失败：`, e.message);
+                continue;
+            }
+        }
+
+        console.log(result.methods);
+
+        Object.entries(result.objects).forEach(([objName, objInfo]) => {
+            console.log(`对象名：${objName}`);
+            console.log('  原始对象：', objInfo.raw);
+            console.log('  内部方法：', objInfo.methods);
+        });
+
+        console.log(result.values);
+
+        return result;
+    }
+
+    // 渲染内容到页面
+    function renderContent() {
+        const customProps = getCustomWindowProps();
+        const methodsContainer = document.getElementById('windowMethods');
+        const objectsContainer = document.getElementById('windowObjects');
+        const valuesContainer = document.getElementById('windowValues');
+
+        // 清空原有内容
+        methodsContainer.innerHTML = '';
+        objectsContainer.innerHTML = '';
+        valuesContainer.innerHTML = '';
+
+        // 渲染Window级方法
+        if (Object.keys(customProps.methods).length === 0) {
+            methodsContainer.innerHTML = '<div class="empty-tip">暂无自定义方法</div>';
+        } else {
+            Object.entries(customProps.methods).forEach(([name, fn]) => {
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.innerHTML = `
+                        <div class="item-name">方法名：${name}</div>
+                        <div class="item-content">${fn.toString()}</div>
+                    `;
+                methodsContainer.appendChild(item);
+            });
+        }
+
+        // 渲染Window级对象（重点：现在能正确显示内部方法）
+        if (Object.keys(customProps.objects).length === 0) {
+            objectsContainer.innerHTML = '<div class="empty-tip">暂无自定义对象</div>';
+        } else {
+            Object.entries(customProps.objects).forEach(([objName, objInfo]) => {
+                const item = document.createElement('div');
+                item.className = 'item';
+
+                // 拼接内部方法内容
+                let innerMethodsHtml = '';
+                if (Object.keys(objInfo.methods).length === 0) {
+                    innerMethodsHtml = '<div class="empty-tip">该对象无自定义内部方法</div>';
+                } else {
+                    Object.entries(objInfo.methods).forEach(([methodName, fn]) => {
+                        innerMethodsHtml += `
+                                <div class="item-name">内部方法：${methodName}</div>
+                                <div class="item-content">${fn.toString()}</div>
+                            `;
+                    });
+                }
+
+                item.innerHTML = `
+                        <div class="item-name">对象名：${objName}</div>
+                        <div class="item-content">原始对象：${JSON.stringify(objInfo.raw, (k, v) => typeof v === 'function' ? '[Function]' : v, 2)}</div>
+                        <div style="margin-top:10px;border-top:1px dashed #ddd;padding-top:10px;">${innerMethodsHtml}</div>
+                    `;
+                objectsContainer.appendChild(item);
+            });
+        }
+
+        // 渲染Window级普通值
+        if (Object.keys(customProps.values).length === 0) {
+            valuesContainer.innerHTML = '<div class="empty-tip">暂无自定义普通值</div>';
+        } else {
+            Object.entries(customProps.values).forEach(([name, value]) => {
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.innerHTML = `
+                        <div class="item-name">属性名：${name}</div>
+                        <div class="item-content">值：${JSON.stringify(value, null, 2)}</div>
+                    `;
+                valuesContainer.appendChild(item);
+            });
+        }
+    }
+
+    // 页面加载和按钮点击触发渲染
+    window.onload = renderContent;
+    document.getElementById('refreshBtn').addEventListener('click', renderContent);
+</script>
+</body>
+</html>
