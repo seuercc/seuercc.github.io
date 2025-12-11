@@ -718,17 +718,6 @@
         });
     });
 
-    // 批量注册同步API方法到window.wiseopercampaign
-    // window.wiseopercampaign = window.wiseopercampaign || {};
-    Object.entries(apiConfigSync).forEach(([moduleName, methods]) => {
-        window.wiseopercampaign[moduleName] = window.wiseopercampaign[moduleName] || {};
-
-        methods.forEach(methodName => {
-            window.wiseopercampaign[moduleName][methodName] = (params, success, fail) => {
-                invokeSyncNativeBridge(moduleName, methodName, params, success, fail);
-            };
-        });
-    });
 
     /**
      * 页面初始化函数（创建样式、DOM、调用API）
@@ -816,18 +805,11 @@
                 }
             ];
 
-            // 批量执行API调用
+            // 批量执行同步API调用
             apiSyncCalls.forEach(({ api, params, label }) => {
                 const [module, method] = api.split('.');
-                wiseopercampaign[module][method](
-                    params,
-                    (data) => {
-                        resultContainer.innerHTML += `<div class="suc">✅ ${label} succeed：${JSON.stringify(data)}</div>`;
-                    },
-                    (err) => {
-                        resultContainer.innerHTML += `<div class="err">❌ ${label} error：${JSON.stringify(err)}</div>`;
-                    }
-                );
+                const result = wiseopercampaignbridge.invokeSync(module, method, params)
+                resultContainer.innerHTML += `<div class="suc"> ${label} result：${JSON.stringify(result)}</div>`;
             });
         }, 100);
     })();
