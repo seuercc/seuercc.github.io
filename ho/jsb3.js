@@ -116,7 +116,7 @@
          */
         fire(arg1, arg2) {
             const args = arg2 ? [arg1, arg2] : [arg1];
-            
+
             // 标记一次性事件为已触发状态
             if (this.state === 1) {
                 this.state = 2;
@@ -249,7 +249,7 @@
      * 微任务执行器（兼容Promise和setTimeout）
      * @param {Function} callback - 要执行的回调
      */
-    const microTask = typeof Promise !== "undefined" 
+    const microTask = typeof Promise !== "undefined"
         ? (callback) => Promise.resolve().then(callback)
         : (callback) => setTimeout(callback);
 
@@ -299,15 +299,15 @@
 
         // 解析是否保持回调（1-保持 其他-不保持）
         const keepCallback = content.charAt(1) === "1";
-        
+
         // 解析状态码（第2位到第一个空格之间）
         const statusSeparator = content.indexOf(" ", 2);
         const statusCode = Number(content.slice(2, statusSeparator));
-        
+
         // 解析回调ID（第一个空格到第二个空格之间）
         const callbackIdSeparator = content.indexOf(" ", statusSeparator + 1);
         const callbackId = content.slice(statusSeparator + 1, callbackIdSeparator);
-        
+
         // 解析参数内容（第二个空格之后）
         const argsContent = content.slice(callbackIdSeparator + 1);
         const args = [];
@@ -465,7 +465,7 @@
         // 调用Native方法
         const nativeBridge = getNativeBridge(bridgeName);
         const result = nativeBridge.invoke(service, action, callbackId, argsStr, -1);
-        
+
         console.debug(`exec ${service}.${action} with args: ${JSON.stringify(args)}, result: ${JSON.stringify(result)}`);
 
         // 结果入队并处理
@@ -490,7 +490,7 @@
     function invoke(bridgeName, service, action, args, success, fail, cancel, complete) {
         // 检测是否有回调函数
         const hasCallback = success || fail || cancel || complete;
-        
+
         // 包装成功回调（执行success + complete）
         const wrappedSuccess = hasCallback ? (res) => {
             success && success(res);
@@ -543,7 +543,7 @@
     function invokeSync(bridgeName, service, action, args) {
         const nativeBridge = getNativeBridge(bridgeName);
         const result = nativeBridge.invokeSync(service, action, args);
-        
+
         let parsedResult;
         try {
             parsedResult = result ? JSON.parse(result) : null;
@@ -551,7 +551,7 @@
             parsedResult = null;
         }
 
-        return parsedResult 
+        return parsedResult
             ? { status: parsedResult.status ?? STATUS_UNKNOWN, result: parsedResult.result }
             : { status: STATUS_UNKNOWN };
     }
@@ -671,7 +671,8 @@
             "createCalendarEvent",
             "queryCalendarEvent",
             "deleteCalendarEvent",
-            "showToast"
+            "showToast",
+            "getParams"
         ],
         account: [
             "getUserId",
@@ -684,7 +685,7 @@
     window.wiseopercampaign = window.wiseopercampaign || {};
     Object.entries(apiConfig).forEach(([moduleName, methods]) => {
         window.wiseopercampaign[moduleName] = window.wiseopercampaign[moduleName] || {};
-        
+
         methods.forEach(methodName => {
             window.wiseopercampaign[moduleName][methodName] = (params, success, fail) => {
                 invokeNativeBridge(moduleName, methodName, params, success, fail);
@@ -739,11 +740,16 @@
                 {
                     api: 'app.queryCalendarEvent',
                     params: [{
-                        id: 0, 
-                        title: 'cc', 
+                        id: 0,
+                        title: 'cc',
                         timeRange: [[new Date().getTime(), new Date().getTime() + 100000]]
                     }],
                     label: 'app queryCalendarEvent'
+                },
+                {
+                    api: 'app.getParams',
+                    params: [],
+                    label: 'app getParams'
                 }
             ];
 
