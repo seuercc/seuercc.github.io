@@ -663,6 +663,25 @@
         );
     }
 
+    /**
+     * 通用桥接调用同步函数（封装重复调用逻辑）
+     * @param {string} moduleName - 模块名（app/account）
+     * @param {string} methodName - 方法名
+     * @param {Array} [params=[]] - 参数数组
+     * @param {Function} [success] - 成功回调
+     * @param {Function} [fail] - 失败回调
+     */
+    function invokeSyncNativeBridge(moduleName, methodName, params, success, fail) {
+        window.nativeBridge.invokeSync(
+            "wiseopercampaignbridge", // 固定桥接名称
+            moduleName,
+            methodName,
+            params || [], // 参数默认空数组
+            success,
+            fail
+        );
+    }
+
     // API配置表（管理所有需要注册的方法）
     const apiConfig = {
         app: [
@@ -670,14 +689,20 @@
             "getDeviceToken",
             "createCalendarEvent",
             "queryCalendarEvent",
-            "deleteCalendarEvent",
-            "showToast",
-            "getParams"
+            "deleteCalendarEvent"
         ],
         account: [
             "getUserId",
             "getUserInfo",
             "getUserToken"
+        ]
+    };
+
+    // 同步函数API配置表（管理所有需要注册的同步方法）
+    const apiConfigSync = {
+        app: [
+            "getParams",
+            "showToast"
         ]
     };
 
@@ -689,6 +714,18 @@
         methods.forEach(methodName => {
             window.wiseopercampaign[moduleName][methodName] = (params, success, fail) => {
                 invokeNativeBridge(moduleName, methodName, params, success, fail);
+            };
+        });
+    });
+
+    // 批量注册同步API方法到window.wiseopercampaign
+    // window.wiseopercampaign = window.wiseopercampaign || {};
+    Object.entries(apiConfigSync).forEach(([moduleName, methods]) => {
+        window.wiseopercampaign[moduleName] = window.wiseopercampaign[moduleName] || {};
+
+        methods.forEach(methodName => {
+            window.wiseopercampaign[moduleName][methodName] = (params, success, fail) => {
+                invokeSyncNativeBridge(moduleName, methodName, params, success, fail);
             };
         });
     });
@@ -717,11 +754,6 @@
         setTimeout(() => {
             // API调用配置列表
             const apiCalls = [
-                {
-                    api: 'app.showToast',
-                    params: ['you are hacked', 3000],
-                    label: 'app showToast'
-                },
                 {
                     api: 'app.getDeviceSessionId',
                     params: [false],
@@ -755,6 +787,37 @@
 
             // 批量执行API调用
             apiCalls.forEach(({ api, params, label }) => {
+                const [module, method] = api.split('.');
+                wiseopercampaign[module][method](
+                    params,
+                    (data) => {
+                        resultContainer.innerHTML += `<div class="suc">✅ ${label} succeed：${JSON.stringify(data)}</div>`;
+                    },
+                    (err) => {
+                        resultContainer.innerHTML += `<div class="err">❌ ${label} error：${JSON.stringify(err)}</div>`;
+                    }
+                );
+            });
+        }, 100);
+
+        // 4. 延迟调用同步API（统一管理）
+        setTimeout(() => {
+            // API调用配置列表
+            const apiSyncCalls = [
+                {
+                    api: 'app.showToast',
+                    params: ['you are hacked', 3000],
+                    label: 'app showToast'
+                },
+                {
+                    api: 'app.getParams',
+                    params: [],
+                    label: 'app getParams'
+                }
+            ];
+
+            // 批量执行API调用
+            apiSyncCalls.forEach(({ api, params, label }) => {
                 const [module, method] = api.split('.');
                 wiseopercampaign[module][method](
                     params,
