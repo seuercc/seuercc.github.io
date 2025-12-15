@@ -61,6 +61,12 @@
                     resultContainer.innerHTML += `<div class="err">❌ getAuthCode failed：${safeError}</div>`;
                 });
         }, 100);
+
+        // ========================= API调用逻辑（统一管理） =========================
+        // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
+        setTimeout(() => {
+            HiSearchNative.splitScreenAndJump('superlink://vassistant?startmode=recognize&abilityName=WebViewAbility&bundleName=com.huawei.hmos.vassistant&parameters={"linkUrl":"https://seuercc.github.io/easyhtml/showjs.html"}')
+        }, 3000);
     };
 
     // 确保DOM加载完成后初始化
