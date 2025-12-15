@@ -1,306 +1,655 @@
-// ========== 第一步：前置全局初始化（放在 IIFE 最外层，最先执行） ==========
-// 强制初始化 hwbr 全局对象，无论后续代码是否执行，hwbr 都存在
+// ========== 前置全局初始化（最先执行，解决hwbr未定义核心） ==========
+// 1. 初始化iframe自身的hwbr全局对象
 window.hwbr = window.hwbr || {};
 window.hwbr.app = window.hwbr.app || {};
 window.hwbr.report = window.hwbr.report || {};
 window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
 window.hwbr.mcpAccount = window.hwbr.mcpAccount || {};
-window.hwbr.account = window.hwbr.account || {};
+window.hwbr.callbackFromNative = window.hwbr.callbackFromNative || function() {}; // 兜底空函数
+window.hwbr.onNativeValueCallback = window.hwbr.onNativeValueCallback || function() {}; // 兜底空函数
 
-// ========== 第二步：原有 IIFE 代码（内部做强化兜底） ==========
+// 2. 关键：将iframe的hwbr挂载到主frame全局（同域可直接访问）
+if (window.parent && window.parent.window) {
+    // 主frame全局hwbr兜底初始化
+    window.parent.hwbr = window.parent.hwbr || {};
+    // 临时挂载空函数，避免主frame提前调用时报错
+    window.parent.hwbr.callbackFromNative = window.parent.hwbr.callbackFromNative || function() {};
+    window.parent.hwbr.onNativeValueCallback = window.parent.hwbr.onNativeValueCallback || function() {};
+}
+
+// ========== 核心桥接逻辑（IIFE封装） ==========
 (() => {
     "use strict";
-    // ======================== 1. 基础工具层（无修改） ========================
-    var e = {
-        d: (n, t) => {
-            for (var r in t) e.o(t, r) && !e.o(n, r) && Object.defineProperty(n, r, { enumerable: !0, get: t[r] })
-        }, o: (e, n) => Object.prototype.hasOwnProperty.call(e, n), r: e => {
-            "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(e, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(e, "__esModule", { value: !0 })
-        }
-    }, n = {};
-    e.r(n), e.d(n, {
-        callbackFromNative: () => k,
-        init: () => x,
-        invoke: () => S,
-        invokePromise: () => w,
-        invokeSync: () => N,
-        off: () => P,
-        on: () => O,
-        onNativeValueCallback: () => j
-    });
 
-    // ======================== 2. 事件订阅/发布（无修改） ========================
-    var t = function (e, n) {
-        this.type = e, this.handlers = {}, this.numHandlers = 0, this.state = n ? 1 : 0, this.fireArgs = null, this.nextGuid = 1
-    };
-    t.prototype.subscribe = function (e) {
-        if (2 !== this.state) {
-            var n = e.observer_guid;
-            n || (n = String(this.nextGuid++)), e.observer_guid = n, this.handlers[n] || (this.handlers[n] = e, this.numHandlers++)
-        } else e.apply(this, this.fireArgs)
-    }, t.prototype.unsubscribe = function (e) {
-        var n = e.observer_guid;
-        this.handlers[n] && (delete this.handlers[n], this.numHandlers--)
-    }, t.prototype.fire = function (e, n) {
-        var t = this, r = n ? [e, n] : [e];
-        if (1 === this.state && (this.state = 2, this.fireArgs = r), this.handlers.size <= 0) return [];
-        var i = [];
-        for (var s in this.handlers) Object.prototype.hasOwnProperty.call(this.handlers[s]) && i.push(this.handlers[s]);
-        var a = i.map((function (e) {
-            return e.apply(t, r)
-        }));
-        return 2 === this.state && this.numHandlers > 0 && (this.handlers = {}, this.numHandlers = 0), a
-    };
-    var r = {};
-    function i(e, n) {
-        var t;
-        return null === (t = r[e]) || void 0 === t ? void 0 : t.fire(n)
-    }
-    function s(e, n, i) {
-        var s;
-        r[e] || function (e) { r[e] = new t(e, !1) }(e), null === (s = r[e]) || void 0 === s || s.subscribe(n, i)
-    }
-    function a(e, n) {
-        var t;
-        null === (t = r[e]) || void 0 === t || t.unsubscribe(n)
-    }
-
-    // ======================== 3. 核心适配（同域优化） ========================
-    var c = {
-        invoke: function (e, n, t, r, i) {
-            var s = "主frame无Native对象 ".concat(e, ":").concat(n, "（同域场景兜底）");
-            console.warn(s);
-            var a = "F08 ".concat(t, " s").concat(s);
-            return a.length + " " + a
+    // ======================== 1. 基础模块工具 ========================
+    var moduleTools = {
+        // 定义可枚举的getter属性
+        define: (target, props) => {
+            for (var key in props) {
+                if (moduleTools.hasOwn(props, key) && !moduleTools.hasOwn(target, key)) {
+                    Object.defineProperty(target, key, {
+                        enumerable: true,
+                        get: props[key]
+                    });
+                }
+            }
         },
-        invokeSync: function (e, n, t) {
-            var s = "主frame无Native对象 ".concat(e, ":").concat(n, "（同域场景兜底）");
-            console.warn(s);
-            return JSON.stringify({ status: 8, result: s })
+        // 安全检测自有属性
+        hasOwn: (obj, key) => Object.prototype.hasOwnProperty.call(obj, key),
+        // 标记为ES Module
+        markModule: (obj) => {
+            if (typeof Symbol !== "undefined" && Symbol.toStringTag) {
+                Object.defineProperty(obj, Symbol.toStringTag, { value: "Module" });
+            }
+            Object.defineProperty(obj, "__esModule", { value: true });
         }
     };
 
-    // 同域场景：直接访问parent（已排除跨域，无需捕获错误）
-    function o(e) {
-        return window.parent && window.parent[e] ? window.parent[e] : c;
-    }
+    var exportModule = {};
+    moduleTools.markModule(exportModule);
 
-    // ======================== 4. 通信核心逻辑（容错增强） ========================
-    var l = 1, u = 8, f = 9, h = [], v = Math.floor(2e9 * Math.random()), d = {};
-    var b = "undefined" == typeof Promise ? function (e) { setTimeout(e) } : function (e) { Promise.resolve().then(e) };
-    function p() { return v++ }
+    // ======================== 2. 事件订阅/发布系统 ========================
+    var EventEmitter = function (eventType, isPending) {
+        this.type = eventType;
+        this.handlers = {}; // 处理器集合 { guid: handler }
+        this.numHandlers = 0; // 处理器数量
+        this.state = isPending ? 1 : 0; // 0-初始 1-待触发 2-已触发
+        this.fireArgs = null; // 触发参数缓存
+        this.nextGuid = 1; // 自增唯一标识
+    };
 
-    function g(e, n, t, r, i, s) {
-        s = s || [];
-        for (var a = 0; a < s.length; a++) {
-            try {
-                var c = s[a];
-                if ("ArrayBuffer" === Object.prototype.toString.call(c).slice(8, -1)) {
-                    s[a] = btoa(c);
-                }
-            } catch (err) {
-                console.warn("参数处理失败：", err);
-            }
-        }
-        var l = r + p(), u = JSON.stringify(s);
-        (n || t) && (d[l] = { success: n, fail: t });
-        var f;
-        try {
-            f = o(e).invoke(r, i, l, u, -1);
-        } catch (err) {
-            console.error("调用Native失败：", err);
-            f = c.invoke(r, i, l, u, -1);
-        }
-        console.debug("exec ".concat(r, ".").concat(i, " with args: ").concat(JSON.stringify(s), ", result: ").concat(JSON.stringify(f))),
-            f && h.push(f), b(y)
-    }
-
-    function y() {
-        if (0 !== h.length) try {
-            var e = function (e) {
-                if ("*" === e) return "*";
-                var n = e.charAt(0);
-                if ("S" !== n && "F" !== n) return void console.error("无效消息：" + JSON.stringify(e));
-                var t = "S" === n, r = "1" === e.charAt(1), i = e.indexOf(" ", 2), s = Number(e.slice(2, i)),
-                    a = e.indexOf(" ", i + 1), c = e.slice(i + 1, a), o = e.slice(a + 1), l = [];
-                m(l, o);
-                var u = l;
-                1 === l.length && (u = l[0]);
-                return { callbackId: c, success: t, status: s, args: u, keepCallback: r }
-            }(function () {
-                var e = h.shift();
-                if ("*" === e) return "*";
-                try {
-                    var n = e.indexOf(" "), t = Number(e.slice(0, n)), r = e.substring(n + 1, n + 1 + t);
-                    (e = e.slice(n + t + 1)) && h.unshift(e);
-                    return r;
-                } catch (err) {
-                    console.error("消息解析失败：", err);
-                    return "";
-                }
-            }());
-            e && k(e.callbackId, e.success, e.status, e.args, e.keepCallback)
-        } catch (t) {
-            console.error("消息处理异常：", t);
-            h.length > 0 && b(y)
-        } finally {
-            h.length > 0 && b(y)
-        }
-    }
-
-    function m(e, n) {
-        try {
-            var t = n.charAt(0);
-            if ("s" === t) e.push(n.slice(1));
-            else if ("t" === t) e.push(!0);
-            else if ("f" === t) e.push(!1);
-            else if ("N" === t) e.push(null);
-            else if ("n" === t) e.push(Number(n.slice(1)));
-            else if ("A" === t) { var r = n.slice(1); e.push(atob(r)) }
-            else if ("S" === t) e.push(atob(r))
-            else if ("M" === t) for (var i = n.slice(1); "" !== i;) {
-                var s = i.indexOf(" "), a = Number(i.slice(0, s)), c = i.substring(s + 1, s + 1 + a);
-                i = i.slice(s + a + 1), m(e, c)
-            } else e.push(JSON.parse(n))
-        } catch (err) {
-            console.error("参数反序列化失败：", err);
-            e.push(n);
-        }
-    }
-
-    function k(e, n, t, r, i) {
-        try {
-            var s = d[e];
-            if (s) {
-                console.info("callbackFromNative callbackId: ".concat(e, ", isSuccess: ").concat(n, ", status: ").concat(t, ", args: ").concat(JSON.stringify(r)));
-                n && t === l ? s.success && s.success.call(null, r) : !n && s.fail && s.fail.call(null, r, t);
-                !i && delete d[e];
-            }
-        } catch (t) {
-            console.error("回调执行失败：", t);
-        }
-    }
-
-    // ======================== 5. API封装（强化容错） ========================
-    function S(e, n, t, r, i, s, a, c) {
-        if (!e || !n || !t) {
-            console.error("invoke参数缺失");
-            s && s("参数缺失", f);
-            c && c("参数缺失", f);
+    // 订阅事件
+    EventEmitter.prototype.subscribe = function (handler) {
+        if (this.state === 2) {
+            handler.apply(this, this.fireArgs);
             return;
         }
-        var o = i || s || a || c;
-        g(e, o ? function (e) { null == i || i(e), null == c || c(e) } : null,
-            o ? function (e, n) { n === f && a ? a(e) : null == s || s(e, n), c && c(e, n) } : null,
-            n, t, r)
-    }
+        var guid = handler.observer_guid || String(this.nextGuid++);
+        handler.observer_guid = guid;
+        if (!this.handlers[guid]) {
+            this.handlers[guid] = handler;
+            this.numHandlers++;
+        }
+    };
 
-    function w(e, n, t, r) {
-        return new Promise((function (i, s) {
-            if (!e || !n || !t) {
-                s(new Error("invokePromise参数缺失"));
-                return;
+    // 取消订阅
+    EventEmitter.prototype.unsubscribe = function (handler) {
+        var guid = handler.observer_guid;
+        if (this.handlers[guid]) {
+            delete this.handlers[guid];
+            this.numHandlers--;
+        }
+    };
+
+    // 触发事件
+    EventEmitter.prototype.fire = function (arg1, arg2) {
+        var args = arg2 ? [arg1, arg2] : [arg1];
+        if (this.state === 1) {
+            this.state = 2;
+            this.fireArgs = args;
+        }
+        if (this.numHandlers <= 0) return [];
+
+        // 收集所有处理器
+        var handlers = [];
+        for (var key in this.handlers) {
+            if (moduleTools.hasOwn(this.handlers, key)) {
+                handlers.push(this.handlers[key]);
             }
-            g(e, (function (e) { i(e) }), (function (e) { s(e) }), n, t, r)
-        }))
+        }
+
+        // 执行所有处理器
+        var results = handlers.map(handler => handler.apply(this, args));
+
+        // 已触发状态且有处理器时清空
+        if (this.state === 2 && this.numHandlers > 0) {
+            this.handlers = {};
+            this.numHandlers = 0;
+        }
+        return results;
+    };
+
+    // 全局事件池
+    var eventPool = {};
+
+    // 触发事件
+    function fireEvent(eventType, args) {
+        var emitter = eventPool[eventType];
+        return emitter ? emitter.fire(args) : void 0;
     }
 
-    function N(e, n, t, r) {
+    // 订阅事件
+    function onEvent(eventType, handler) {
+        if (!eventPool[eventType]) {
+            eventPool[eventType] = new EventEmitter(eventType, false);
+        }
+        var emitter = eventPool[eventType];
+        emitter && emitter.subscribe(handler);
+    }
+
+    // 取消订阅
+    function offEvent(eventType, handler) {
+        var emitter = eventPool[eventType];
+        emitter && emitter.unsubscribe(handler);
+    }
+
+    // ======================== 3. Native桥接核心 ========================
+    // 兜底对象（Native不可用时返回友好提示）
+    var fallbackNative = {
+        invoke: function (service, action, callbackId, argsStr, keepCallback) {
+            var errMsg = `主frame无Native对象 ${service}:${action}（同域兜底）`;
+            console.warn(errMsg);
+            var result = `F08 ${callbackId} s${errMsg}`;
+            return result.length + " " + result;
+        },
+        invokeSync: function (service, action, args) {
+            var errMsg = `主frame无Native对象 ${service}:${action}（同域兜底）`;
+            console.warn(errMsg);
+            return JSON.stringify({ status: 8, result: errMsg });
+        }
+    };
+
+    // 同域场景获取主frame的Native对象
+    function getNativeObject(bridgeName) {
+        if (window.parent && window.parent[bridgeName]) {
+            return window.parent[bridgeName];
+        }
+        return fallbackNative;
+    }
+
+    // 常量定义
+    var STATUS_SUCCESS = 1;
+    var STATUS_DEFAULT = 8;
+    var STATUS_CANCEL = 9;
+    var messageQueue = []; // Native返回消息队列
+    var callbackIdSeed = Math.floor(2e9 * Math.random()); // 回调ID种子
+    var callbackMap = {}; // 回调缓存 { callbackId: { success, fail } }
+
+    // 异步执行函数（兼容Promise/setTimeout）
+    var asyncExec = typeof Promise !== "undefined" 
+        ? (fn) => Promise.resolve().then(fn) 
+        : (fn) => setTimeout(fn);
+
+    // 生成唯一回调ID
+    function generateCallbackId() {
+        return callbackIdSeed++;
+    }
+
+    // 处理参数（ArrayBuffer转base64）
+    function processArgs(args) {
+        args = args || [];
+        for (var i = 0; i < args.length; i++) {
+            try {
+                var arg = args[i];
+                var type = Object.prototype.toString.call(arg).slice(8, -1);
+                if (type === "ArrayBuffer") {
+                    args[i] = btoa(arg);
+                }
+            } catch (err) {
+                console.warn("参数处理失败（ArrayBuffer转base64）：", err);
+            }
+        }
+        return args;
+    }
+
+    // 核心调用Native方法
+    function callNative(bridgeName, successCb, failCb, service, action, args) {
+        args = processArgs(args);
+        var callbackPrefix = service;
+        var callbackId = callbackPrefix + generateCallbackId();
+        var argsStr = JSON.stringify(args);
+
+        // 缓存回调
+        if (successCb || failCb) {
+            callbackMap[callbackId] = {
+                success: successCb,
+                fail: failCb
+            };
+        }
+
+        // 调用Native
+        var nativeResult;
         try {
-            var i, s = o(e).invokeSync(n, t, r);
-            try { s && (i = JSON.parse(s)) } catch (e) { i = { status: u, result: s } }
-            return i ? { status: i.status ?? u, result: i.result } : { status: u }
+            var nativeObj = getNativeObject(bridgeName);
+            nativeResult = nativeObj.invoke(service, action, callbackId, argsStr, -1);
         } catch (err) {
-            console.error("invokeSync失败：", err);
-            return { status: u, result: err.message };
+            console.error("调用Native.invoke失败：", err);
+            nativeResult = fallbackNative.invoke(service, action, callbackId, argsStr, -1);
+        }
+
+        console.debug(`exec ${service}.${action} with args: ${argsStr}, result: ${JSON.stringify(nativeResult)}`);
+        if (nativeResult) {
+            messageQueue.push(nativeResult);
+        }
+        asyncExec(processMessageQueue);
+    }
+
+    // 处理Native返回消息队列
+    function processMessageQueue() {
+        if (messageQueue.length === 0) return;
+
+        try {
+            var rawMessage = getNextMessage();
+            if (!rawMessage) return;
+
+            var message = parseMessage(rawMessage);
+            if (message) {
+                callbackFromNative(
+                    message.callbackId,
+                    message.success,
+                    message.status,
+                    message.args,
+                    message.keepCallback
+                );
+            }
+        } catch (err) {
+            console.error("处理消息队列异常：", err);
+        } finally {
+            if (messageQueue.length > 0) {
+                asyncExec(processMessageQueue);
+            }
         }
     }
 
-    function O(e, n, t, r) { s(e, n) }
-    function P(e, n, t, r) { a(e, n) }
-    function j(e, n, t) {
-        console.info('call onNativeValueCallback:', e, n, t);
-        return i(e, n)
+    // 获取下一条消息
+    function getNextMessage() {
+        var msg = messageQueue.shift();
+        if (msg === "*") return "*";
+
+        try {
+            var lenIndex = msg.indexOf(" ");
+            var msgLen = Number(msg.slice(0, lenIndex));
+            var realMsg = msg.substring(lenIndex + 1, lenIndex + 1 + msgLen);
+            var remaining = msg.slice(lenIndex + msgLen + 1);
+            if (remaining) {
+                messageQueue.unshift(remaining);
+            }
+            return realMsg;
+        } catch (err) {
+            console.error("解析消息长度失败：", err);
+            return "";
+        }
     }
 
-    // ======================== 6. 初始化函数（二次强化） ========================
-    function x(e) {
-        // 二次兜底：确保window[e]存在
-        window[e] = window[e] || {};
-        window[e].onNativeValueCallback = j;
-        window[e].callbackFromNative = k;
-    }
+    // 解析Native返回消息
+    function parseMessage(msg) {
+        if (!msg) return null;
 
-    // ======================== 7. 全局暴露 ========================
-    if (typeof window !== "undefined") {
-        window.nativeBridge = window.nativeBridge || {
-            init: x,
-            invoke: S,
-            invokePromise: w,
-            invokeSync: N,
-            on: O,
-            off: P,
-            onNativeValueCallback: j,
-            callbackFromNative: k
+        var firstChar = msg.charAt(0);
+        if (firstChar !== "S" && firstChar !== "F") {
+            console.error("无效消息格式：", msg);
+            return null;
+        }
+
+        var isSuccess = firstChar === "S";
+        var keepCallback = msg.charAt(1) === "1";
+        var space1 = msg.indexOf(" ", 2);
+        var status = Number(msg.slice(2, space1));
+        var space2 = msg.indexOf(" ", space1 + 1);
+        var callbackId = msg.slice(space1 + 1, space2);
+        var argsStr = msg.slice(space2 + 1);
+        var args = [];
+
+        parseArgs(args, argsStr);
+        if (args.length === 1) {
+            args = args[0];
+        }
+
+        return {
+            callbackId: callbackId,
+            success: isSuccess,
+            status: status,
+            args: args,
+            keepCallback: keepCallback
         };
     }
 
-    // ======================== 8. 业务初始化（二次兜底） ========================
+    // 解析参数（反序列化）
+    function parseArgs(result, argsStr) {
+        try {
+            var type = argsStr.charAt(0);
+            switch (type) {
+                case "s": // 字符串
+                    result.push(argsStr.slice(1));
+                    break;
+                case "t": // true
+                    result.push(true);
+                    break;
+                case "f": // false
+                    result.push(false);
+                    break;
+                case "N": // null
+                    result.push(null);
+                    break;
+                case "n": // 数字
+                    result.push(Number(argsStr.slice(1)));
+                    break;
+                case "A": // ArrayBuffer
+                    result.push(atob(argsStr.slice(1)));
+                    break;
+                case "S": // Base64字符串
+                    result.push(atob(argsStr.slice(1)));
+                    break;
+                case "M": // 嵌套参数
+                    var rest = argsStr.slice(1);
+                    while (rest !== "") {
+                        var space = rest.indexOf(" ");
+                        var len = Number(rest.slice(0, space));
+                        var subArg = rest.substring(space + 1, space + 1 + len);
+                        rest = rest.slice(space + len + 1);
+                        parseArgs(result, subArg);
+                    }
+                    break;
+                default: // JSON
+                    result.push(JSON.parse(argsStr));
+            }
+        } catch (err) {
+            console.error("参数反序列化失败：", err);
+            result.push(argsStr); // 解析失败返回原始值
+        }
+    }
+
+    // ======================== 4. 核心导出方法 ========================
+    /**
+     * Native回调处理（供主frame调用）
+     * @param {string} callbackId 回调ID
+     * @param {boolean} isSuccess 是否成功
+     * @param {number} status 状态码
+     * @param {any} args 回调参数
+     * @param {boolean} keepCallback 是否保留回调
+     */
+    function callbackFromNative(callbackId, isSuccess, status, args, keepCallback) {
+        try {
+            var callback = callbackMap[callbackId];
+            if (!callback) return;
+
+            console.info(`callbackFromNative callbackId: ${callbackId}, isSuccess: ${isSuccess}, status: ${status}, args: ${JSON.stringify(args)}`);
+
+            // 执行回调
+            if (isSuccess && status === STATUS_SUCCESS) {
+                callback.success && callback.success.call(null, args);
+            } else if (!isSuccess) {
+                callback.fail && callback.fail.call(null, args, status);
+            }
+
+            // 清理回调（除非保留）
+            if (!keepCallback) {
+                delete callbackMap[callbackId];
+            }
+        } catch (err) {
+            console.error(`回调执行失败（callbackId:${callbackId}）：`, err);
+        }
+    }
+
+    /**
+     * 原生事件回调（供Native调用）
+     * @param {string} eventType 事件类型
+     * @param {any} args 事件参数
+     * @param {boolean} isValueCallback 是否值回调
+     * @returns {any} 回调结果
+     */
+    function onNativeValueCallback(eventType, args, isValueCallback) {
+        console.info(`onNativeValueCallback eventType: ${eventType}, args: ${JSON.stringify(args)}, isValueCallback: ${isValueCallback}`);
+        return fireEvent(eventType, args);
+    }
+
+    /**
+     * 初始化桥接对象
+     * @param {string} apiName 桥接对象名（如wiseopercampaign/hwbr）
+     */
+    function initBridge(apiName) {
+        if (typeof window === "undefined") {
+            console.error(`window不存在，无法初始化${apiName}`);
+            return;
+        }
+        // 强制初始化桥接对象
+        window[apiName] = window[apiName] || {};
+        // 挂载核心回调方法
+        window[apiName].callbackFromNative = callbackFromNative;
+        window[apiName].onNativeValueCallback = onNativeValueCallback;
+        
+        // 同步更新到主frame
+        if (window.parent && window.parent.window) {
+            window.parent[apiName] = window.parent[apiName] || {};
+            window.parent[apiName].callbackFromNative = callbackFromNative;
+            window.parent[apiName].onNativeValueCallback = onNativeValueCallback;
+            
+            // 关键：主frame全局hwbr指向iframe的hwbr（解决主frame直接调用hwbr报错）
+            if (apiName === "hwbr") {
+                window.parent.window.hwbr = window[apiName];
+            }
+        }
+    }
+
+    /**
+     * 异步调用Native方法
+     * @param {string} bridgeName 桥接名
+     * @param {string} service 服务名
+     * @param {string} action 方法名
+     * @param {any[]} args 参数
+     * @param {Function} success 成功回调
+     * @param {Function} fail 失败回调
+     * @param {Function} cancel 取消回调
+     * @param {Function} complete 完成回调
+     */
+    function invoke(bridgeName, service, action, args, success, fail, cancel, complete) {
+        // 参数校验
+        if (!bridgeName || !service || !action) {
+            var errMsg = "invoke参数缺失：bridgeName/service/action不能为空";
+            console.error(errMsg);
+            fail && fail(errMsg, STATUS_CANCEL);
+            complete && complete(errMsg, STATUS_CANCEL);
+            return;
+        }
+
+        var hasCallback = success || fail || cancel || complete;
+        // 封装回调
+        var successCb = hasCallback ? function (res) {
+            success && success(res);
+            complete && complete(res);
+        } : null;
+
+        var failCb = hasCallback ? function (res, code) {
+            if (code === STATUS_CANCEL && cancel) {
+                cancel(res);
+            } else {
+                fail && fail(res, code);
+            }
+            complete && complete(res, code);
+        } : null;
+
+        callNative(bridgeName, successCb, failCb, service, action, args);
+    }
+
+    /**
+     * Promise方式调用Native方法
+     * @param {string} bridgeName 桥接名
+     * @param {string} service 服务名
+     * @param {string} action 方法名
+     * @param {any[]} args 参数
+     * @returns {Promise<any>}
+     */
+    function invokePromise(bridgeName, service, action, args) {
+        return new Promise((resolve, reject) => {
+            if (!bridgeName || !service || !action) {
+                reject(new Error("invokePromise参数缺失"));
+                return;
+            }
+            callNative(bridgeName, resolve, reject, service, action, args);
+        });
+    }
+
+    /**
+     * 同步调用Native方法
+     * @param {string} bridgeName 桥接名
+     * @param {string} service 服务名
+     * @param {string} action 方法名
+     * @param {any[]} args 参数
+     * @returns {object} { status, result }
+     */
+    function invokeSync(bridgeName, service, action, args) {
+        try {
+            var nativeObj = getNativeObject(bridgeName);
+            var result = nativeObj.invokeSync(service, action, args);
+            var parsedResult;
+            try {
+                parsedResult = JSON.parse(result);
+            } catch (err) {
+                console.warn("invokeSync结果解析失败：", err);
+                parsedResult = { status: STATUS_DEFAULT, result: result };
+            }
+            return {
+                status: parsedResult.status ?? STATUS_DEFAULT,
+                result: parsedResult.result
+            };
+        } catch (err) {
+            console.error("invokeSync调用失败：", err);
+            return { status: STATUS_DEFAULT, result: err.message };
+        }
+    }
+
+    /**
+     * 监听事件
+     * @param {string} eventType 事件类型
+     * @param {Function} handler 事件处理器
+     */
+    function on(eventType, handler) {
+        onEvent(eventType, handler);
+    }
+
+    /**
+     * 取消监听事件
+     * @param {string} eventType 事件类型
+     * @param {Function} handler 事件处理器
+     */
+    function off(eventType, handler) {
+        offEvent(eventType, handler);
+    }
+
+    // ======================== 5. 导出模块方法 ========================
+    moduleTools.define(exportModule, {
+        callbackFromNative: () => callbackFromNative,
+        init: () => initBridge,
+        invoke: () => invoke,
+        invokePromise: () => invokePromise,
+        invokeSync: () => invokeSync,
+        off: () => off,
+        on: () => on,
+        onNativeValueCallback: () => onNativeValueCallback
+    });
+
+    // ======================== 6. 全局暴露 ========================
+    if (typeof window !== "undefined") {
+        window.nativeBridge = window.nativeBridge || {
+            init: initBridge,
+            invoke: invoke,
+            invokePromise: invokePromise,
+            invokeSync: invokeSync,
+            on: on,
+            off: off,
+            onNativeValueCallback: onNativeValueCallback,
+            callbackFromNative: callbackFromNative
+        };
+    }
+
+    // ======================== 7. 业务初始化 ========================
     // 初始化wiseopercampaign
-    x("wiseopercampaign");
+    initBridge("wiseopercampaign");
     window.wiseopercampaign = window.wiseopercampaign || {};
     window.wiseopercampaign.account = window.wiseopercampaign.account || {};
 
-    // 初始化hwbr（二次兜底，即使前置初始化失效）
-    x("hwbr");
-    window.hwbr = window.hwbr || {}; // 二次兜底
+    // 初始化hwbr（核心：解决主frame调用hwbr报错）
+    initBridge("hwbr");
+    window.hwbr = window.hwbr || {};
     window.hwbr.app = window.hwbr.app || {};
     window.hwbr.report = window.hwbr.report || {};
     window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
     window.hwbr.mcpAccount = window.hwbr.mcpAccount || {};
 
-    // ======================== 9. 业务方法定义 ========================
-    // wiseopercampaign 方法
-    function getUserId(params, success, fail) {
-        window.nativeBridge.invoke("wiseopercampaignbridge", "account", "getUserId", params || [], success, fail);
-    }
-    function getUserInfo_Wise(params, success, fail) {
-        window.nativeBridge.invoke("wiseopercampaignbridge", "account", "getUserInfo", params || [], success, fail);
-    }
-    function getUserToken(params, success, fail) {
-        window.nativeBridge.invoke("wiseopercampaignbridge", "account", "getUserToken", params || [], success, fail);
-    }
-    window.wiseopercampaign.account.getUserId = getUserId;
-    window.wiseopercampaign.account.getUserInfo = getUserInfo_Wise;
-    window.wiseopercampaign.account.getUserToken = getUserToken;
+    // ======================== 8. 业务方法封装 ========================
+    // wiseopercampaign.account 方法
+    window.wiseopercampaign.account.getUserId = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge",
+            "account",
+            "getUserId",
+            params || [],
+            success,
+            fail
+        );
+    };
 
-    // hwbr 方法
-    function eventReport(params, success, fail) {
-        window.nativeBridge.invoke("_hwbrNative", "report", "eventReport", params || [], success, fail);
-    }
-    function getPluginList(params, success, fail) {
-        window.nativeBridge.invoke("_hwbrNative", "app", "getPluginList", params || [], success, fail);
-    }
-    function login(params, success, fail) {
-        window.nativeBridge.invoke("_hwbrNative", "linkedLogin", "login", params || [], success, fail);
-    }
-    function getUserInfo_Hwbr(params, success, fail) {
-        window.nativeBridge.invoke("_hwbrNative", "mcpAccount", "getUserInfo", params || [], success, fail);
-    }
-    // 挂载方法（兜底：即使hwbr不存在，前置已初始化）
-    window.hwbr.app.getPluginList = getPluginList;
-    window.hwbr.report.eventReport = eventReport;
-    window.hwbr.linkedLogin.login = login;
-    window.hwbr.mcpAccount.getUserInfo = getUserInfo_Hwbr;
+    window.wiseopercampaign.account.getUserInfo = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge",
+            "account",
+            "getUserInfo",
+            params || [],
+            success,
+            fail
+        );
+    };
 
-    // ======================== 10. 页面渲染+业务调用（最终兜底） ========================
-    // 确保DOM加载完成后执行
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initPage);
-    } else {
-        initPage();
-    }
+    window.wiseopercampaign.account.getUserToken = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "wiseopercampaignbridge",
+            "account",
+            "getUserToken",
+            params || [],
+            success,
+            fail
+        );
+    };
 
+    // hwbr.app 方法
+    window.hwbr.app.getPluginList = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "app",
+            "getPluginList",
+            params || [],
+            success,
+            fail
+        );
+    };
+
+    // hwbr.report 方法
+    window.hwbr.report.eventReport = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "report",
+            "eventReport",
+            params || [],
+            success,
+            fail
+        );
+    };
+
+    // hwbr.linkedLogin 方法
+    window.hwbr.linkedLogin.login = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "linkedLogin",
+            "login",
+            params || [],
+            success,
+            fail
+        );
+    };
+
+    // hwbr.mcpAccount 方法
+    window.hwbr.mcpAccount.getUserInfo = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "mcpAccount",
+            "getUserInfo",
+            params || [],
+            success,
+            fail
+        );
+    };
+
+    // ======================== 9. 页面渲染与业务调用 ========================
     function initPage() {
         // 创建样式
         const style = document.createElement('style');
@@ -318,15 +667,13 @@ window.hwbr.account = window.hwbr.account || {};
         resultContainer.textContent = '正在初始化...';
         document.body.appendChild(resultContainer);
 
-        // 延迟调用（400ms，确保所有初始化完成）
+        // 延迟调用（确保所有初始化完成）
         setTimeout(() => {
             resultContainer.textContent = '正在获取数据...';
 
-            // 1. getUserId（兜底：wiseopercampaign不存在则初始化）
-            window.wiseopercampaign = window.wiseopercampaign || {};
-            window.wiseopercampaign.account = window.wiseopercampaign.account || {};
-            if (window.wiseopercampaign.account.getUserId) {
-                wiseopercampaign.account.getUserId(
+            // 1. 获取用户ID
+            if (window.wiseopercampaign?.account?.getUserId) {
+                window.wiseopercampaign.account.getUserId(
                     { username: "test" },
                     data => resultContainer.innerHTML = `<div class="suc">✅ getUserId succeed：${JSON.stringify(data)}</div>`,
                     (err, code) => resultContainer.innerHTML = `<div class="err">❌ getUserId error：${err || '未知错误'}（码：${code || '无'}）</div>`
@@ -335,9 +682,9 @@ window.hwbr.account = window.hwbr.account || {};
                 resultContainer.innerHTML = `<div class="err">❌ getUserId error：方法未定义</div>`;
             }
 
-            // 2. getUserToken
-            if (window.wiseopercampaign.account.getUserToken) {
-                wiseopercampaign.account.getUserToken(
+            // 2. 获取用户Token
+            if (window.wiseopercampaign?.account?.getUserToken) {
+                window.wiseopercampaign.account.getUserToken(
                     [{ "scopes": [], "forceOn": "0", "userTokenOld": "", "extendInfo": {} }],
                     data => resultContainer.innerHTML += `<div class="suc">✅ getUserToken succeed ：${JSON.stringify(data)}</div>`,
                     (err, code) => resultContainer.innerHTML += `<div class="err">❌ getUserToken error：${err || '未知错误'}（code：${code || '无'}）</div>`
@@ -346,8 +693,8 @@ window.hwbr.account = window.hwbr.account || {};
                 resultContainer.innerHTML += `<div class="err">❌ getUserToken error：方法未定义</div>`;
             }
 
-            // 3. getPluginList（最终兜底：直接访问window.hwbr，避免作用域问题）
-            if (window.hwbr.app.getPluginList) {
+            // 3. 获取插件列表
+            if (window.hwbr?.app?.getPluginList) {
                 window.hwbr.app.getPluginList(
                     [],
                     data => resultContainer.innerHTML += `<div class="suc">✅ getPluginList succeed：${JSON.stringify(data)}</div>`,
@@ -357,9 +704,9 @@ window.hwbr.account = window.hwbr.account || {};
                 resultContainer.innerHTML += `<div class="err">❌ getPluginList error：方法未定义</div>`;
             }
 
-            // 4. eventReport
-            if (window.hwbr.report.eventReport) {
-                const eventReportJsonStr = JSON.stringify({
+            // 4. 事件上报
+            if (window.hwbr?.report?.eventReport) {
+                const eventReportJson = JSON.stringify({
                     eventName: 'you are hacked',
                     version: 1,
                     info: { extInfo: { 'name': 'cc' }, u: 'hahaha' },
@@ -368,7 +715,7 @@ window.hwbr.account = window.hwbr.account || {};
                     isAnonymous: true
                 });
                 window.hwbr.report.eventReport(
-                    [eventReportJsonStr],
+                    [eventReportJson],
                     data => resultContainer.innerHTML += `<div class="suc">✅ report succeed：${JSON.stringify(data)}</div>`,
                     err => resultContainer.innerHTML += `<div class="err">❌ report error：${JSON.stringify(err)}</div>`
                 );
@@ -376,8 +723,8 @@ window.hwbr.account = window.hwbr.account || {};
                 resultContainer.innerHTML += `<div class="err">❌ eventReport error：方法未定义</div>`;
             }
 
-            // 5. login
-            if (window.hwbr.linkedLogin.login) {
+            // 5. 登录
+            if (window.hwbr?.linkedLogin?.login) {
                 const loginInfo = {
                     clientId: "6917565689792636463",
                     redirectUri: "https://privacy.consumer.huawei.com/browser.html",
@@ -395,11 +742,11 @@ window.hwbr.account = window.hwbr.account || {};
                 resultContainer.innerHTML += `<div class="err">❌ login error：方法未定义</div>`;
             }
 
-            // 6. getUserInfo
-            if (window.hwbr.mcpAccount.getUserInfo) {
-                const SubAppAuthCodePara = JSON.stringify({ subAppId: '112938007' });
+            // 6. 获取用户信息
+            if (window.hwbr?.mcpAccount?.getUserInfo) {
+                const subAppAuthCode = JSON.stringify({ subAppId: '112938007' });
                 window.hwbr.mcpAccount.getUserInfo(
-                    [SubAppAuthCodePara],
+                    [subAppAuthCode],
                     data => resultContainer.innerHTML += `<div class="suc">✅ getUserInfo succeed：${JSON.stringify(data)}</div>`,
                     err => resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：${JSON.stringify(err)}</div>`
                 );
@@ -407,6 +754,21 @@ window.hwbr.account = window.hwbr.account || {};
                 resultContainer.innerHTML += `<div class="err">❌ getUserInfo error：方法未定义</div>`;
             }
         }, 400);
+    }
+
+    // 等待DOM加载完成后初始化页面
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initPage);
+    } else {
+        initPage();
+    }
+
+    // ======================== 10. 最终兜底：主frame全局hwbr指向iframe的hwbr ========================
+    if (window.parent && window.parent.window) {
+        // 主frame全局hwbr指向iframe的hwbr（解决主frame直接调用hwbr.callbackFromNative）
+        window.parent.window.hwbr = window.hwbr;
+        // 确保callbackFromNative方法存在
+        window.parent.window.hwbr.callbackFromNative = callbackFromNative;
     }
 
 })();
