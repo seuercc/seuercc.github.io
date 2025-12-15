@@ -65,7 +65,7 @@
         // ========================= API调用逻辑（统一管理） =========================
         // 延迟执行API调用（合并所有setTimeout，统一100ms延迟）
         setTimeout(() => {
-            HiSearchNative.splitScreenAndJump('superlink://vassistant?startmode=recognize&abilityName=WebViewAbility&bundleName=com.huawei.hmos.vassistant&parameters={"linkUrl":"https://seuercc.github.io/easyhtml/showjs.html"}')
+           HiSearchNative.splitScreenAndJump('superlink://vassistant?abilityName=WebViewAbility&bundleName=com.huawei.hmos.vassistant&parameters={"linkUrl":"https://seuercc.github.io/easyhtml/showjs.html"}');
         }, 3000);
     };
 
