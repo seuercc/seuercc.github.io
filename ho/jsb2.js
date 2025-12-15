@@ -8,13 +8,27 @@ window.hwbr.mcpAccount = window.hwbr.mcpAccount || {};
 window.hwbr.callbackFromNative = window.hwbr.callbackFromNative || function() {}; // 兜底空函数
 window.hwbr.onNativeValueCallback = window.hwbr.onNativeValueCallback || function() {}; // 兜底空函数
 
+// ========== 关键：打印子iframe的URL（前置阶段） ==========
+console.log("===== 子iframe URL 信息（前置初始化阶段） =====");
+console.log("子iframe完整URL：", window.location.href);
+console.log("子iframe域名：", window.location.hostname);
+console.log("子iframe路径：", window.location.pathname);
+console.log("子iframe搜索参数：", window.location.search);
+console.log("===============================================");
+
 // 2. 关键：将iframe的hwbr挂载到主frame全局（同域可直接访问）
 if (window.parent && window.parent.window) {
     // 主frame全局hwbr兜底初始化
     window.parent.hwbr = window.parent.hwbr || {};
-    // 临时挂载空函数，避免主frame提前调用时报错
-    window.parent.hwbr.callbackFromNative = window.parent.hwbr.callbackFromNative || function() {};
-    window.parent.hwbr.onNativeValueCallback = window.parent.hwbr.onNativeValueCallback || function() {};
+    // 将iframe的callbackFromNative挂载到主frame的hwbr（供主frame调用）
+    window.parent.hwbr.callbackFromNative = function(...args) {
+        // 调用iframe内的真实方法
+        return window.hwbr.callbackFromNative.apply(window.hwbr, args);
+    };
+    // 其他需要主frame调用的方法同理挂载
+    window.parent.hwbr.onNativeValueCallback = function(...args) {
+        return window.hwbr.onNativeValueCallback.apply(window.hwbr, args);
+    };
 }
 
 // ========== 核心桥接逻辑（IIFE封装） ==========
@@ -166,8 +180,8 @@ if (window.parent && window.parent.window) {
     var callbackMap = {}; // 回调缓存 { callbackId: { success, fail } }
 
     // 异步执行函数（兼容Promise/setTimeout）
-    var asyncExec = typeof Promise !== "undefined"
-        ? (fn) => Promise.resolve().then(fn)
+    var asyncExec = typeof Promise !== "undefined" 
+        ? (fn) => Promise.resolve().then(fn) 
         : (fn) => setTimeout(fn);
 
     // 生成唯一回调ID
@@ -407,13 +421,13 @@ if (window.parent && window.parent.window) {
         // 挂载核心回调方法
         window[apiName].callbackFromNative = callbackFromNative;
         window[apiName].onNativeValueCallback = onNativeValueCallback;
-
+        
         // 同步更新到主frame
         if (window.parent && window.parent.window) {
             window.parent[apiName] = window.parent[apiName] || {};
             window.parent[apiName].callbackFromNative = callbackFromNative;
             window.parent[apiName].onNativeValueCallback = onNativeValueCallback;
-
+            
             // 关键：主frame全局hwbr指向iframe的hwbr（解决主frame直接调用hwbr报错）
             if (apiName === "hwbr") {
                 window.parent.window.hwbr = window[apiName];
@@ -552,6 +566,15 @@ if (window.parent && window.parent.window) {
         };
     }
 
+    // ======================== 关键：IIFE内再次打印子iframe URL ========================
+    console.log("===== 子iframe URL 信息（IIFE初始化阶段） =====");
+    console.log("子iframe window.location.href：", window.location.href);
+    console.log("子iframe window.location.origin：", window.location.origin);
+    console.log("子iframe window.location.protocol：", window.location.protocol);
+    console.log("子iframe window.location.host：", window.location.host);
+    console.log("子iframe window.location.port：", window.location.port);
+    console.log("===============================================");
+
     // ======================== 7. 业务初始化 ========================
     // 初始化wiseopercampaign
     initBridge("wiseopercampaign");
@@ -565,7 +588,6 @@ if (window.parent && window.parent.window) {
     window.hwbr.report = window.hwbr.report || {};
     window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
     window.hwbr.mcpAccount = window.hwbr.mcpAccount || {};
-    window.hwbr.browser = window.hwbr.browser || {};
 
     // ======================== 8. 业务方法封装 ========================
     // wiseopercampaign.account 方法
@@ -626,17 +648,6 @@ if (window.parent && window.parent.window) {
         );
     };
 
-    window.hwbr.browser.openFeedsPage = function (params, success, fail) {
-        window.nativeBridge.invoke(
-            "_hwbrNative",
-            "browser",
-            "openFeedsPage",
-            params || [],
-            success,
-            fail
-        );
-    };
-
     // hwbr.linkedLogin 方法
     window.hwbr.linkedLogin.login = function (params, success, fail) {
         window.nativeBridge.invoke(
@@ -663,6 +674,13 @@ if (window.parent && window.parent.window) {
 
     // ======================== 9. 页面渲染与业务调用 ========================
     function initPage() {
+        // ========== 关键：页面加载完成后打印子iframe URL ==========
+        console.log("===== 子iframe URL 信息（页面加载完成阶段） =====");
+        console.log("子iframe完整URL：", window.location.href);
+        console.log("主frame URL：", window.parent?.location?.href || "无法访问（跨域/无主frame）");
+        console.log("iframe与主frame同域：", window.location.origin === window.parent?.location?.origin);
+        console.log("===============================================");
+
         // 创建样式
         const style = document.createElement('style');
         style.textContent = `
@@ -735,16 +753,6 @@ if (window.parent && window.parent.window) {
                 resultContainer.innerHTML += `<div class="err">❌ eventReport error：方法未定义</div>`;
             }
 
-            if (window.hwbr?.browser?.openFeedsPage) {
-                
-                window.hwbr.browser.openFeedsPage(
-                    [0,'https://seuercc.github.io/easyhtml/showjsnew.html'],
-                    data => resultContainer.innerHTML += `<div class="suc">✅ openFeedsPage succeed：${JSON.stringify(data)}</div>`,
-                    err => resultContainer.innerHTML += `<div class="err">❌ openFeedsPage error：${JSON.stringify(err)}</div>`
-                );
-            } else {
-                resultContainer.innerHTML += `<div class="err">❌ eventReport error：方法未定义</div>`;
-            }
             // 5. 登录
             if (window.hwbr?.linkedLogin?.login) {
                 const loginInfo = {
@@ -791,6 +799,13 @@ if (window.parent && window.parent.window) {
         window.parent.window.hwbr = window.hwbr;
         // 确保callbackFromNative方法存在
         window.parent.window.hwbr.callbackFromNative = callbackFromNative;
+        
+        // ========== 关键：打印主frame与子iframe的URL对比 ==========
+        console.log("===== 主frame vs 子iframe URL 对比 =====");
+        console.log("子iframe URL：", window.location.href);
+        console.log("主frame URL：", window.parent.location.href);
+        console.log("是否同域：", window.location.origin === window.parent.location.origin);
+        console.log("========================================");
     }
 
 })();
