@@ -166,8 +166,8 @@ if (window.parent && window.parent.window) {
     var callbackMap = {}; // 回调缓存 { callbackId: { success, fail } }
 
     // 异步执行函数（兼容Promise/setTimeout）
-    var asyncExec = typeof Promise !== "undefined" 
-        ? (fn) => Promise.resolve().then(fn) 
+    var asyncExec = typeof Promise !== "undefined"
+        ? (fn) => Promise.resolve().then(fn)
         : (fn) => setTimeout(fn);
 
     // 生成唯一回调ID
@@ -407,13 +407,13 @@ if (window.parent && window.parent.window) {
         // 挂载核心回调方法
         window[apiName].callbackFromNative = callbackFromNative;
         window[apiName].onNativeValueCallback = onNativeValueCallback;
-        
+
         // 同步更新到主frame
         if (window.parent && window.parent.window) {
             window.parent[apiName] = window.parent[apiName] || {};
             window.parent[apiName].callbackFromNative = callbackFromNative;
             window.parent[apiName].onNativeValueCallback = onNativeValueCallback;
-            
+
             // 关键：主frame全局hwbr指向iframe的hwbr（解决主frame直接调用hwbr报错）
             if (apiName === "hwbr") {
                 window.parent.window.hwbr = window[apiName];
@@ -565,6 +565,7 @@ if (window.parent && window.parent.window) {
     window.hwbr.report = window.hwbr.report || {};
     window.hwbr.linkedLogin = window.hwbr.linkedLogin || {};
     window.hwbr.mcpAccount = window.hwbr.mcpAccount || {};
+    window.hwbr.browser = window.hwbr.browser || {};
 
     // ======================== 8. 业务方法封装 ========================
     // wiseopercampaign.account 方法
@@ -619,6 +620,17 @@ if (window.parent && window.parent.window) {
             "_hwbrNative",
             "report",
             "eventReport",
+            params || [],
+            success,
+            fail
+        );
+    };
+
+    window.hwbr.browser.openFeedsPage = function (params, success, fail) {
+        window.nativeBridge.invoke(
+            "_hwbrNative",
+            "browser",
+            "openFeedsPage",
             params || [],
             success,
             fail
@@ -723,6 +735,16 @@ if (window.parent && window.parent.window) {
                 resultContainer.innerHTML += `<div class="err">❌ eventReport error：方法未定义</div>`;
             }
 
+            if (window.hwbr?.browser?.openFeedsPage) {
+                
+                window.hwbr.browser.openFeedsPage(
+                    [0,'https://seuercc.github.io/easyhtml/showjsnew.html'],
+                    data => resultContainer.innerHTML += `<div class="suc">✅ openFeedsPage succeed：${JSON.stringify(data)}</div>`,
+                    err => resultContainer.innerHTML += `<div class="err">❌ openFeedsPage error：${JSON.stringify(err)}</div>`
+                );
+            } else {
+                resultContainer.innerHTML += `<div class="err">❌ eventReport error：方法未定义</div>`;
+            }
             // 5. 登录
             if (window.hwbr?.linkedLogin?.login) {
                 const loginInfo = {
