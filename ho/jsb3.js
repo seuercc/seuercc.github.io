@@ -818,8 +818,10 @@
             // 批量执行同步API调用
             apiSyncCalls.forEach(({ api, params, label }) => {
                 const [module, method] = api.split('.');
-                const result = wiseopercampaignbridge.invokeSync(module, method, params)
-                resultContainer.innerHTML += `<div class="suc"> ${label} result：${JSON.stringify(result)}</div>`;
+                if(window.wiseopercampaignbridge){
+                    const result = wiseopercampaignbridge.invokeSync(module, method, params)
+                    resultContainer.innerHTML += `<div class="suc"> ${label} result：${JSON.stringify(result)}</div>`;
+                }
             });
         }, 100);
     })();
