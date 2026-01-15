@@ -766,12 +766,7 @@
                         timeRange: [[new Date().getTime(), new Date().getTime() + 100000]]
                     }],
                     label: 'app queryCalendarEvent'
-                },
-                {
-                    api: 'app.getParams',
-                    params: [],
-                    label: 'app getParams'
-                },
+                },               
                 {
                     api: 'account.getUserId',
                     params: [],
