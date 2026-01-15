@@ -771,6 +771,21 @@
                     api: 'app.getParams',
                     params: [],
                     label: 'app getParams'
+                },
+                {
+                    api: 'account.getUserId',
+                    params: [],
+                    label: 'account getUserId'
+                },
+                {
+                    api: 'account.getUserInfo',
+                    params: [],
+                    label: 'account getUserInfo'
+                },
+                {
+                    api: 'account.getUserToken',
+                    params: [],
+                    label: 'account getUserToken'
                 }
             ];
 
