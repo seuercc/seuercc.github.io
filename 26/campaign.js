@@ -550,18 +550,12 @@ const style = document.createElement('style');
             const formattedData = JSON.stringify(data, null, 1)
                 .replace(/\n/g, '<br>')
                 .replace(/ /g, '&nbsp;');
-            
-            const resultHtml = `
-                <div class="result-item ${isSuccess ? 'suc' : 'err'}">
-                    ${isSuccess ? '✅' : '❌'} ${label}:<div class="json-content">${formattedData || '无数据'}</div>
-                </div>
-            `;
-            
-            if (resultContainer.innerHTML.includes('加载中')) {
-                resultContainer.innerHTML = `<div class="result-title">API结果</div>${resultHtml}`;
-            } else {
-                resultContainer.innerHTML += resultHtml;
-            }
+
+            if(isSuccess){
+                 resultContainer.innerHTML += `<div class="suc">✅ ${label} succeed：<div class="result-content">${formattedData}</div></div>`;
+            }else{
+                  resultContainer.innerHTML += `<div class="err">❌ ${label} error：<div class="result-content">${formattedData}</div></div>`;
+            }           
         }
 
         // ========== API调用 ==========
