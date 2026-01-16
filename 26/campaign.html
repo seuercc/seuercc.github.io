@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cloudx test</title>
+</head>
+<body>
+<script src=./campaign.js>		
+<script>
+function loadJsAndAlert(jsUrl, successMsg = "JS加载成功！", failMsg = "JS加载失败！") {
+    const script = document.createElement('script');  
+    script.src = jsUrl;
+    script.async = true; 
+    script.onload = function() {
+        alert(successMsg);  
+        console.log(`✅ JS文件 ${jsUrl} 加载完成`);
+    };
+    script.onerror = function() {
+        alert(failMsg);
+        console.error(`❌ JS文件 ${jsUrl} 加载失败`);
+    };
+    document.head.appendChild(script);
+}
+const targetJsUrl = "./campaign.js";
+loadJsAndAlert(
+    targetJsUrl,
+    "CloudX JS加载成功！",
+    "CloudX JS加载失败，请检查URL！"
+);
+</script>   
+</body>
+</html>
