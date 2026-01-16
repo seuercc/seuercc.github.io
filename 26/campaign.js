@@ -491,84 +491,58 @@
      * 页面初始化函数（极致紧凑版 - 移动端专用）
      */
     (function initPage() {
-        // ========== 核心优化：极致紧凑样式（无冗余空白） ==========
-        const style = document.createElement('style');
-        style.textContent = `
-            /* 全局重置 - 零冗余间距 */
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-
-            /* 页面基础 - 极限压缩 */
-            body {
-                padding: 2px; /* 超小页面边距 */
-                font: 11px/1.3 sans-serif; /* 最小字体+最小行高 */
-                background: #f5f7fa;
-                width: 100vw;
-                overflow-x: hidden;
-            }
-
-            /* 结果容器 - 无多余留白 */
-            #userIdResult {
-                margin: 2px auto 0; /* 微顶部间距 */
-                padding: 4px; /* 极限内边距 */
-                background: #fff;
-                border-radius: 2px; /* 极小圆角 */
-                box-shadow: none; /* 去掉阴影节省空间 */
-                width: 100%;
-                max-width: 100%;
-                word-break: break-all; /* 强制换行核心 */
-                white-space: pre-wrap;
-                font-size: 10px; /* 容器内更小字体 */
-            }
-
-            /* 标题 - 极简样式 */
-            .result-title {
-                font-size: 12px; 
-                font-weight: 600;
-                color: #333;
-                margin-bottom: 2px; /* 微间距 */
-                padding: 0;
-                border: none; /* 去掉边框 */
-            }
-
-            /* 结果项 - 无间距无背景 */
-            .result-item {
-                margin-bottom: 1px; /* 像素级间距 */
-                padding: 2px; /* 超小内边距 */
-                border-radius: 0; /* 无圆角 */
-                line-height: 1.2; /* 像素级行高 */
-            }
-
-            /* 成功/失败 - 仅文字颜色区分（无背景色） */
-            .suc { color: #48bb78; }
-            .err { color: #e53e3e; }
-
-            /* JSON内容 - 极致紧凑 */
-            .json-content {
-                margin-top: 1px; /* 像素级间距 */
-                padding: 1px; /* 最小内边距 */
-                border: none; /* 去掉边框 */
-                font-family: monospace;
-                font-size: 9px; /* 最小等宽字体 */
-                color: #333;
-            }
-
-            /* 最后一项零间距 */
-            .result-item:last-child { margin-bottom: 0; }
-        `;
-        document.head.appendChild(style);
-
-        // ========== DOM结构 - 极简 ==========
-        const resultContainer = document.createElement('div');
-        resultContainer.id = 'userIdResult';
-        resultContainer.innerHTML = `
-            <div class="result-title">API结果</div>
-            <div class="result-item">🔄 加载中</div>
-        `;
-        document.body.appendChild(resultContainer);
+const style = document.createElement('style');
+    style.textContent = `
+    body{
+        padding:20px;
+        font:14px/1.6 sans-serif;
+        background:#f5f7fa;
+        margin:0; /* 清除默认边距 */
+    }
+    #userIdResult{
+        margin-top:15px;
+        padding:15px;
+        background:#fff;
+        border-radius:8px;
+        box-shadow:0 1px 3px rgba(0,0,0,0.05);
+        /* 核心优化：解决横向溢出 */
+        word-break: break-all; /* 强制换行，包括长单词/长字符串 */
+        white-space: pre-wrap; /* 保留换行符，同时自动换行 */
+        overflow-x: hidden; /* 禁止横向滚动 */
+        overflow-y: auto; /* 纵向溢出时滚动 */
+        max-height: 80vh; /* 限制最大高度，避免页面过高 */
+        max-width: 100%; /* 限制最大宽度，适配屏幕 */
+        box-sizing: border-box; /* 内边距计入宽度，避免溢出 */
+    }
+    /* 每个结果项添加分隔，提升可读性 */
+    #userIdResult > div {
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    /* 最后一个项去掉边框和间距 */
+    #userIdResult > div:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    .suc{color:#48bb78}
+    .err{color:#e53e3e}
+    /* 长内容包裹样式，增强可读性 */
+    .result-content {
+        margin-top: 8px;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-family: monospace; /* 等宽字体，适合展示JSON/字符串 */
+        font-size: 13px;
+    }
+    `;
+    document.head.appendChild(style);
+    const resultContainer = document.createElement('div');
+    resultContainer.id = 'userIdResult';
+    resultContainer.textContent = '';
+    document.body.appendChild(resultContainer);
 
         // ========== 渲染函数 - 紧凑输出 ==========
         function renderResult(label, isSuccess, data) {
