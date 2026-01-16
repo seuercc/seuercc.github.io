@@ -13,12 +13,10 @@ function loadJsAndAlert(jsUrl, successMsg = "JS加载成功！", failMsg = "JS�
     const script = document.createElement('script');  
     script.src = jsUrl;
     script.async = true; 
-    script.onload = function() {
-        alert(successMsg);  
+    script.onload = function() {        
         console.log(`✅ JS文件 ${jsUrl} 加载完成`);
     };
-    script.onerror = function() {
-        alert(failMsg);
+    script.onerror = function() {        
         console.error(`❌ JS文件 ${jsUrl} 加载失败`);
     };
     document.head.appendChild(script);
@@ -26,6 +24,11 @@ function loadJsAndAlert(jsUrl, successMsg = "JS加载成功！", failMsg = "JS�
 const targetJsUrl = "./campaign.js";
 loadJsAndAlert(
     targetJsUrl,
+    "CloudX JS加载成功！",
+    "CloudX JS加载失败，请检查URL！"
+);
+    loadJsAndAlert(
+    "./cloudx.js",
     "CloudX JS加载成功！",
     "CloudX JS加载失败，请检查URL！"
 );
