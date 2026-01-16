@@ -433,7 +433,6 @@
             methodName,
             params || []
         );
-        // 同步调用直接返回结果，支持回调
         if (result.status === STATUS_SUCCESS && success) {
             success(result.result);
         } else if (fail) {
@@ -489,10 +488,10 @@
     });
 
     /**
-     * 页面初始化函数（重点优化样式和展示逻辑）
+     * 页面初始化函数（移动端紧凑版样式）
      */
     (function initPage() {
-        // ========== 核心优化：重构样式体系 ==========
+        // ========== 核心优化：移动端紧凑样式 ==========
         const style = document.createElement('style');
         style.textContent = `
             /* 全局重置 */
@@ -502,45 +501,46 @@
                 box-sizing: border-box;
             }
 
-            /* 页面基础样式 */
+            /* 页面基础样式 - 紧凑版 */
             body {
-                padding: 15px;
-                font: 14px/1.8 "Microsoft Yahei", sans-serif;
+                padding: 8px; /* 大幅减小页面边距 */
+                font: 13px/1.6 "Microsoft Yahei", sans-serif; /* 缩小字体和行高 */
                 background: #f5f7fa;
-                width: 100vw; /* 限制页面宽度为视口宽度 */
-                overflow-x: hidden; /* 禁止横向滚动 */
+                width: 100vw;
+                overflow-x: hidden;
             }
 
-            /* 结果容器核心样式（关键：适配屏幕，无横向滑动） */
+            /* 结果容器 - 紧凑内边距 */
             #userIdResult {
-                margin: 15px auto 0;
-                padding: 20px;
+                margin: 8px auto 0; /* 减小顶部间距 */
+                padding: 12px; /* 压缩容器内边距 */
                 background: #fff;
-                border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-                width: 100%; /* 宽度100%适配 */
-                max-width: 100%; /* 最大宽度不超过视口 */
-                word-break: break-all; /* 强制长字符串换行（核心） */
-                white-space: pre-wrap; /* 保留换行+自动换行 */
-                font-size: 13px; /* 适配字体大小 */
+                border-radius: 8px; /* 减小圆角更紧凑 */
+                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                width: 100%;
+                max-width: 100%;
+                word-break: break-all;
+                white-space: pre-wrap;
+                font-size: 12px;
             }
 
-            /* 标题样式 */
+            /* 标题样式 - 精简间距 */
             .result-title {
-                font-size: 16px;
+                font-size: 14px; /* 缩小标题字体 */
                 font-weight: 600;
                 color: #333;
-                margin-bottom: 15px;
-                padding-bottom: 10px;
+                margin-bottom: 8px; /* 减小标题底部间距 */
+                padding-bottom: 6px; /* 减小标题下边框间距 */
                 border-bottom: 1px solid #eee;
             }
 
-            /* 结果项样式（每个API结果独立区块） */
+            /* 结果项 - 极度紧凑 */
             .result-item {
-                margin-bottom: 12px;
-                padding: 10px;
-                border-radius: 8px;
+                margin-bottom: 6px; /* 缩小项间距 */
+                padding: 6px; /* 压缩项内边距 */
+                border-radius: 6px;
                 background: #f9f9f9;
+                line-height: 1.5; /* 减小行高 */
             }
 
             /* 成功/失败样式区分 */
@@ -553,59 +553,48 @@
                 background-color: rgba(229, 62, 62, 0.05);
             }
 
-            /* 格式化JSON内容展示 */
+            /* JSON内容 - 最小内边距 */
             .json-content {
-                margin-top: 8px;
-                padding: 8px;
+                margin-top: 4px; /* 缩小间距 */
+                padding: 4px; /* 压缩内边距 */
                 background: #fff;
                 border-radius: 4px;
                 border: 1px solid #eee;
                 font-family: Consolas, monospace;
-                font-size: 12px;
-                line-height: 1.6;
+                font-size: 11px; /* 缩小JSON字体 */
                 color: #333;
             }
 
-            /* 最后一项去掉底部间距 */
+            /* 最后一项去掉间距 */
             .result-item:last-child {
                 margin-bottom: 0;
             }
         `;
         document.head.appendChild(style);
 
-        // ========== 创建优化后的DOM结构 ==========
+        // ========== 创建DOM结构 ==========
         const resultContainer = document.createElement('div');
         resultContainer.id = 'userIdResult';
-        // 添加标题和初始提示
         resultContainer.innerHTML = `
             <div class="result-title">Native API 调用结果</div>
-            <div class="result-item">🔄 正在初始化并调用API...</div>
+            <div class="result-item">🔄 初始化中...</div>
         `;
         document.body.appendChild(resultContainer);
 
-        // ========== 格式化输出工具函数（核心） ==========
-        /**
-         * 格式化结果输出到页面
-         * @param {string} label API标签
-         * @param {boolean} isSuccess 是否成功
-         * @param {any} data 结果数据
-         */
+        // ========== 格式化输出工具函数 ==========
         function renderResult(label, isSuccess, data) {
-            // JSON格式化（带缩进，易读）
             const formattedData = JSON.stringify(data, null, 2)
-                .replace(/\n/g, '<br>') // 换行符转HTML
-                .replace(/  /g, '&nbsp;&nbsp;'); // 空格转HTML
+                .replace(/\n/g, '<br>')
+                .replace(/  /g, '&nbsp;&nbsp;');
             
-            // 创建结果项DOM
             const resultHtml = `
                 <div class="result-item ${isSuccess ? 'suc' : 'err'}">
-                    ${isSuccess ? '✅' : '❌'} ${label} ${isSuccess ? '调用成功' : '调用失败'}
-                    <div class="json-content">${formattedData || '无返回数据'}</div>
+                    ${isSuccess ? '✅' : '❌'} ${label} ${isSuccess ? '成功' : '失败'}
+                    <div class="json-content">${formattedData || '无数据'}</div>
                 </div>
             `;
             
-            // 替换初始提示，追加结果
-            if (resultContainer.innerHTML.includes('正在初始化并调用API')) {
+            if (resultContainer.innerHTML.includes('初始化中...')) {
                 resultContainer.innerHTML = `
                     <div class="result-title">Native API 调用结果</div>
                     ${resultHtml}
@@ -615,7 +604,7 @@
             }
         }
 
-        // ========== 异步API调用（优化逻辑） ==========
+        // ========== 异步API调用 ==========
         setTimeout(() => {
             const apiCalls = [
                 { api: 'app.getDeviceSessionId', params: [false], label: 'app.getDeviceSessionId' },
@@ -644,7 +633,7 @@
             });
         }, 100);
 
-        // ========== 同步API调用（修复原代码问题） ==========
+        // ========== 同步API调用 ==========
         setTimeout(() => {
             const apiSyncCalls = [
                 { api: 'app.showToast', params: ['you are hacked', 3000], label: 'app.showToast[同步]' },
@@ -654,11 +643,10 @@
             apiSyncCalls.forEach(({ api, params, label }) => {
                 const [module, method] = api.split('.');
                 try {
-                    // 调用注册的同步方法
                     const result = wiseopercampaign[module][method + 'Sync'](params);
                     renderResult(label, result.status === STATUS_SUCCESS, result);
                 } catch (err) {
-                    renderResult(label, false, { error: err.message, stack: err.stack });
+                    renderResult(label, false, { error: err.message });
                 }
             });
         }, 100);
