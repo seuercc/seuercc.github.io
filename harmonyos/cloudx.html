@@ -1,1 +1,135 @@
+<html lang="">
+<head><title>cloudx test</title></head>
+<body style="word-wrap:break-word;">
 
+<script>
+    // 1. 创建页面样式
+    const style = document.createElement('style');
+    style.textContent = `
+    body{padding:20px;font:14px/1.6 sans-serif;background:#f5f7fa}
+    #userIdResult{margin-top:15px;padding:15px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+    .suc{color:#48bb78}
+    .err{color:#e53e3e}
+    `;
+    document.head.appendChild(style);
+
+    // 2. 创建结果展示容器
+    const resultContainer = document.createElement('div');
+    resultContainer.id = 'userIdResult';
+    resultContainer.textContent = '';
+    document.body.appendChild(resultContainer);
+
+    function gameCenterStartDownloadApp() {
+    let params = {
+    'appId': 'C5765880207856049751',
+    'iconUrl': 'https://appimg.dbankcdn.com/application/icon144/phone/90baadb2a4694cd5aeb1054130cdc024.webp',
+    'name': 'pxx',
+    'packageName': 'com.xunmeng.pinduoduo.hos'
+};
+    if (window.HiSpaceObject) {
+    console.log('HiSpaceObject startDownloadApp')
+    window.HiSpaceObject.startDownload(JSON.stringify(params));
+    resultContainer.innerHTML += `<div class="suc">✅ 游戏中心 startDownloadApp succeed</div>`;
+
+} else {
+    console.log('no window.HiSpaceObject')
+    resultContainer.innerHTML += `<div class="err">❌ 游戏中心 startDownloadApp error：no window.HiSpaceObject</div>`;
+}
+}
+
+    function gameCenterGetPostParams() {
+    if (window.HiSpaceObject) {
+    console.log('HiSpaceObject getPostParams')
+    let result = window.HiSpaceObject.getPostParams();
+    resultContainer.innerHTML += `<div class="suc">✅ 游戏中心 getPostParams succeed, result：${JSON.stringify(result)}</div>`;
+
+} else {
+    console.log('no window.HiSpaceObject')
+    resultContainer.innerHTML += `<div class="err">❌ 游戏中心 getPostParams error：no window.HiSpaceObject</div>`;
+}
+}
+
+    async function musicGetUserInfo() {
+    if (window.AOPJSInterface) {
+    let params = window.AOPJSInterface.getParams();
+    let userInfo = await window.AOPJSInterface.getUserInfo();
+    let spToken = await window.AOPJSInterface.getSpToken('H5-Camp');
+    let res1 = 'get getParams : \n'.concat(params).concat('\n');
+    let res2 = res1.concat('get getUserInfo : \n'.concat(userInfo)).concat('\n');
+    let res3 = res2.concat('get getSpToken : \n'.concat(spToken));
+    resultContainer.innerHTML += `<div class="suc">✅ 音乐 getUserInfo succeed, result：${res3}</div>`;
+} else {
+    console.log('no window.AOPJSInterface')
+    resultContainer.innerHTML += `<div class="err">❌ 音乐 getUserInfo error：no window.AOPJSInterface</div>`;
+}
+}
+
+    async function himovieSignInAsync() {
+    if (window.JsInterface) {
+    let h5SessionId = await window.JsInterface.signInAsync()
+    resultContainer.innerHTML += `<div class="suc">✅ 视频 signInAsync succeed, result：${h5SessionId}</div>`;
+} else {
+    console.log('no window.JsInterface')
+    resultContainer.innerHTML += `<div class="err">❌ 视频 signInAsync error：no window.JsInterface</div>`;
+}
+}
+
+    function themeGetParams() {
+    if (window.JsInterface) {
+    let result = window.JsInterface.getParams();
+    resultContainer.innerHTML += `<div class="suc">✅ 主题 getParams succeed, result：${JSON.stringify(result)}</div>`;
+} else {
+    console.log('no window.JsInterface')
+    resultContainer.innerHTML += `<div class="err">❌ 主题 getParams error：no window.JsInterface</div>`;
+}
+}
+
+    function walletGetAccessTokens() {
+    try {
+    if (window.walletTokenInfoJsInterface) {
+    window.walletTokenInfoJsInterface.getAccessToken()
+    .then((session) => {
+    console.info('session : ' + session);
+    resultContainer.innerHTML += `<div class="suc">✅ 钱包 getAccessToken succeed, result：${session}</div>`;
+    window.walletBasicAbilityJSInterface.logForH5('session', session)
+})
+    // 捕获 getAccessToken 异步调用的异常
+    .catch((err) => {
+    console.error('getAccessToken 调用失败:', err);
+    const errorMsg = err.message || '未知错误';
+    resultContainer.innerHTML += `<div class="err">❌ 钱包 getAccessToken error：${errorMsg}</div>`;
+});
+} else {
+    console.log('no window.walletTokenInfoJsInterface');
+    resultContainer.innerHTML += `<div class="err">❌ 钱包 getAccessToken error：no window.JsInterface</div>`;
+}
+} catch (err) {
+    // 捕获函数内所有同步代码的异常
+    console.error('walletGetAccessTokens 执行异常:', err);
+    resultContainer.innerHTML += `<div class="err">❌ 钱包 getAccessToken 执行异常：${err.message}</div>`;
+}
+}
+
+    function mapGetUserInfo() {
+    if (window.HmsMapsJsBridge) {
+    window.HmsMapsJsBridge.onmessage = function (param) {
+    console.log('onmessage param:', param);
+    resultContainer.innerHTML += `<div class="suc">✅ 地图 getUserInfo succeed, result：${param}</div>`;
+};
+    window.HmsMapsJsBridge.postMessage(JSON.stringify({"type": "getUserInfo"}));
+} else {
+    console.log('no window.HmsMapsJsBridge')
+    resultContainer.innerHTML += `<div class="err">❌ 地图 getUserInfo error：no window.HmsMapsJsBridge</div>`;
+}
+}
+
+    gameCenterStartDownloadApp();
+    gameCenterGetPostParams();
+    musicGetUserInfo();
+    mapGetUserInfo();
+    themeGetParams();
+    himovieSignInAsync();
+    walletGetAccessTokens()
+</script>
+</body>
+</html>
