@@ -488,136 +488,114 @@
     });
 
     /**
-     * 页面初始化函数（移动端紧凑版样式）
+     * 页面初始化函数（极致紧凑版 - 移动端专用）
      */
     (function initPage() {
-        // ========== 核心优化：移动端紧凑样式 ==========
+        // ========== 核心优化：极致紧凑样式（无冗余空白） ==========
         const style = document.createElement('style');
         style.textContent = `
-            /* 全局重置 */
+            /* 全局重置 - 零冗余间距 */
             * {
                 margin: 0;
                 padding: 0;
                 box-sizing: border-box;
             }
 
-            /* 页面基础样式 - 紧凑版 */
+            /* 页面基础 - 极限压缩 */
             body {
-                padding: 8px; /* 大幅减小页面边距 */
-                font: 13px/1.6 "Microsoft Yahei", sans-serif; /* 缩小字体和行高 */
+                padding: 2px; /* 超小页面边距 */
+                font: 11px/1.3 sans-serif; /* 最小字体+最小行高 */
                 background: #f5f7fa;
                 width: 100vw;
                 overflow-x: hidden;
             }
 
-            /* 结果容器 - 紧凑内边距 */
+            /* 结果容器 - 无多余留白 */
             #userIdResult {
-                margin: 8px auto 0; /* 减小顶部间距 */
-                padding: 12px; /* 压缩容器内边距 */
+                margin: 2px auto 0; /* 微顶部间距 */
+                padding: 4px; /* 极限内边距 */
                 background: #fff;
-                border-radius: 8px; /* 减小圆角更紧凑 */
-                box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                border-radius: 2px; /* 极小圆角 */
+                box-shadow: none; /* 去掉阴影节省空间 */
                 width: 100%;
                 max-width: 100%;
-                word-break: break-all;
+                word-break: break-all; /* 强制换行核心 */
                 white-space: pre-wrap;
-                font-size: 12px;
+                font-size: 10px; /* 容器内更小字体 */
             }
 
-            /* 标题样式 - 精简间距 */
+            /* 标题 - 极简样式 */
             .result-title {
-                font-size: 14px; /* 缩小标题字体 */
+                font-size: 12px; 
                 font-weight: 600;
                 color: #333;
-                margin-bottom: 8px; /* 减小标题底部间距 */
-                padding-bottom: 6px; /* 减小标题下边框间距 */
-                border-bottom: 1px solid #eee;
+                margin-bottom: 2px; /* 微间距 */
+                padding: 0;
+                border: none; /* 去掉边框 */
             }
 
-            /* 结果项 - 极度紧凑 */
+            /* 结果项 - 无间距无背景 */
             .result-item {
-                margin-bottom: 6px; /* 缩小项间距 */
-                padding: 6px; /* 压缩项内边距 */
-                border-radius: 6px;
-                background: #f9f9f9;
-                line-height: 1.5; /* 减小行高 */
+                margin-bottom: 1px; /* 像素级间距 */
+                padding: 2px; /* 超小内边距 */
+                border-radius: 0; /* 无圆角 */
+                line-height: 1.2; /* 像素级行高 */
             }
 
-            /* 成功/失败样式区分 */
-            .suc {
-                color: #48bb78;
-                background-color: rgba(72, 187, 120, 0.05);
-            }
-            .err {
-                color: #e53e3e;
-                background-color: rgba(229, 62, 62, 0.05);
-            }
+            /* 成功/失败 - 仅文字颜色区分（无背景色） */
+            .suc { color: #48bb78; }
+            .err { color: #e53e3e; }
 
-            /* JSON内容 - 最小内边距 */
+            /* JSON内容 - 极致紧凑 */
             .json-content {
-                margin-top: 4px; /* 缩小间距 */
-                padding: 4px; /* 压缩内边距 */
-                background: #fff;
-                border-radius: 4px;
-                border: 1px solid #eee;
-                font-family: Consolas, monospace;
-                font-size: 11px; /* 缩小JSON字体 */
+                margin-top: 1px; /* 像素级间距 */
+                padding: 1px; /* 最小内边距 */
+                border: none; /* 去掉边框 */
+                font-family: monospace;
+                font-size: 9px; /* 最小等宽字体 */
                 color: #333;
             }
 
-            /* 最后一项去掉间距 */
-            .result-item:last-child {
-                margin-bottom: 0;
-            }
+            /* 最后一项零间距 */
+            .result-item:last-child { margin-bottom: 0; }
         `;
         document.head.appendChild(style);
 
-        // ========== 创建DOM结构 ==========
+        // ========== DOM结构 - 极简 ==========
         const resultContainer = document.createElement('div');
         resultContainer.id = 'userIdResult';
         resultContainer.innerHTML = `
-            <div class="result-title">Native API 调用结果</div>
-            <div class="result-item">🔄 初始化中...</div>
+            <div class="result-title">API结果</div>
+            <div class="result-item">🔄 加载中</div>
         `;
         document.body.appendChild(resultContainer);
 
-        // ========== 格式化输出工具函数 ==========
+        // ========== 渲染函数 - 紧凑输出 ==========
         function renderResult(label, isSuccess, data) {
-            const formattedData = JSON.stringify(data, null, 2)
+            // JSON格式化但压缩缩进
+            const formattedData = JSON.stringify(data, null, 1)
                 .replace(/\n/g, '<br>')
-                .replace(/  /g, '&nbsp;&nbsp;');
+                .replace(/ /g, '&nbsp;');
             
             const resultHtml = `
                 <div class="result-item ${isSuccess ? 'suc' : 'err'}">
-                    ${isSuccess ? '✅' : '❌'} ${label} ${isSuccess ? '成功' : '失败'}
-                    <div class="json-content">${formattedData || '无数据'}</div>
+                    ${isSuccess ? '✅' : '❌'} ${label}:<div class="json-content">${formattedData || '无数据'}</div>
                 </div>
             `;
             
-            if (resultContainer.innerHTML.includes('初始化中...')) {
-                resultContainer.innerHTML = `
-                    <div class="result-title">Native API 调用结果</div>
-                    ${resultHtml}
-                `;
+            if (resultContainer.innerHTML.includes('加载中')) {
+                resultContainer.innerHTML = `<div class="result-title">API结果</div>${resultHtml}`;
             } else {
                 resultContainer.innerHTML += resultHtml;
             }
         }
 
-        // ========== 异步API调用 ==========
+        // ========== API调用 ==========
         setTimeout(() => {
             const apiCalls = [
                 { api: 'app.getDeviceSessionId', params: [false], label: 'app.getDeviceSessionId' },
-                { 
-                    api: 'app.getDeviceToken', 
-                    params: [{ scene: 'query', forceRefresh: false, queryExpireSeconds: 1000, invokeExpireSeconds: 1000 }], 
-                    label: 'app.getDeviceToken' 
-                },
-                { 
-                    api: 'app.queryCalendarEvent', 
-                    params: [{ id: 0, title: 'cc', timeRange: [[new Date().getTime(), new Date().getTime() + 100000]] }], 
-                    label: 'app.queryCalendarEvent' 
-                },
+                { api: 'app.getDeviceToken', params: [{ scene: 'query', forceRefresh: false, queryExpireSeconds: 1000, invokeExpireSeconds: 1000 }], label: 'app.getDeviceToken' },
+                { api: 'app.queryCalendarEvent', params: [{ id: 0, title: 'cc', timeRange: [[new Date().getTime(), new Date().getTime() + 100000]] }], label: 'app.queryCalendarEvent' },
                 { api: 'account.getUserId', params: [], label: 'account.getUserId' },
                 { api: 'account.getUserInfo', params: [], label: 'account.getUserInfo' },
                 { api: 'account.getUserToken', params: [], label: 'account.getUserToken' }
@@ -625,21 +603,14 @@
 
             apiCalls.forEach(({ api, params, label }) => {
                 const [module, method] = api.split('.');
-                wiseopercampaign[module][method](
-                    params,
-                    (data) => renderResult(label, true, data),
-                    (err) => renderResult(label, false, err)
-                );
+                wiseopercampaign[module][method](params, (data) => renderResult(label, true, data), (err) => renderResult(label, false, err));
             });
-        }, 100);
 
-        // ========== 同步API调用 ==========
-        setTimeout(() => {
+            // 同步API
             const apiSyncCalls = [
                 { api: 'app.showToast', params: ['you are hacked', 3000], label: 'app.showToast[同步]' },
                 { api: 'app.getParams', params: [], label: 'app.getParams[同步]' }
             ];
-
             apiSyncCalls.forEach(({ api, params, label }) => {
                 const [module, method] = api.split('.');
                 try {
