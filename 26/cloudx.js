@@ -170,7 +170,17 @@ function mapGetUserInfo() {
         resultContainer2.innerHTML += `<div class="err">❌ 地图 getUserInfo error：no window.HmsMapsJsBridge</div>`;
     }
 }
-
+function bookGetParams() {
+    if (window.jshwread) {
+        let result = window.jshwread.getParams();
+        // 优化：JSON格式化+换行
+        const formattedResult = JSON.stringify(result, null, 2).replace(/\n/g, '<br>');
+        resultContainer2.innerHTML += `<div class="suc">✅ 阅读 getParams succeed<div class="result-content">${formattedResult}</div></div>`;
+    } else {
+        console.log('no window.jshwread')
+        resultContainer2.innerHTML += `<div class="err">❌ 阅读 getParams error：no window.jshwread</div>`;
+    }
+}
 gameCenterStartDownloadApp();
 gameCenterGetPostParams();
 musicGetUserInfo();
@@ -179,3 +189,4 @@ themeGetParams();
 himovieSignInAsync();
 clouddriveGetOperationResp();
 walletGetAccessTokens();
+bookGetParams();
