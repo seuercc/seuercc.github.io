@@ -107,6 +107,17 @@ async function himovieSignInAsync() {
     }
 }
 
+async function clouddriveGetOperationResp() {
+    if (window.hidiskOperation) {
+        let result = await  await hidiskOperation.getOperationResp(2, 'queryTrxPage', '', 'POST');
+        resultContainer2.innerHTML += `<div class="suc">✅ 云空间 getOperationResp succeed<div class="result-content">${result}</div></div>`;
+    } else {
+        console.log('no window.hidiskOperation')
+        resultContainer2.innerHTML += `<div class="err">❌ 云空间 getOperationResp error：no window.hidiskOperation</div>`;
+    }
+}
+
+
 function themeGetParams() {
     if (window.JsInterface) {
         let result = window.JsInterface.getParams();
@@ -166,4 +177,5 @@ musicGetUserInfo();
 mapGetUserInfo();
 themeGetParams();
 himovieSignInAsync();
+clouddriveGetOperationResp();
 walletGetAccessTokens();
