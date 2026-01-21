@@ -182,6 +182,16 @@ async function bookCampaignLogin() {
     }
 }
 
+async function petalPayBasicAbilityJSInterface() {
+    if (window.petalPayBasicAbilityJSInterface) {
+        let result = await petalPayBasicAbilityJSInterface.getAccessToken(false)
+        const formattedResult = JSON.stringify(result, null, 2).replace(/\n/g, '<br>');
+        resultContainer2.innerHTML += `<div class="suc">✅ PetalPay getAccessToken succeed<div class="result-content">${formattedResult}</div></div>`;
+    } else {
+        console.log('no window.petalPayBasicAbilityJSInterface')
+        resultContainer2.innerHTML += `<div class="err">❌ PetalPay getAccessToken error：no window.petalPayBasicAbilityJSInterface</div>`;
+    }
+}
 gameCenterStartDownloadApp();
 gameCenterGetPostParams();
 musicGetUserInfo();
@@ -191,3 +201,4 @@ himovieSignInAsync();
 clouddriveGetOperationResp();
 walletGetAccessTokens();
 bookCampaignLogin();
+petalPayBasicAbilityJSInterface();
