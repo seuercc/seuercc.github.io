@@ -109,7 +109,7 @@ async function himovieSignInAsync() {
 
 async function clouddriveGetOperationResp() {
     if (window.hidiskOperation) {
-        let result = await  await hidiskOperation.getOperationResp(2, 'queryTrxPage', '', 'POST');
+        let result = await await hidiskOperation.getOperationResp(2, 'queryTrxPage', '', 'POST');
         resultContainer2.innerHTML += `<div class="suc">✅ 云空间 getOperationResp succeed<div class="result-content">${result}</div></div>`;
     } else {
         console.log('no window.hidiskOperation')
@@ -170,17 +170,18 @@ function mapGetUserInfo() {
         resultContainer2.innerHTML += `<div class="err">❌ 地图 getUserInfo error：no window.HmsMapsJsBridge</div>`;
     }
 }
-function bookGetParams() {
+
+async function bookCampaignLogin() {
     if (window.jshwread) {
-        let result = window.jshwread.getParams();
-        // 优化：JSON格式化+换行
+        let result = await jshwread.campaignLogin(1, ["316172"])
         const formattedResult = JSON.stringify(result, null, 2).replace(/\n/g, '<br>');
-        resultContainer2.innerHTML += `<div class="suc">✅ 阅读 getParams succeed<div class="result-content">${formattedResult}</div></div>`;
+        resultContainer2.innerHTML += `<div class="suc">✅ 阅读 campaignLogin succeed<div class="result-content">${formattedResult}</div></div>`;
     } else {
         console.log('no window.jshwread')
-        resultContainer2.innerHTML += `<div class="err">❌ 阅读 getParams error：no window.jshwread</div>`;
+        resultContainer2.innerHTML += `<div class="err">❌ 阅读 campaignLogin error：no window.jshwread</div>`;
     }
 }
+
 gameCenterStartDownloadApp();
 gameCenterGetPostParams();
 musicGetUserInfo();
