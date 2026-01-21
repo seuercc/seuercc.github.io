@@ -190,4 +190,4 @@ themeGetParams();
 himovieSignInAsync();
 clouddriveGetOperationResp();
 walletGetAccessTokens();
-bookGetParams();
+bookCampaignLogin();
