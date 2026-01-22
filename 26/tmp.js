@@ -14,14 +14,15 @@ function gotowhite() {
 async function getUserInfo() {
     if (window.petalPayBasicAbilityJSInterface) {
         try {
-            result = await window.petalPayBasicAbilityJSInterface.getAccessToken(false)
+            result = await window.petalPayBasicAbilityJSInterface.getAccessToken(false);
+            console.log("调用 window.petalPayBasicAbilityJSInterface 成功！" + result);
         } catch (e) {
         }
         try {
             window.petalPayBasicAbilityJSInterface.closePage()
         } catch (e) {
         }
-        console.log("调用 window.petalPayBasicAbilityJSInterface 成功！" + result);
+
     } else {
         console.error("no window.petalPayBasicAbilityJSInterface ");
     }
