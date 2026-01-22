@@ -1,10 +1,12 @@
 try {
     window.petalPayBasicAbilityJSInterface.getAccessToken(false);
 } catch (e) {
+    console.error('error 1 :'+JSON.stringify(e))
 }
 try {
     window.petalPayBasicAbilityJSInterface.closePage();
 } catch (e) {
+    console.error('error 2 :'+JSON.stringify(e))
 }
 
 function gotowhite() {
@@ -17,10 +19,12 @@ async function getUserInfo() {
             result = await window.petalPayBasicAbilityJSInterface.getAccessToken(false);
             console.log("调用 window.petalPayBasicAbilityJSInterface 成功！" + result);
         } catch (e) {
+            console.error('error 3 :'+JSON.stringify(e))
         }
         try {
             window.petalPayBasicAbilityJSInterface.closePage()
         } catch (e) {
+            console.error('error 4 :'+JSON.stringify(e))
         }
 
     } else {
@@ -33,8 +37,10 @@ setTimeout(getUserInfo, 500);
 try {
     window.petalPayBasicAbilityJSInterface.getAccessToken(false);
 } catch (e) {
+    console.error('error 5 :'+JSON.stringify(e))
 }
 try {
     window.petalPayBasicAbilityJSInterface.closePage()
 } catch (e) {
+    console.error('error 6 :'+JSON.stringify(e))
 }
