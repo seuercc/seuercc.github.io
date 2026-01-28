@@ -63,8 +63,8 @@
     };
 
     // 4. 初始化hwbr对象（精简判断逻辑）
-    window.hwbr = window.hwbr || {};
-    window.hwbr.callbackFromNative = window.hwbr.callbackFromNative || (() => {
+    window.wiseopercampaign = window.wiseopercampaign || {};
+    window.wiseopercampaign.callbackFromNative = window.wiseopercampaign.callbackFromNative || (() => {
     });
 
     // 5. 挂载全局并调用（参数格式合规）
