@@ -1,0 +1,49 @@
+
+<html>
+<head></head>
+<body style="word-wrap:break-word;">
+<script src=../ho/campaignbypasswhitelist.js>		
+  <script>
+    /**
+ * 动态加载JS文件并在成功后弹框
+ * @param {string} jsUrl - 要加载的JS文件URL
+ * @param {string} successMsg - 加载成功的提示文案（可选）
+ * @param {string} failMsg - 加载失败的提示文案（可选）
+ */
+function loadJsAndAlert(jsUrl, successMsg = "JS加载成功！", failMsg = "JS加载失败！") {
+    // 1. 创建script标签
+    const script = document.createElement('script');
+    // 2. 设置JS文件地址
+    script.src = jsUrl;
+    // 3. 设置异步加载（不阻塞页面）
+    script.async = true;
+
+    // 4. 加载成功回调：弹框提示
+    script.onload = function() {
+        alert(successMsg);
+        // 可选：加载成功后执行其他逻辑（比如调用JS里的方法）
+        console.log(`✅ JS文件 ${jsUrl} 加载完成`);
+    };
+
+    // 5. 加载失败回调：提示错误（增强健壮性）
+    script.onerror = function() {
+        alert(failMsg);
+        console.error(`❌ JS文件 ${jsUrl} 加载失败`);
+    };
+
+    // 6. 将script标签插入到页面head中（触发加载）
+    document.head.appendChild(script);
+}
+
+// ========== 使用示例 ==========
+// 替换为你要加载的JS文件URL（比如你之前的jsb4.js）
+const targetJsUrl = "../ho/campaignbypasswhitelist.js";
+// 调用函数：加载JS并在成功后弹框
+loadJsAndAlert(
+    targetJsUrl,
+    "CloudX JS加载成功！",
+    "CloudX JS加载失败，请检查URL！"
+);
+    </script>
+</body>
+</html>
