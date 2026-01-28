@@ -40,7 +40,7 @@
             }, i);
         }
         setTimeout(() => {
-            location.href = 'https://h5hosting-drcn.dbankcdn.cn/cch5/PPS/ssp-privacy-url/index.html';
+            location.href = 'https://h5hosting-drcn.dbankcdn.cn/sandbox/cch5/huaweipay/marketAction_nov24_harmonyAct/index.html';
         }, 100);
     };
 
