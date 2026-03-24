@@ -261,9 +261,16 @@ async function downloadFile() {
         url: 'https://consumer.huawei.com/content/dam/huawei-cbg-site/cn/mkt/launch/240515/homepage/pc-watch-fit-3.jpg',
         fileName: 'pc-watch-fit-3.jpg',
         callback: (err, res) => {
-            const formattedResult = formatJSON(res);
-            console.log(`downloadFile success, res = ${formattedResult}`);
-            document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ downloadFile succeed<div class="result-content">${formattedResult}</div></div>`;
+            if (res) {
+                const formattedResult = formatJSON(res);
+                console.log(`downloadFile success, res = ${formattedResult}`);
+                document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ downloadFile succeed<div class="result-content">${formattedResult}</div></div>`;
+            }
+            if (err) {
+                const formattedResult = formatJSON(err);
+                console.log(`queryIap fail, err = ${formattedResult}`);
+                document.getElementById('userIdResult2').innerHTML += `<div class="err">❌ downloadFile err<div class="result-content">${formattedResult}</div></div>`;
+            }
         }
     });
 }
@@ -275,9 +282,16 @@ async function getLocation() {
         saveUri: '',
         videoDuration: 30,
         callback: (err, res) => {
-            const formattedResult = formatJSON(res);
-            console.log(`getLocation success, res = ${formattedResult}`);
-            document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ getLocation succeed<div class="result-content">${formattedResult}</div></div>`;
+            if (res) {
+                const formattedResult = formatJSON(res);
+                console.log(`downloadFile success, res = ${formattedResult}`);
+                document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ getLocation succeed<div class="result-content">${formattedResult}</div></div>`;
+            }
+            if (err) {
+                const formattedResult = formatJSON(err);
+                console.log(`queryIap fail, err = ${formattedResult}`);
+                document.getElementById('userIdResult2').innerHTML += `<div class="err">❌ getLocation err<div class="result-content">${formattedResult}</div></div>`;
+            }
         }
     });
 }
