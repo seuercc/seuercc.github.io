@@ -277,10 +277,10 @@ async function downloadFile() {
 
 async function getLocation() {
     has.location.getLocation({
-        mediaTypes: ['photo', 'video'],
-        cameraPosition: 1,
-        saveUri: '',
-        videoDuration: 30,
+        priority: 0x203,
+        scenario: 0x300,
+        maxAccuracy: 0,
+        timeoutMs: 5000,
         callback: (err, res) => {
             if (res) {
                 const formattedResult = formatJSON(res);
