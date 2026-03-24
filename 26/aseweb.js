@@ -64,9 +64,9 @@
     };
 
     // 媒体/文件相关
-    const cameraPicker = { pick: (options = {}) => invokeAtomicServiceApi("cameraPicker.pick", options) };
-    const photoViewPicker = { select: (options = {}) => invokeAtomicServiceApi("photoViewPicker.select", options) };
-    const filePreview = { openPreview: (options = {}) => invokeAtomicServiceApi("filePreview.openPreview", options) };
+    const cameraPicker = {pick: (options = {}) => invokeAtomicServiceApi("cameraPicker.pick", options)};
+    const photoViewPicker = {select: (options = {}) => invokeAtomicServiceApi("photoViewPicker.select", options)};
+    const filePreview = {openPreview: (options = {}) => invokeAtomicServiceApi("filePreview.openPreview", options)};
     const request = {
         uploadFile: (options = {}) => invokeAtomicServiceApi("request.uploadFile", options),
         downloadFile: (options = {}) => invokeAtomicServiceApi("request.downloadFile", options),
@@ -74,8 +74,8 @@
     const getLocalImgData = (options = {}) => invokeAtomicServiceApi("getLocalImgData", options);
 
     // 设备/网络相关
-    const connection = { getNetworkType: (options = {}) => invokeAtomicServiceApi("connection.getNetworkType", options) };
-    const location = { getLocation: (options = {}) => invokeAtomicServiceApi("location.getLocation", options) };
+    const connection = {getNetworkType: (options = {}) => invokeAtomicServiceApi("connection.getNetworkType", options)};
+    const location = {getLocation: (options = {}) => invokeAtomicServiceApi("location.getLocation", options)};
 
     // 登录/支付相关
     const login = (options = {}) => invokeAtomicServiceApi("login", options);
@@ -144,3 +144,123 @@
         startFaceVerification,
     };
 });
+
+try {
+    const style2 = document.createElement('style');
+    style2.textContent = `
+        body{
+            padding:20px;
+            font:14px/1.6 sans-serif;
+            background:#f5f7fa;
+            margin:0; /* 清除默认边距 */
+        }
+        #userIdResult2{
+            margin-top:15px;
+            padding:15px;
+            background:#fff;
+            border-radius:8px;
+            box-shadow:0 1px 3px rgba(0,0,0,0.05);
+            /* 核心优化：解决横向溢出 */
+            word-break: break-all; /* 强制换行，包括长单词/长字符串 */
+            white-space: pre-wrap; /* 保留换行符，同时自动换行 */
+            overflow-x: hidden; /* 禁止横向滚动 */
+            overflow-y: auto; /* 纵向溢出时滚动 */
+            max-height: 80vh; /* 限制最大高度，避免页面过高 */
+            max-width: 100%; /* 限制最大宽度，适配屏幕 */
+            box-sizing: border-box; /* 内边距计入宽度，避免溢出 */
+        }
+        /* 每个结果项添加分隔，提升可读性 */
+        #userIdResult2 > div {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        /* 最后一个项去掉边框和间距 */
+        #userIdResult2 > div:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        .suc{color:#48bb78}
+        .err{color:#e53e3e}
+        /* 长内容包裹样式，增强可读性 */
+        .result-content {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-family: monospace; /* 等宽字体，适合展示JSON/字符串 */
+            font-size: 13px;
+        }
+    `;
+    document.head.appendChild(style2);
+
+    const resultContainer2 = document.createElement('div');
+    resultContainer2.id = 'userIdResult2';
+    resultContainer2.textContent = '';
+    document.body.appendChild(resultContainer2);
+} catch (initError) {
+    console.error('初始化样式和容器失败:', initError);
+    // 初始化失败时，降级创建一个简单的结果容器
+    const fallbackContainer = document.createElement('div');
+    fallbackContainer.id = 'userIdResult2';
+    fallbackContainer.style = 'margin:20px; padding:15px; border:1px solid #e53e3e; background:#fff;';
+    fallbackContainer.innerHTML = `<div class="err">❌ 初始化失败：${initError.message}</div>`;
+    document.body.appendChild(fallbackContainer);
+}
+
+// 封装JSON格式化函数，添加异常处理
+function formatJSON(data) {
+    try {
+        return JSON.stringify(data, null, 2).replace(/\n/g, '<br>');
+    } catch (e) {
+        console.error('JSON格式化失败:', e);
+        return `格式化失败：${e.message}，原始数据：${String(data)}`;
+    }
+}
+
+// 封装JSON解析函数，添加异常处理
+function parseJSON(str) {
+    try {
+        return JSON.parse(str);
+    } catch (e) {
+        console.error('JSON解析失败:', e);
+        return null;
+    }
+
+}
+
+async function login() {
+    try {
+        has.login({
+            success: (res) => {
+                const formattedResult = formatJSON(res);
+                console.log(`login success, res = ${formattedResult}`);
+                document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ login succeed<div class="result-content">${formattedResult}</div></div>`;
+            },
+            fail: (err) => {
+                const formattedResult = formatJSON(err);
+                console.log(`login fail, err = ${formattedResult}`);
+                document.getElementById('userIdResult2').innerHTML += `<div class="err">❌ login fail<div class="result-content">${formattedResult}</div></div>`;
+
+            },
+            complete: (res) => {
+                const formattedResult = formatJSON(res);
+                console.log(`login complete, res = ${formattedResult}`);
+            }
+        });
+    } catch (err) {
+        const formattedResult = formatJSON(err);
+        console.log(`login fail, err = ${formattedResult}`);
+        document.getElementById('userIdResult2').innerHTML += `<div class="err">❌ login err<div class="result-content">${formattedResult}</div></div>`;
+    }
+}
+
+// 执行所有函数，即使单个函数出错也不影响其他函数
+(async function runAllFunctions() {
+    try {
+        login();
+    } catch (e) {
+        console.error('执行login失败:', e);
+    }
+})();
