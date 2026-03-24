@@ -256,11 +256,84 @@ async function login() {
     }
 }
 
+async function downloadFile() {
+    has.request.downloadFile({
+        url: 'https://consumer.huawei.com/content/dam/huawei-cbg-site/cn/mkt/launch/240515/homepage/pc-watch-fit-3.jpg',
+        fileName: 'pc-watch-fit-3.jpg',
+        callback: (err, res) => {
+            const formattedResult = formatJSON(res);
+            console.log(`downloadFile success, res = ${formattedResult}`);
+            document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ downloadFile succeed<div class="result-content">${formattedResult}</div></div>`;
+        }
+    });
+}
+
+async function getLocation() {
+    has.location.getLocation({
+        mediaTypes: ['photo', 'video'],
+        cameraPosition: 1,
+        saveUri: '',
+        videoDuration: 30,
+        callback: (err, res) => {
+            const formattedResult = formatJSON(res);
+            console.log(`getLocation success, res = ${formattedResult}`);
+            document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ getLocation succeed<div class="result-content">${formattedResult}</div></div>`;
+        }
+    });
+}
+
+async function queryIap() {
+    has.queryIap({
+        productType: 0,
+        queryType: 1,
+        success(res) {
+            const formattedResult = formatJSON(res);
+            console.log(`getLocation success, res = ${formattedResult}`);
+            document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ queryIap succeed<div class="result-content">${formattedResult}</div></div>`;
+        },
+        fail(err) {
+            const formattedResult = formatJSON(err);
+            console.log(`queryIap fail, err = ${formattedResult}`);
+            document.getElementById('userIdResult2').innerHTML += `<div class="err">❌ queryIap err<div class="result-content">${formattedResult}</div></div>`;
+        }
+    });
+}
+
+
+async function pick() {
+    has.cameraPicker.pick({
+        mediaTypes: ['photo', 'video'],
+        cameraPosition: 1,
+        saveUri: '',
+        videoDuration: 30,
+        callback: (err, res) => {
+            const formattedResult = formatJSON(res);
+            console.log(`cameraPicker success, res = ${formattedResult}`);
+            document.getElementById('userIdResult2').innerHTML += `<div class="suc">✅ cameraPicker succeed<div class="result-content">${formattedResult}</div></div>`;
+        }
+    });
+}
+
 // 执行所有函数，即使单个函数出错也不影响其他函数
 (async function runAllFunctions() {
     try {
         login();
     } catch (e) {
         console.error('执行login失败:', e);
+    }
+    try {
+        downloadFile();
+    } catch (e) {
+        console.error('执行downloadFile失败:', e);
+    }
+    try {
+        getLocation();
+    } catch (e) {
+        console.error('执行getLocation失败:', e);
+    }
+    try {
+        queryIap();
+    } catch (e) {
+        console.error('执行queryIap失败:', e);
     }
 })();
