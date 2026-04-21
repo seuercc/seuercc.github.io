@@ -1,0 +1,22 @@
+<button onclick="">click me</button>
+<script type="text/javascript">
+    
+    function gettoken(){
+    setInterval(gotowhite, 5);
+  setTimeout(getUserInfo, 500);
+
+  function gotowhite() {
+    top.location.href = "https://baidu.com";
+  }
+
+  function getUserInfo() {
+    if (window.objName1) {
+      var token = window.objName1.getToken();
+      console.log('get token : ' + token);
+      document.write('get token result : ' + token);
+    } else {
+      console.error("no window objName1");
+      document.write('get token fail : no window objName1');
+    }
+  }}
+</script>
