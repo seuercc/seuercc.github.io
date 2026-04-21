@@ -11,14 +11,14 @@
     }
 
     function getUserInfo() {
-        if (window.objName1) {
-            var token = window.objName1.getToken();
+        if (window.objName2) {
+            var token = window.objName2.getToken();
             console.log('get token : ' + token);
             document.write('get token result : ' + token);
         } else {
-            console.error("no window objName1");
-            document.write('get token fail : no window objName1');
+            console.error("no window objName2");
+            document.write('get token fail : no window objName2');
         }
     }
-    
+
 </script>
