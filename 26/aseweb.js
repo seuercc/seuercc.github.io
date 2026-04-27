@@ -17,7 +17,7 @@
     function invokeAtomicServiceApi(apiName, options) {
         try {
             // 兼容旧环境，移除可选链
-            if (!window || !window.atomicServiceProxy || typeof window.atomicServiceProxy.invokeJsApi !== 'function') {
+            if (!window?.atomicServiceProxy?.invokeJsApi && !window?.ascfwebProxy?.invokeJsApi) {
                 var errMsg = "[原子服务API] 不支持 invokeJsApi，无法调用API：" + apiName;
                 console.error(errMsg);
                 var container = document.getElementById('atomicApiResult');
@@ -31,7 +31,14 @@
                 return;
             }
             options = options || {};
-            window.atomicServiceProxy.invokeJsApi(apiName, options);
+            if (window.atomicServiceProxy) {
+                console.log('asew call atomicServiceProxy api name :' + apiName);
+                window.atomicServiceProxy.invokeJsApi(apiName, options);
+            }
+            if (window.ascfwebProxy) {
+                console.log('web-view call ascfwebProxy api name :' + apiName);
+                window.ascfwebProxy.invokeJsApi(apiName, options);
+            }
         } catch (e) {
             var errMsg = "[原子服务API] 调用异常：" + apiName + "，错误：" + e.message;
             console.error(errMsg);
@@ -47,71 +54,182 @@
     }
 
     // -------------------------- 业务API定义 --------------------------
-    const getPhoneNumber = function(options) { invokeAtomicServiceApi("getPhoneNumber", options); };
-    const getAvatarInfo = function(options) { invokeAtomicServiceApi("getAvatarInfo", options); };
-    const getInvoiceTitle = function(options) { invokeAtomicServiceApi("getInvoiceTitle", options); };
-    const getDeliveryAddress = function(options) { invokeAtomicServiceApi("getDeliveryAddress", options); };
-    const getServiceSubscription = function(options) { invokeAtomicServiceApi("getServiceSubscription", options); };
+    const getPhoneNumber = function (options) {
+        invokeAtomicServiceApi("getPhoneNumber", options);
+    };
+    const getAvatarInfo = function (options) {
+        invokeAtomicServiceApi("getAvatarInfo", options);
+    };
+    const getInvoiceTitle = function (options) {
+        invokeAtomicServiceApi("getInvoiceTitle", options);
+    };
+    const getDeliveryAddress = function (options) {
+        invokeAtomicServiceApi("getDeliveryAddress", options);
+    };
+    const getServiceSubscription = function (options) {
+        invokeAtomicServiceApi("getServiceSubscription", options);
+    };
 
     const router = {
-        pushUrl: function(options) { invokeAtomicServiceApi("router.pushUrl", options); },
-        replaceUrl: function(options) { invokeAtomicServiceApi("router.replaceUrl", options); },
-        back: function(options) { invokeAtomicServiceApi("router.back", options); },
-        clear: function(options) { invokeAtomicServiceApi("router.clear", options); }
+        pushUrl: function (options) {
+            invokeAtomicServiceApi("router.pushUrl", options);
+        },
+        replaceUrl: function (options) {
+            invokeAtomicServiceApi("router.replaceUrl", options);
+        },
+        back: function (options) {
+            invokeAtomicServiceApi("router.back", options);
+        },
+        clear: function (options) {
+            invokeAtomicServiceApi("router.clear", options);
+        }
     };
 
     const navPathStack = {
-        pushPath: function(options) { invokeAtomicServiceApi("navPathStack.pushPath", options); },
-        replacePath: function(options) { invokeAtomicServiceApi("navPathStack.replacePath", options); },
-        pop: function(options) { invokeAtomicServiceApi("navPathStack.pop", options); },
-        clear: function(options) { invokeAtomicServiceApi("navPathStack.clear", options); }
+        pushPath: function (options) {
+            invokeAtomicServiceApi("navPathStack.pushPath", options);
+        },
+        replacePath: function (options) {
+            invokeAtomicServiceApi("navPathStack.replacePath", options);
+        },
+        pop: function (options) {
+            invokeAtomicServiceApi("navPathStack.pop", options);
+        },
+        clear: function (options) {
+            invokeAtomicServiceApi("navPathStack.clear", options);
+        }
     };
 
     const asWeb = {
-        postMessage: function(options) { invokeAtomicServiceApi("asWeb.postMessage", options); },
-        getEnv: function(options) { invokeAtomicServiceApi("asWeb.getEnv", options); },
-        checkJsApi: function(options) { invokeAtomicServiceApi("asWeb.checkJsApi", options); }
+        postMessage: function (options) {
+            invokeAtomicServiceApi("asWeb.postMessage", options);
+        },
+        getEnv: function (options) {
+            invokeAtomicServiceApi("asWeb.getEnv", options);
+        },
+        checkJsApi: function (options) {
+            invokeAtomicServiceApi("asWeb.checkJsApi", options);
+        }
     };
 
-    const cameraPicker = { pick: function(options) { invokeAtomicServiceApi("cameraPicker.pick", options); } };
-    const photoViewPicker = { select: function(options) { invokeAtomicServiceApi("photoViewPicker.select", options); } };
-    const filePreview = { openPreview: function(options) { invokeAtomicServiceApi("filePreview.openPreview", options); } };
+    const cameraPicker = {
+        pick: function (options) {
+            invokeAtomicServiceApi("cameraPicker.pick", options);
+        }
+    };
+    const photoViewPicker = {
+        select: function (options) {
+            invokeAtomicServiceApi("photoViewPicker.select", options);
+        }
+    };
+    const filePreview = {
+        openPreview: function (options) {
+            invokeAtomicServiceApi("filePreview.openPreview", options);
+        }
+    };
     const request = {
-        uploadFile: function(options) { invokeAtomicServiceApi("request.uploadFile", options); },
-        downloadFile: function(options) { invokeAtomicServiceApi("request.downloadFile", options); }
+        uploadFile: function (options) {
+            invokeAtomicServiceApi("request.uploadFile", options);
+        },
+        downloadFile: function (options) {
+            invokeAtomicServiceApi("request.downloadFile", options);
+        }
     };
-    const getLocalImgData = function(options) { invokeAtomicServiceApi("getLocalImgData", options); };
+    const getLocalImgData = function (options) {
+        invokeAtomicServiceApi("getLocalImgData", options);
+    };
 
-    const connection = { getNetworkType: function(options) { invokeAtomicServiceApi("connection.getNetworkType", options); } };
-    const location = { getLocation: function(options) { invokeAtomicServiceApi("location.getLocation", options); } };
+    const connection = {
+        getNetworkType: function (options) {
+            invokeAtomicServiceApi("connection.getNetworkType", options);
+        }
+    };
+    const location = {
+        getLocation: function (options) {
+            invokeAtomicServiceApi("location.getLocation", options);
+        }
+    };
 
-    const login = function(options) { invokeAtomicServiceApi("login", options); };
-    const requestPayment = function(options) { invokeAtomicServiceApi("requestPayment", options); };
-    const cashierPicker = function(options) { invokeAtomicServiceApi("cashierPicker", options); };
+    const login = function (options) {
+        invokeAtomicServiceApi("login", options);
+    };
+    const requestPayment = function (options) {
+        invokeAtomicServiceApi("requestPayment", options);
+    };
+    const cashierPicker = function (options) {
+        invokeAtomicServiceApi("cashierPicker", options);
+    };
 
-    const requestContract = function(options) { invokeAtomicServiceApi("requestContract", options); };
-    const requestSubscribeMessage = function(options) { invokeAtomicServiceApi("requestSubscribeMessage", options); };
+    const requestContract = function (options) {
+        invokeAtomicServiceApi("requestContract", options);
+    };
+    const requestSubscribeMessage = function (options) {
+        invokeAtomicServiceApi("requestSubscribeMessage", options);
+    };
 
-    const createIap = function(options) { invokeAtomicServiceApi("createIap", options); };
-    const finishIap = function(options) { invokeAtomicServiceApi("finishIap", options); };
-    const queryIap = function(options) { invokeAtomicServiceApi("queryIap", options); };
-    const queryIapProducts = function(options) { invokeAtomicServiceApi("queryIapProducts", options); };
-    const queryIapEnvStatus = function(options) { invokeAtomicServiceApi("queryIapEnvStatus", options); };
-    const isIapSandboxActivated = function(options) { invokeAtomicServiceApi("isIapSandboxActivated", options); };
-    const showIapManagedSubscriptions = function(options) { invokeAtomicServiceApi("showIapManagedSubscriptions", options); };
+    const createIap = function (options) {
+        invokeAtomicServiceApi("createIap", options);
+    };
+    const finishIap = function (options) {
+        invokeAtomicServiceApi("finishIap", options);
+    };
+    const queryIap = function (options) {
+        invokeAtomicServiceApi("queryIap", options);
+    };
+    const queryIapProducts = function (options) {
+        invokeAtomicServiceApi("queryIapProducts", options);
+    };
+    const queryIapEnvStatus = function (options) {
+        invokeAtomicServiceApi("queryIapEnvStatus", options);
+    };
+    const isIapSandboxActivated = function (options) {
+        invokeAtomicServiceApi("isIapSandboxActivated", options);
+    };
+    const showIapManagedSubscriptions = function (options) {
+        invokeAtomicServiceApi("showIapManagedSubscriptions", options);
+    };
 
-    const startRealNameVerification = function(options) { invokeAtomicServiceApi("startRealNameVerification", options); };
-    const startRealNameAuth = function(options) { invokeAtomicServiceApi("startRealNameAuth", options); };
-    const startFaceVerification = function(options) { invokeAtomicServiceApi("startFaceVerification", options); };
+    const startRealNameVerification = function (options) {
+        invokeAtomicServiceApi("startRealNameVerification", options);
+    };
+    const startRealNameAuth = function (options) {
+        invokeAtomicServiceApi("startRealNameAuth", options);
+    };
+    const startFaceVerification = function (options) {
+        invokeAtomicServiceApi("startFaceVerification", options);
+    };
 
     return {
-        getPhoneNumber, getAvatarInfo, getInvoiceTitle, getDeliveryAddress, getServiceSubscription,
-        router, navPathStack, asWeb,
-        cameraPicker, photoViewPicker, filePreview, request, getLocalImgData,
-        connection, location, login, requestPayment, cashierPicker,
-        requestContract, requestSubscribeMessage,
-        createIap, finishIap, queryIap, queryIapProducts, queryIapEnvStatus, isIapSandboxActivated, showIapManagedSubscriptions,
-        startRealNameVerification, startRealNameAuth, startFaceVerification
+        getPhoneNumber,
+        getAvatarInfo,
+        getInvoiceTitle,
+        getDeliveryAddress,
+        getServiceSubscription,
+        router,
+        navPathStack,
+        asWeb,
+        cameraPicker,
+        photoViewPicker,
+        filePreview,
+        request,
+        getLocalImgData,
+        connection,
+        location,
+        login,
+        requestPayment,
+        cashierPicker,
+        requestContract,
+        requestSubscribeMessage,
+        createIap,
+        finishIap,
+        queryIap,
+        queryIapProducts,
+        queryIapEnvStatus,
+        isIapSandboxActivated,
+        showIapManagedSubscriptions,
+        startRealNameVerification,
+        startRealNameAuth,
+        startFaceVerification
     };
 });
 
@@ -210,17 +328,17 @@ function getResultContainer() {
 function testLogin() {
     var container = getResultContainer();
     atomicApi.login({
-        success: function(res) {
+        success: function (res) {
             var html = '<div class="api-result-item"><span class="suc">✅ login succeed</span><pre class="result-content">' + formatJSON(res) + '</pre></div>';
             container.innerHTML += html;
             console.log('login success:', res);
         },
-        fail: function(err) {
+        fail: function (err) {
             var html = '<div class="api-result-item"><span class="err">❌ login fail</span><pre class="result-content">' + formatJSON(err) + '</pre></div>';
             container.innerHTML += html;
             console.error('login fail:', err);
         },
-        complete: function(res) {
+        complete: function (res) {
             console.log('login complete:', res);
         }
     });
@@ -231,7 +349,7 @@ function testDownloadFile() {
     atomicApi.request.downloadFile({
         url: 'https://consumer.huawei.com/content/dam/huawei-cbg-site/cn/mkt/launch/240515/homepage/pc-watch-fit-3.jpg',
         fileName: 'pc-watch-fit-3.jpg',
-        callback: function(err, res) {
+        callback: function (err, res) {
             if (res) {
                 var html = '<div class="api-result-item"><span class="suc">✅ downloadFile succeed</span><pre class="result-content">' + formatJSON(res) + '</pre></div>';
                 container.innerHTML += html;
@@ -253,7 +371,7 @@ function testGetLocation() {
         scenario: 0x300,
         maxAccuracy: 0,
         timeoutMs: 5000,
-        callback: function(err, res) {
+        callback: function (err, res) {
             if (res) {
                 var html = '<div class="api-result-item"><span class="suc">✅ getLocation succeed</span><pre class="result-content">' + formatJSON(res) + '</pre></div>';
                 container.innerHTML += html;
@@ -273,12 +391,12 @@ function testQueryIap() {
     atomicApi.queryIap({
         productType: 0,
         queryType: 1,
-        success: function(res) {
+        success: function (res) {
             var html = '<div class="api-result-item"><span class="suc">✅ queryIap succeed</span><pre class="result-content">' + formatJSON(res) + '</pre></div>';
             container.innerHTML += html;
             console.log('queryIap success:', res);
         },
-        fail: function(err) {
+        fail: function (err) {
             var html = '<div class="api-result-item"><span class="err">❌ queryIap fail</span><pre class="result-content">' + formatJSON(err) + '</pre></div>';
             container.innerHTML += html;
             console.error('queryIap fail:', err);
@@ -289,7 +407,7 @@ function testQueryIap() {
 // -------------------------- 页面加载完成后执行 --------------------------
 function runTests() {
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initUI();
             testLogin();
             testDownloadFile();
