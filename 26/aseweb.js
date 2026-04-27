@@ -30,9 +30,11 @@
         }
 
         if (window.atomicServiceProxy) {
+            console.log('asew call atomicServiceProxy api name :' + apiName);
             window.atomicServiceProxy.invokeJsApi(apiName, options);
         }
         if (window.ascfwebProxy) {
+            console.log('web-view call ascfwebProxy api name :' + apiName);
             window.ascfwebProxy.invokeJsApi(apiName, options);
         }
     }
