@@ -24,12 +24,17 @@
      */
     function invokeAtomicServiceApi(apiName, options = {}) {
         // 校验原子服务代理是否存在，避免调用报错
-        if (!window?.atomicServiceProxy?.invokeJsApi) {
+        if (!window?.atomicServiceProxy?.invokeJsApi && !window?.ascfwebProxy?.invokeJsApi) {
             console.error("[原子服务API] window.atomicServiceProxy.invokeJsApi 未定义，无法调用API：", apiName);
             return;
         }
-        // 调用核心API
-        window.atomicServiceProxy.invokeJsApi(apiName, options);
+
+        if (window.atomicServiceProxy) {
+            window.atomicServiceProxy.invokeJsApi(apiName, options);
+        }
+        if (window.ascfwebProxy) {
+            window.ascfwebProxy.invokeJsApi(apiName, options);
+        }
     }
 
     // -------------------------- 业务API方法定义 --------------------------
